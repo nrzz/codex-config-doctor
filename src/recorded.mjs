@@ -8,19 +8,16 @@ export const RECORDED_MODEL = "gpt-5.5";
 /** The base instructions: the first developer message (characters). */
 export const BASE_INSTRUCTIONS_CHARS = 21299;
 
-/** The tool definitions of the first request (JSON characters of each), with the default configuration. */
-export const TOOLS = [["exec_command",2635],["write_stdin",784],["request_user_input",1355],["apply_patch",884],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]];
-
 /**
- * The permissions block (characters), by approval policy and sandbox mode. `codex exec` always runs with approval "never"; the other
- * figures are those of an app-server thread, which the terminal UI is built on. The workspace-write block names the writable folders, so its
- * figure moves with the length of their paths (it was recorded at 62 characters).
+ * What differs from one system to another, recorded on each: the tool definitions of the first request (the JSON characters of each, with the
+ * default configuration; exec_command and apply_patch are described differently on Windows), the permissions block (characters, by approval
+ * policy and sandbox mode; `codex exec` always runs with approval "never", the other figures are those of an app-server thread, which the
+ * terminal UI is built on; the workspace-write block names the writable folders, so its figure moves with the length of their paths), and the
+ * environment block (characters at a working folder of cwdChars characters: the folder's path appears twice, seven times with workspace-write).
  */
-export const PERMISSIONS_CHARS = {"never":{"read-only":342,"workspace-write":534,"danger-full-access":363},"on-request":{"read-only":3939,"workspace-write":4131,"danger-full-access":3960}};
-
-/** The environment block (characters) at a working folder of 62 characters: the folder's path appears twice (seven times with workspace-write). */
-export const ENVIRONMENT_CHARS = {"read-only":519,"workspace-write":1180,"danger-full-access":457};
-export const ENVIRONMENT_CWD_CHARS = 62;
+export const BY_SYSTEM = {
+  win32: {"on":"2026-10-17","tools":[["exec_command",2635],["write_stdin",784],["request_user_input",1355],["apply_patch",884],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":342,"workspace-write":534,"danger-full-access":363},"on-request":{"read-only":3939,"workspace-write":4131,"danger-full-access":3960}},"environment":{"read-only":519,"workspace-write":1180,"danger-full-access":457},"cwdChars":62},
+};
 
 /**
  * What an enabled MCP server adds to the first request (put to Codex 0.163.0): these tools, after write_stdin, and a line "- <id>" in the

@@ -37,8 +37,10 @@ const tasks = {
   recorded: async () => {
     const { recordFirstRequest, recordedSource } = await import("./measure.mjs");
     const measured = await recordFirstRequest();
-    fs.writeFileSync(path.join(here, "..", "src", "recorded.mjs"), recordedSource(measured));
-    console.log("wrote src/recorded.mjs");
+    // the figures of the other systems are kept: this one replaces its own
+    const { BY_SYSTEM } = await import("../src/recorded.mjs");
+    fs.writeFileSync(path.join(here, "..", "src", "recorded.mjs"), recordedSource(measured, BY_SYSTEM));
+    console.log(`wrote src/recorded.mjs (the figures of ${process.platform})`);
   },
 };
 const list = what === "all" ? Object.keys(tasks) : [what];

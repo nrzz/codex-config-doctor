@@ -93,8 +93,11 @@ export function mcpServer(id, toolNames, extra = "") {
 
 const TIMES_IN_ENVIRONMENT = { "read-only": 2, "workspace-write": 7, "danger-full-access": 2 };
 
-/** The text of src/recorded.mjs for a measurement made by recordFirstRequest(). */
-export function recordedSource(m) {
+/**
+ * The text of src/recorded.mjs for a measurement made by recordFirstRequest() on this system. The figures that differ from one system to
+ * another are kept for each system (`previous` is BY_SYSTEM of the file as it is now), and this system's are replaced by the measurement.
+ */
+export function recordedSource(m, previous = {}, platform = process.platform) {
   const ro = m.exec["read-only"];
   const skills = ro.parts.text.skills;
   const headEnd = skills.indexOf("### Skill roots\n") + "### Skill roots\n".length;
@@ -120,6 +123,10 @@ export function recordedSource(m) {
     // the folder's path is in the block several times: set the figure to what it is at the reference length
     env[mode] = m.exec[mode].parts.chars.environment - TIMES_IN_ENVIRONMENT[mode] * (m.exec[mode].cwd.length - REFERENCE_CWD_CHARS);
   }
+  const bySystem = { ...previous, [platform]: { on: m.on, tools: ro.parts.tools, permissions: perms, environment: env, cwdChars: REFERENCE_CWD_CHARS } };
+  const known = ["win32", "linux", "darwin"];
+  const order = [...known, ...Object.keys(bySystem).filter((k) => !known.includes(k))].filter((k) => bySystem[k]);
+  const bySystemText = order.map((k) => `  ${k}: ${JSON.stringify(bySystem[k])},`).join("\n");
   return `// What Codex ${m.codex} sent in the first request of a session, recorded with the fake API of test/codex-sandbox.mjs
 // (\`E2E_CODEX=... node test/record-oracles.mjs recorded\` writes this file again; test/measure.mjs does the measuring). \`cost\` uses these
 // where it cannot compute a figure from your files, and says so; test/e2e-cost.test.mjs compares them with a real first request.
@@ -130,19 +137,16 @@ export const RECORDED_MODEL = ${JSON.stringify(ro.parts.model)};
 /** The base instructions: the first developer message (characters). */
 export const BASE_INSTRUCTIONS_CHARS = ${ro.parts.chars.base};
 
-/** The tool definitions of the first request (JSON characters of each), with the default configuration. */
-export const TOOLS = ${JSON.stringify(ro.parts.tools)};
-
 /**
- * The permissions block (characters), by approval policy and sandbox mode. \`codex exec\` always runs with approval "never"; the other
- * figures are those of an app-server thread, which the terminal UI is built on. The workspace-write block names the writable folders, so its
- * figure moves with the length of their paths (it was recorded at ${REFERENCE_CWD_CHARS} characters).
+ * What differs from one system to another, recorded on each: the tool definitions of the first request (the JSON characters of each, with the
+ * default configuration; exec_command and apply_patch are described differently on Windows), the permissions block (characters, by approval
+ * policy and sandbox mode; \`codex exec\` always runs with approval "never", the other figures are those of an app-server thread, which the
+ * terminal UI is built on; the workspace-write block names the writable folders, so its figure moves with the length of their paths), and the
+ * environment block (characters at a working folder of cwdChars characters: the folder's path appears twice, seven times with workspace-write).
  */
-export const PERMISSIONS_CHARS = ${JSON.stringify(perms)};
-
-/** The environment block (characters) at a working folder of ${REFERENCE_CWD_CHARS} characters: the folder's path appears twice (seven times with workspace-write). */
-export const ENVIRONMENT_CHARS = ${JSON.stringify(env)};
-export const ENVIRONMENT_CWD_CHARS = ${REFERENCE_CWD_CHARS};
+export const BY_SYSTEM = {
+${bySystemText}
+};
 
 /**
  * What an enabled MCP server adds to the first request (put to Codex ${m.codex}): these tools, after write_stdin, and a line "- <id>" in the

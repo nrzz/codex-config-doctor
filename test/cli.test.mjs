@@ -161,7 +161,7 @@ test("why: exit 0 when Codex would run or ask, 1 when it would refuse; the JSON 
   const no = cli(w, ["why", "rm -rf build", "--json"]);
   assert.equal(no.code, 1);
   const doc = JSON.parse(no.out);
-  assert.deepEqual([doc.ok, doc.outcome, doc.decision, doc.command], [false, "forbidden", "forbidden", "rm -rf build"]);
+  assert.deepEqual([doc.ok, doc.outcome, doc.decision, doc.command, doc.shellCommand], [false, "forbidden", "forbidden", "why", "rm -rf build"]);
 });
 
 test("agents: exit 0, 1 when a file is cut; --print is the text the model gets", () => {

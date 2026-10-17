@@ -188,7 +188,8 @@ export function markdownBound(projectLength = 0) {
 // ---- why --------------------------------------------------------------------------------------------------------------------
 
 export function whyDoc(c, r) {
-  return { ok: !r.refused, tool: "codex-config-doctor", version: VERSION, command: "why", platform: c.sys.platform, project: c.world.dir, ...r };
+  const { command, ...rest } = r;
+  return { ok: !r.refused, tool: "codex-config-doctor", version: VERSION, command: "why", shellCommand: command, platform: c.sys.platform, project: c.world.dir, ...rest };
 }
 
 export function whyText(c, r) {
@@ -252,7 +253,8 @@ export function costText(c, r) {
   L.push(`codex-config-doctor ${VERSION}  cost`);
   L.push(`project   ${c.world.dir}`);
   L.push(`What the first request of a session carries before your words. Tokens are characters / 4, an estimate.`);
-  L.push(`"computed" comes from your files; "recorded" is what Codex ${r.recorded.codex} sent with model ${r.recorded.model} (${r.recorded.on}) and moves with the version and the model.`);
+  const system = { win32: "Windows", linux: "Linux", darwin: "macOS" }[r.recorded.system] || r.recorded.system;
+  L.push(`"computed" comes from your files; "recorded" is what Codex ${r.recorded.codex} sent with model ${r.recorded.model} on ${system} (${r.recorded.on}) and moves with the version, the model and the system${r.recorded.exact ? "" : " (there is no recording for this system: these are the ones for " + system + ")"}.`);
   L.push("");
   const w = Math.max(...r.rows.map((x) => x.label.length));
   L.push(`  ${pad("", w)}  characters  tokens  source`);

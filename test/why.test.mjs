@@ -150,7 +150,8 @@ test("the text and the JSON of a verdict", () => {
   const r = why(c, "git status && rm -rf x");
   const doc = whyDoc(c, r);
   assert.equal(doc.ok, false);
-  assert.equal(doc.command, "git status && rm -rf x");
+  assert.equal(doc.command, "why");
+  assert.equal(doc.shellCommand, "git status && rm -rf x");
   assert.equal(doc.outcome, "forbidden");
   assert.ok(Array.isArray(doc.parts) && Array.isArray(doc.lines));
   const text = whyText(c, r);

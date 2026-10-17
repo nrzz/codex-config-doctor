@@ -2,12 +2,18 @@
 // (src/recorded.mjs); test/e2e-cost.test.mjs compares both with a real first request of Codex.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cost, environmentChars, parseSkill, skillsBlock, tokens, toolList } from "../src/cost.mjs";
+import { cost, environmentChars, parseSkill, recordedFor, skillsBlock, tokens, toolList } from "../src/cost.mjs";
 import { costDoc, costText } from "../src/report.mjs";
-import { BASE_INSTRUCTIONS_CHARS, ENVIRONMENT_CHARS, ENVIRONMENT_CWD_CHARS, MCP_TOOLS, PERMISSIONS_CHARS, TOOLS } from "../src/recorded.mjs";
+import { BASE_INSTRUCTIONS_CHARS, MCP_TOOLS } from "../src/recorded.mjs";
 import { world } from "./world.mjs";
 
 const row = (r, id) => r.rows.find((x) => x.id === id);
+// the pretend machines of world() are Linux machines: the figures recorded on Linux
+const REC = recordedFor("linux");
+const TOOLS = REC.tools;
+const PERMISSIONS_CHARS = REC.permissions;
+const ENVIRONMENT_CHARS = REC.environment;
+const ENVIRONMENT_CWD_CHARS = REC.cwdChars;
 
 test("a token is four characters, rounded", () => {
   assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 10].map(tokens), [0, 0, 1, 1, 1, 1, 2, 2, 2, 3]);
@@ -23,7 +29,7 @@ test("the rows add up to the total, and AGENTS.md is what the model gets", () =>
   assert.equal(row(r, "tools").chars, TOOLS.reduce((n, t) => n + t[1], 0) + TOOLS.length + 1, "the definitions are one JSON array");
   assert.equal(row(r, "agents").chars, c.agents.chars);
   assert.equal(row(r, "mcp").chars, null);
-  assert.deepEqual(r.recorded, { codex: "0.163.0", model: "gpt-5.5", on: r.recorded.on });
+  assert.deepEqual(r.recorded, { codex: "0.163.0", model: "gpt-5.5", on: REC.on, system: REC.system, exact: REC.exact });
 });
 
 test("AGENTS.md: the figure follows the files that reach the model", () => {
@@ -45,10 +51,10 @@ test("permissions follow the approval policy and the sandbox; the environment fo
   assert.equal(perm('sandbox_mode = "read-only"\n'), PERMISSIONS_CHARS["on-request"]["read-only"]);
   assert.equal(perm('sandbox_mode = "danger-full-access"\n'), PERMISSIONS_CHARS["on-request"]["danger-full-access"]);
   assert.equal(perm('approval_policy = "never"\n'), PERMISSIONS_CHARS.never["workspace-write"] + (cwd - ENVIRONMENT_CWD_CHARS));
-  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS), "read-only"), ENVIRONMENT_CHARS["read-only"]);
-  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS + 10), "read-only"), ENVIRONMENT_CHARS["read-only"] + 20);
-  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS + 10), "workspace-write"), ENVIRONMENT_CHARS["workspace-write"] + 70);
-  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS - 2), "danger-full-access"), ENVIRONMENT_CHARS["danger-full-access"] - 4);
+  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS), "read-only", "linux"), ENVIRONMENT_CHARS["read-only"]);
+  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS + 10), "read-only", "linux"), ENVIRONMENT_CHARS["read-only"] + 20);
+  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS + 10), "workspace-write", "linux"), ENVIRONMENT_CHARS["workspace-write"] + 70);
+  assert.equal(environmentChars("x".repeat(ENVIRONMENT_CWD_CHARS - 2), "danger-full-access", "linux"), ENVIRONMENT_CHARS["danger-full-access"] - 4);
 });
 
 test("the skills block: the bundled skills alone, then yours, each with its line and its root", () => {

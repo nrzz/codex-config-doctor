@@ -5,8 +5,8 @@ import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { collect } from "../src/collect.mjs";
-import { cost, skillsBlock, toolList } from "../src/cost.mjs";
-import { BASE_INSTRUCTIONS_CHARS, ENVIRONMENT_CHARS, ENVIRONMENT_CWD_CHARS, PERMISSIONS_CHARS, RECORDED_CODEX } from "../src/recorded.mjs";
+import { cost, recordedFor, skillsBlock, toolList } from "../src/cost.mjs";
+import { BASE_INSTRUCTIONS_CHARS, RECORDED_CODEX } from "../src/recorded.mjs";
 import { sysFor } from "./behave.mjs";
 import { skip, put } from "./codex-sandbox.mjs";
 import { SANDBOX_MODES, captureExec, captureThread, firstDifference, writeSkill } from "./measure.mjs";
@@ -15,8 +15,12 @@ const opts = { skip: skip() };
 const row = (r, id) => r.rows.find((x) => x.id === id);
 const worldOf = (cap) => collect(sysFor(cap.sb), { project: cap.cwd });
 const TIMES = { "read-only": 2, "workspace-write": 7, "danger-full-access": 2 };
+// the figures recorded on the system these checks run on
+const REC = recordedFor(process.platform);
+const ENVIRONMENT_CWD_CHARS = REC.cwdChars;
 
 test("the recorded figures are what this Codex sends: base instructions, tools, permissions and environment, for each sandbox", opts, async () => {
+  assert.equal(REC.exact, true, `src/recorded.mjs has no figures for ${process.platform}: run E2E_CODEX=... node test/record-oracles.mjs recorded on this system`);
   const seen = [];
   for (const mode of SANDBOX_MODES) {
     const cap = await captureExec({ sandboxMode: mode });
@@ -25,8 +29,8 @@ test("the recorded figures are what this Codex sends: base instructions, tools, 
     assert.equal(parts.chars.base, BASE_INSTRUCTIONS_CHARS, `${mode}: the base instructions`);
     assert.deepEqual(parts.tools, toolList(worldOf(cap)), `${mode}: the tool definitions, by name and size`);
     const shift = mode === "workspace-write" ? cap.cwd.length - ENVIRONMENT_CWD_CHARS : 0;
-    assert.equal(parts.chars.permissions, PERMISSIONS_CHARS.never[mode] + shift, `${mode}: the permissions block of codex exec (approval never)`);
-    assert.equal(parts.chars.environment, ENVIRONMENT_CHARS[mode] + TIMES[mode] * (cap.cwd.length - ENVIRONMENT_CWD_CHARS), `${mode}: the environment block`);
+    assert.equal(parts.chars.permissions, REC.permissions.never[mode] + shift, `${mode}: the permissions block of codex exec (approval never)`);
+    assert.equal(parts.chars.environment, REC.environment[mode] + TIMES[mode] * (cap.cwd.length - ENVIRONMENT_CWD_CHARS), `${mode}: the environment block`);
     assert.equal(parts.model, "gpt-5.5");
   }
   console.log(`# Codex ${RECORDED_CODEX} recorded; now ${seen.join("; ")}`);
@@ -45,7 +49,7 @@ test("the permissions block of the other approval policies (the app server) is t
   for (const mode of SANDBOX_MODES) {
     const cap = await captureThread({ sandboxMode: mode });
     const shift = mode === "workspace-write" ? cap.cwd.length - ENVIRONMENT_CWD_CHARS : 0;
-    assert.equal(cap.parts.chars.permissions, PERMISSIONS_CHARS["on-request"][mode] + shift, `${mode}, on-request`);
+    assert.equal(cap.parts.chars.permissions, REC.permissions["on-request"][mode] + shift, `${mode}, on-request`);
     const c = worldOf(cap);
     assert.equal(row(cost(c), "permissions").chars, cap.parts.chars.permissions, `${mode}: cost`);
   }
@@ -114,7 +118,11 @@ test("the skills block, character for character, for the places Codex looks in",
   for (const [what, extra, setup] of worlds) {
     const cap = await captureExec({ sandboxMode: "read-only", setup, subdir: extra.subdir, label: "e2e-cost-skills" });
     const c = worldOf(cap);
-    assert.equal(firstDifference(skillsBlock(c.sys, c).text, cap.parts.text.skills), "", what);
+    const mine = skillsBlock(c.sys, c).text;
+    const diff = firstDifference(mine, cap.parts.text.skills);
+    // on a difference, both lists of roots and skills are in the message, with the throwaway folder shortened
+    const middle = (s) => s.slice(s.indexOf("### Skill roots"), s.indexOf("### How to use skills")).split(cap.sb.root).join("<root>").replace(/- (imagegen|openai-docs|skill-creator|skill-installer): .*\n/g, "- $1: ...\n");
+    assert.equal(diff, "", `${what}\nthis tool:\n${middle(mine)}\nCodex:\n${middle(cap.parts.text.skills)}`);
   }
 });
 

@@ -3,12 +3,21 @@
 // character); figures marked `recorded` are what Codex 0.163.0 sent with a default configuration (src/recorded.mjs) and move with
 // the Codex version, the model and the feature flags. A token is estimated as four characters.
 import {
-  BASE_INSTRUCTIONS_CHARS, ENVIRONMENT_CHARS, ENVIRONMENT_CWD_CHARS, PERMISSIONS_CHARS, RECORDED_CODEX, RECORDED_MODEL, RECORDED_ON,
-  MCP_TOOLS, SKILLS_BUNDLED, SKILLS_HEAD, SKILLS_LIST_HEAD, SKILLS_TAIL, TOOLS,
+  BASE_INSTRUCTIONS_CHARS, BY_SYSTEM, RECORDED_CODEX, RECORDED_MODEL, RECORDED_ON,
+  MCP_TOOLS, SKILLS_BUNDLED, SKILLS_HEAD, SKILLS_LIST_HEAD, SKILLS_TAIL,
 } from "./recorded.mjs";
 import { SKILL_DESCRIPTION_CAP } from "./knowledge.mjs";
 
 export const tokens = (chars) => Math.round(chars / 4);
+
+/**
+ * The figures that were recorded on the system the command runs on (win32, linux or darwin): the tool definitions, the permissions block and the
+ * environment block differ from one system to another. Any other system takes the Linux figures; `exact` says whether they are its own.
+ */
+export function recordedFor(platform) {
+  const key = BY_SYSTEM[platform] ? platform : BY_SYSTEM.linux ? "linux" : Object.keys(BY_SYSTEM)[0];
+  return { system: key, exact: key === platform, ...BY_SYSTEM[key] };
+}
 
 /** The name and description of a SKILL.md, read the way Codex lists them (a front matter of simple YAML), or null when Codex would not list it. */
 export function parseSkill(text, dirName) {
@@ -101,17 +110,19 @@ export function skillsBlock(sys, c) {
   return { text, chars: text.length, yours, roots, bundled: bundled.length };
 }
 
-/** The environment block: recorded at a 62-character folder, and the folder's path appears twice (seven times with workspace-write). */
-export function environmentChars(cwd, mode) {
-  const base = ENVIRONMENT_CHARS[mode] ?? ENVIRONMENT_CHARS["read-only"];
+/** The environment block: recorded at a folder of a known length, and the folder's path appears twice (seven times with workspace-write). */
+export function environmentChars(cwd, mode, platform) {
+  const r = recordedFor(platform);
+  const base = r.environment[mode] ?? r.environment["read-only"];
   const times = mode === "workspace-write" ? 7 : 2;
-  return base + times * (cwd.length - ENVIRONMENT_CWD_CHARS);
+  return base + times * (cwd.length - r.cwdChars);
 }
 
-/** The permissions block: recorded at a working folder of 62 characters; the workspace-write block names the folder once. */
-export function permissionsChars(cwd, approval, mode) {
-  const base = (PERMISSIONS_CHARS[approval] || PERMISSIONS_CHARS["on-request"])[mode] ?? PERMISSIONS_CHARS["on-request"]["read-only"];
-  return mode === "workspace-write" ? base + (cwd.length - ENVIRONMENT_CWD_CHARS) : base;
+/** The permissions block: recorded at a working folder of a known length; the workspace-write block names the folder once. */
+export function permissionsChars(cwd, approval, mode, platform) {
+  const r = recordedFor(platform);
+  const base = (r.permissions[approval] || r.permissions["on-request"])[mode] ?? r.permissions["on-request"]["read-only"];
+  return mode === "workspace-write" ? base + (cwd.length - r.cwdChars) : base;
 }
 
 /**
@@ -122,7 +133,7 @@ export function permissionsChars(cwd, approval, mode) {
 export function toolList(c) {
   const mode = typeof c.value.web_search === "string" ? c.value.web_search : null;
   const danger = c.effective.sandbox === "danger-full-access";
-  const list = TOOLS.map((t) => [...t]);
+  const list = recordedFor(c.sys.platform).tools.map((t) => [...t]);
   const i = list.findIndex((t) => t[0] === "web_search");
   if (i >= 0) {
     if (mode === "disabled") list.splice(i, 1);
@@ -144,7 +155,7 @@ export function cost(c) {
   const mode = c.effective.sandbox;
   const approval = c.effective.approval === "never" ? "never" : "on-request";
   const skills = skillsBlock(sys, c);
-  const perm = permissionsChars(c.world.dir, approval, mode);
+  const perm = permissionsChars(c.world.dir, approval, mode, sys.platform);
   // the definitions are a JSON array in the request: a comma between two and a bracket at each end
   const tools = toolList(c);
   const toolChars = tools.reduce((n, t) => n + t[1], 0) + tools.length + 1;
@@ -153,12 +164,12 @@ export function cost(c) {
     { id: "skills", label: "Skills", chars: skills.chars, source: skills.yours.length ? "computed" : "recorded", detail: `${skills.bundled} bundled skills${skills.yours.length ? ` and ${skills.yours.length} of yours (${skills.yours.map((s) => s.name).join(", ")})` : ""}; the how-to text is about 2,600 of the characters` },
     { id: "permissions", label: "Permissions", chars: perm, source: "recorded", detail: `approval ${c.effective.approval}, sandbox ${mode}` },
     { id: "agents", label: "AGENTS.md", chars: c.agents.chars, source: "computed", detail: c.agents.text === null ? "no AGENTS.md" : `${c.agents.files.length} project file${c.agents.files.length === 1 ? "" : "s"}${c.agents.global ? " and the global file" : ""}, ${c.agents.bytesOfText.toLocaleString("en-US")} bytes` },
-    { id: "environment", label: "Environment", chars: environmentChars(c.world.dir, mode), source: "recorded", detail: "the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path" },
+    { id: "environment", label: "Environment", chars: environmentChars(c.world.dir, mode, sys.platform), source: "recorded", detail: "the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path" },
     { id: "tools", label: `Tool definitions (${tools.length})`, chars: toolChars, source: "recorded", detail: tools.map((t) => `${t[0]} ${t[1].toLocaleString("en-US")}`).join(", "), items: tools.map((t) => ({ name: t[0], chars: t[1] })) },
   ];
   const enabledServers = c.mcp.filter((s) => s.enabled);
   rows.push({ id: "mcp", label: `MCP servers (${enabledServers.length})`, chars: null, source: "not measured", detail: enabledServers.length ? `${enabledServers.map((s) => s.id).join(", ")}: the three resource tools they bring are counted under tool definitions; a server's own tools are not in the first request (Codex 0.163.0 defers them behind tool_search: 2, 3, 30 and 60 tools gave the same request), so they cost when the model loads them, which this tool does not measure because it starts no server` : "none configured" });
   const total = rows.reduce((n, r) => n + (r.chars || 0), 0);
   const yours = (c.agents.chars || 0) + skills.yours.reduce((n, s) => n + `- ${s.name}: ${s.description} (file: ${s.alias}/${s.rel})\n`.length, 0);
-  return { rows, total, totalTokens: tokens(total), yours, yoursTokens: tokens(yours), recorded: { codex: RECORDED_CODEX, model: RECORDED_MODEL, on: RECORDED_ON }, skills };
+  return { rows, total, totalTokens: tokens(total), yours, yoursTokens: tokens(yours), recorded: { codex: RECORDED_CODEX, model: RECORDED_MODEL, on: recordedFor(sys.platform).on || RECORDED_ON, system: recordedFor(sys.platform).system, exact: recordedFor(sys.platform).exact }, skills };
 }
