@@ -1,0 +1,994 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "scenarios": [
+  {
+   "name": "one command hook, no record",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "one command hook, trusted",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "trusted_hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "trusted"
+    }
+   ]
+  },
+  {
+   "name": "one command hook, record with a wrong hash",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "trusted_hash": "sha256:0000000000000000000000000000000000000000000000000000000000000000"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "modified"
+    }
+   ]
+  },
+  {
+   "name": "one command hook, record that disables it",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "trusted_hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "enabled": false
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": false,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "trusted"
+    }
+   ]
+  },
+  {
+   "name": "the PreToolUse event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo PreToolUse",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:50ca819de1101d9a31b04887ca7c65e48c40845bd18fae636c73308c4dc1b874",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the PermissionRequest event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:permission_request:0:0",
+     "event": "permissionRequest",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo PermissionRequest",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:2ffb4486378cb82340a7ecc3fc97617cb57f8b0d044f553da407d6e923878e6e",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the PostToolUse event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo PostToolUse",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:aad1bee6925cf5cd912c9d74a30767f25add5fe69e9985c949ad3b85790f48ea",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the PreCompact event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_compact:0:0",
+     "event": "preCompact",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo PreCompact",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b30eaae894163e8f76c969a98b8de21624aef852c84a9bb918f5ee23044877c3",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the PostCompact event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_compact:0:0",
+     "event": "postCompact",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo PostCompact",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:726c7b2bb6a3a864275508ae9f0d28c4f23732a109c78958d0283206cd6d8165",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the SessionStart event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the SessionEnd event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_end:0:0",
+     "event": "sessionEnd",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionEnd",
+     "timeoutSec": 1,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:3358cf679fbc88d89b32c784bc095137a1094bdd907c86eeb4525383ef9165c2",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the UserPromptSubmit event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:user_prompt_submit:0:0",
+     "event": "userPromptSubmit",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo UserPromptSubmit",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:743ba7e2ae9eb1598441def7bc593add4241e493fe567b28567db3c2b82b1a71",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the SubagentStart event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:subagent_start:0:0",
+     "event": "subagentStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SubagentStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:de04f8fbfce22904c3f2c49740a2bafa87e6714da8999b731d131485227b5f4a",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the SubagentStop event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:subagent_stop:0:0",
+     "event": "subagentStop",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SubagentStop",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:abf58322e5e8c5074008e55c35bea8b64b5e9235d19cc3d5942fa91e4c791802",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the Stop event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:stop:0:0",
+     "event": "stop",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo Stop",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:7773e56566e95134864bef4b6cd2d68e86a6321cbd95c91839a8bf57958fd74a",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "the Interrupt event",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:interrupt:0:0",
+     "event": "interrupt",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo Interrupt",
+     "timeoutSec": 1,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:e267be66a406f8e0d639a8e26c32750c665ae169716d5eec2f84ad49e3659d58",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a matcher",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "^Bash$",
+     "command": "echo m",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:671c272948bbda34dcf169ed639d2695e157aee89dc13218c1bf6b06fd8fb510",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a star matcher",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo m",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:857e0799ff19ea685d63cd345c592beaea93eab3edf142c4314404c55638c6f5",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a timeout",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo t",
+     "timeoutSec": 30,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:0da2d13b2cdeda0e751006644fdf6db382e8863fb91b62870b9743b30058a251",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a timeout that is a float",
+   "stateEntries": [],
+   "errors": 1,
+   "warnings": [],
+   "hooks": []
+  },
+  {
+   "name": "async",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo a",
+     "timeoutSec": 5,
+     "async": true,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:0136f2a8822ef3d45165bb375146ef4d3ff2b2cde38c78b40eff56e5908b6ead",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a status message",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": "Bash",
+     "command": "echo s",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": "Working",
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:7c9cc7e6908d53ffc8ea2244829ffe03c61b27041a31e4703d732b34c9d21e0f",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "additionalContextLimit",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:user_prompt_submit:0:0",
+     "event": "userPromptSubmit",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo c",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:9c13ac135d91fcbe41725bc99d8a60be8044752ea06b684d743e6e4035cf9ab8",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "additionalContextLimit 0",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:user_prompt_submit:0:0",
+     "event": "userPromptSubmit",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo c",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:86131ca026a439c36b20df325942ffbca652eca55bbb8009fc57dc15e0b7ae8b",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "two handlers in one group",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "trusted_hash": "sha256:dc82211608c0e220d3b4a5105c54e5fb647e04ab4fee158113f8245bc7645e1c"
+    },
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:1",
+     "trusted_hash": "sha256:a294355f6513c1185e34d3ba8b88033a0e29c367d4384b286bd34d2e3db18ccc"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:0",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": "Bash",
+     "command": "echo one",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:dc82211608c0e220d3b4a5105c54e5fb647e04ab4fee158113f8245bc7645e1c",
+     "status": "trusted"
+    },
+    {
+     "key": "<root>/codex-home/config.toml:post_tool_use:0:1",
+     "event": "postToolUse",
+     "handler": "command",
+     "matcher": "Bash",
+     "command": "echo two",
+     "timeoutSec": 5,
+     "async": true,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:a294355f6513c1185e34d3ba8b88033a0e29c367d4384b286bd34d2e3db18ccc",
+     "status": "trusted"
+    }
+   ]
+  },
+  {
+   "name": "two groups of one event",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:session_end:0:0",
+     "trusted_hash": "sha256:526a3262f46572c783dd9920944cf9713b4efd7b9aebbb9355352d700f961179"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_end:0:0",
+     "event": "sessionEnd",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo f",
+     "timeoutSec": 1,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:526a3262f46572c783dd9920944cf9713b4efd7b9aebbb9355352d700f961179",
+     "status": "trusted"
+    },
+    {
+     "key": "<root>/codex-home/config.toml:session_end:1:0",
+     "event": "sessionEnd",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo g",
+     "timeoutSec": 1,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:090ba2a1153731eb8c3b825e197f8b4dbe693293b512237b8450ef4607e5161b",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a command with quotes and a backslash",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo \"a b\" \\ c",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:6aed3ed4afa952e208fcedb852487d7e6bfa54ab6c46be3439763f0b25ecee18",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a command with unicode",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo café 日本",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:4b9d4c1d4d5da671ff62e7002b56c14b965ed830de57a1c31f8a8cf74f22bc16",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "an mcp_tool handler",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:permission_request:0:0",
+     "event": "permissionRequest",
+     "handler": "mcpTool",
+     "matcher": "^Bash$",
+     "command": null,
+     "timeoutSec": 600,
+     "async": null,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:c5f31974f2c3fe7181d3111a3a9fea6607c6d220bfa8044b8fb3ff4dc6ded43d",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "an mcp_tool handler with input",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:permission_request:0:0",
+     "event": "permissionRequest",
+     "handler": "mcpTool",
+     "matcher": "^Bash$",
+     "command": null,
+     "timeoutSec": 600,
+     "async": null,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:85c4dceb2a1703be2d8a7112883c579b9d257c4342bfffe4c77e083290516e89",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "hooks.json with one hook",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/hooks.json:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo json",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/hooks.json",
+     "enabled": true,
+     "hash": "sha256:d642804ff8a7428df8bed9ba96f39d249f21d6ca9d74be5c080c5dc6dae12565",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "hooks.json with a matcher, a timeout and a status message",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/hooks.json:pre_tool_use:0:0",
+     "trusted_hash": "sha256:4260b574aca59ef628652c492a7ae777b0a6ae550a0be82978744f6390749e51"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/hooks.json:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "^Bash$",
+     "command": "echo json",
+     "timeoutSec": 12,
+     "async": false,
+     "statusMessage": "Checking",
+     "source": "user",
+     "sourcePath": "<root>/codex-home/hooks.json",
+     "enabled": true,
+     "hash": "sha256:4260b574aca59ef628652c492a7ae777b0a6ae550a0be82978744f6390749e51",
+     "status": "trusted"
+    }
+   ]
+  },
+  {
+   "name": "hooks.json and config.toml together",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [
+    "loading hooks from both <root>/codex-home/hooks.json and <root>/codex-home/config.toml; prefer a single representation for this layer"
+   ],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/hooks.json:stop:0:0",
+     "event": "stop",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo json",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/hooks.json",
+     "enabled": true,
+     "hash": "sha256:443927977f1a5f51e6aec41fb368a1a32f0ccd211516b1ba81ecf367d292075b",
+     "status": "untrusted"
+    },
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a project config.toml hook, project trusted",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/work/.codex/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "project",
+     "sourcePath": "<root>/work/.codex/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a project config.toml hook, trusted by record",
+   "stateEntries": [
+    {
+     "key": "<root>/work/.codex/config.toml:session_start:0:0",
+     "trusted_hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/work/.codex/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "project",
+     "sourcePath": "<root>/work/.codex/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "trusted"
+    }
+   ]
+  },
+  {
+   "name": "a project hooks.json hook, project trusted",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/work/.codex/hooks.json:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo pj",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "project",
+     "sourcePath": "<root>/work/.codex/hooks.json",
+     "enabled": true,
+     "hash": "sha256:1b50739d1f9b2b1cb452aca9bc057b251f463f7b6c066d893f53253c20b9b06d",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a project hook, project not trusted",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": []
+  },
+  {
+   "name": "user and project hooks of one event",
+   "stateEntries": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "trusted_hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366"
+    }
+   ],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "trusted"
+    },
+    {
+     "key": "<root>/work/.codex/config.toml:session_start:0:0",
+     "event": "sessionStart",
+     "handler": "command",
+     "matcher": null,
+     "command": "echo SessionStart",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "project",
+     "sourcePath": "<root>/work/.codex/config.toml",
+     "enabled": true,
+     "hash": "sha256:b9d0a0d31fa903310641a9ef85c80428b47d345a941a1b6c46c21afb963b4366",
+     "status": "untrusted"
+    }
+   ]
+  },
+  {
+   "name": "a prompt handler is read and not run",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [
+    "skipping prompt hook in <root>/codex-home/config.toml: prompt hooks are not supported yet"
+   ],
+   "hooks": []
+  },
+  {
+   "name": "an unknown event under hooks.json",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": []
+  },
+  {
+   "name": "a handler with a Windows command",
+   "stateEntries": [],
+   "errors": 0,
+   "warnings": [],
+   "hooks": [
+    {
+     "key": "<root>/codex-home/config.toml:pre_tool_use:0:0",
+     "event": "preToolUse",
+     "handler": "command",
+     "matcher": "*",
+     "command": "echo windows",
+     "timeoutSec": 600,
+     "async": false,
+     "statusMessage": null,
+     "source": "user",
+     "sourcePath": "<root>/codex-home/config.toml",
+     "enabled": true,
+     "hash": "sha256:6029ec8bcde95dca74886140997200517d7de49864aba80a3d24c9ce7e6d6112",
+     "status": "untrusted"
+    }
+   ]
+  }
+ ]
+}
