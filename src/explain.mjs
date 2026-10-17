@@ -107,7 +107,8 @@ export const PAGES = {
     does: [
       [V, "Codex compares the entry with the folder's path as Windows spells it: backslashes, no trailing separator, no \\\\?\\ prefix. On Windows case does not matter. An entry with forward slashes, a trailing backslash or a \\\\?\\ prefix matches nothing, and the project stays untrusted without a word."],
       [V, "The warning the app server sends for an untrusted project names the entry to add in lower case, with backslashes (add c:\\users\\you\\work as a trusted project), and an entry written exactly so trusts the folder. `codex exec` with danger-full-access writes the same spelling."],
-      [N, "On Linux and macOS the entry that Codex wrote for a real path trusted the folder (checked on Ubuntu 24.04 and macOS 26 in CI); a folder reached through a symbolic link was not tried, and this tool resolves the path before it looks the entry up."],
+      [V, "On Linux and macOS the entry that Codex wrote for a real path trusted the folder: the next session loaded its file (Ubuntu 24.04 and macOS 26)."],
+      [N, "A folder reached through a symbolic link was not tried; this tool resolves the path before it looks the entry up."],
     ],
     fix: ["Write the entry with the path exactly as `show` prints it."],
     docs: [DOC.advanced],
