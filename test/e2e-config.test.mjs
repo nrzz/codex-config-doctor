@@ -86,11 +86,15 @@ test("untrusted-project: a run with sandbox_mode danger-full-access writes a tru
     assert.equal(entry[1] ?? entry[2], process.platform === "win32" ? first.sb.work.toLowerCase() : first.sb.work, `${how}: the folder, lower-cased on Windows`);
     assert.equal(lintWorld(first.sb).find("untrusted-project").length, 0, "after the run the project is trusted");
   }
+  // the other sandbox modes: read-only and the default (read-only for a folder that is not trusted) write nothing; workspace-write writes the
+  // entry where a sandbox can run it (Linux and macOS), and on Windows with no sandbox selected it is read-only, so it writes nothing
+  const wrote = {};
   for (const [how, spec] of [["workspace-write", { args: ["--sandbox", "workspace-write"] }], ["read-only", { args: ["--sandbox", "read-only"] }], ["the default", {}]]) {
     const r = await exec({ label: "e2e-trust-safe", project, ...spec });
     assert.equal(r.code, 0, r.err);
-    assert.doesNotMatch(readUser(r.sb), /\[projects\./, `${how}: no entry is written`);
+    wrote[how] = /\[projects\./.test(readUser(r.sb));
   }
+  assert.deepEqual(wrote, { "workspace-write": process.platform !== "win32", "read-only": false, "the default": false }, "which sandbox modes write an entry");
   // an entry that is there is left as it is
   const marked = await exec({ label: "e2e-trust-marked", project, userTop: 'sandbox_mode = "danger-full-access"\n', before: (sb) => { fs.appendFileSync(sb.user, `\n[projects.'${sb.work}']\ntrust_level = "untrusted"\n`); } });
   assert.equal(marked.code, 0, marked.err);

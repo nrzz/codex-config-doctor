@@ -41,7 +41,7 @@ test("windows-sandbox: unelevated, mxc and prefer_mxc select an implementation; 
   const mxc = await exec({ label: "e2e-win-mxc", userTop: MODE, userTables: '[windows]\nsandbox = "mxc"\n' });
   assert.ok(lines(mxc.sb).includes("Windows sandbox selection: mxc"), lines(mxc.sb).join(" | "));
   const prefer = await exec({ label: "e2e-win-prefer", userTop: MODE, userTables: "[features]\nprefer_mxc = true\n" });
-  assert.ok(lines(prefer.sb).includes("Windows sandbox selection: mxc"), "prefer_mxc selects mxc");
+  assert.ok(lines(prefer.sb).includes("Windows sandbox selection: mxc"), `prefer_mxc selects mxc: the log says ${lines(prefer.sb).join(" | ")}`);
   assert.equal(win(prefer.sb).length === 0, readSandboxLog(sysFor(prefer.sb), prefer.sb.codexHome).mxcAvailable !== false, "lint complains about mxc exactly when the log says MXC is not available (or the build is too old)");
   // lint reads the same log
   const available = lines(mxc.sb).includes("MXC availability: true");

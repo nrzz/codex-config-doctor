@@ -74,18 +74,19 @@ test("the skills block: the bundled skills alone, then yours, each with its line
   assert.ok(long.chars > plain.chars);
 });
 
-test("the places skills are read from: the project's .codex/skills (trusted or not), the Codex home, and .agents/skills of the project folders; not ~/.agents/skills", () => {
+test("the places skills are read from: the project's .codex/skills (trusted or not), the Codex home, ~/.agents/skills, and .agents/skills of the project folders", () => {
   const skill = (name) => `---\nname: ${name}\ndescription: skill ${name}\n---\n`;
   const files = {
     "config.toml": "",
     "work/.codex/skills/p/SKILL.md": skill("p"),
     "work/.agents/skills/q/SKILL.md": skill("q"),
     "skills/u/SKILL.md": skill("u"),
-    "home/.agents/skills/h/SKILL.md": skill("h"),
+    "abs:/w/home/.agents/skills/h/SKILL.md": skill("h"),
   };
   for (const trusted of [true, false]) {
     const block = skillsBlock(...pair(files, { trusted }));
-    assert.deepEqual(block.yours.map((s) => s.name), ["p", "q", "u"], `trusted ${trusted}: the project's skills by name, then yours`);
+    assert.deepEqual(block.yours.map((s) => s.name), ["p", "q", "h", "u"], `trusted ${trusted}: the project's skills by name, then yours (the Codex home's and ~/.agents/skills together) by name`);
+    assert.deepEqual(block.roots.map((r) => r.alias), ["r0", "r1", "r2", "r3", "r4"], `trusted ${trusted}: the project's .codex/skills, the Codex home, ~/.agents/skills, the bundled root, the project's .agents/skills`);
   }
 });
 

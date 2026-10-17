@@ -77,10 +77,10 @@ const byName = (a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0);
 /**
  * The skills block as Codex builds it (put to Codex 0.163.0, character for character, in test/e2e-cost.test.mjs). The table of roots lists, in
  * this order, the `.codex/skills` folder of each project folder from the working folder up to the project root, the Codex home's `skills`,
- * its `skills/.system` (where the four bundled skills are) and the `.agents/skills` folder of each project folder from the root down to the
- * working folder; a root that holds no skill is left out, except the bundled one. The list has the bundled skills first, then the skills of
- * the project folders (by name), then yours in the Codex home (by name). `~/.agents/skills` is not read, and neither are the folders that
- * start with a dot; the project's `.codex/skills` is read whether or not the project is trusted.
+ * `~/.agents/skills`, the Codex home's `skills/.system` (where the four bundled skills are) and the `.agents/skills` folder of each project
+ * folder from the root down to the working folder; a root that holds no skill is left out, except the bundled one. The list has the bundled
+ * skills first, then the skills of the project folders (by name), then yours, those of the Codex home and of `~/.agents/skills` together (by
+ * name). The folders that start with a dot are not read; the project's `.codex/skills` is read whether or not the project is trusted.
  * Returns { text, chars, yours: [..], roots: [..], bundled }.
  */
 export function skillsBlock(sys, c) {
@@ -99,6 +99,7 @@ export function skillsBlock(sys, c) {
   };
   for (const folder of [...chain].reverse()) consider(sys.path.join(folder, ".codex", "skills"), "project");
   consider(sys.path.join(home, "skills"), "user");
+  consider(sys.path.join(sys.home, ".agents", "skills"), "user");
   const systemAlias = `r${roots.length}`;
   roots.push({ alias: systemAlias, dir: sys.path.join(home, "skills", ".system") });
   for (const folder of chain) consider(sys.path.join(folder, ".agents", "skills"), "project");
@@ -164,7 +165,7 @@ export function cost(c) {
     { id: "skills", label: "Skills", chars: skills.chars, source: skills.yours.length ? "computed" : "recorded", detail: `${skills.bundled} bundled skills${skills.yours.length ? ` and ${skills.yours.length} of yours (${skills.yours.map((s) => s.name).join(", ")})` : ""}; the how-to text is about 2,600 of the characters` },
     { id: "permissions", label: "Permissions", chars: perm, source: "recorded", detail: `approval ${c.effective.approval}, sandbox ${mode}` },
     { id: "agents", label: "AGENTS.md", chars: c.agents.chars, source: "computed", detail: c.agents.text === null ? "no AGENTS.md" : `${c.agents.files.length} project file${c.agents.files.length === 1 ? "" : "s"}${c.agents.global ? " and the global file" : ""}, ${c.agents.bytesOfText.toLocaleString("en-US")} bytes` },
-    { id: "environment", label: "Environment", chars: environmentChars(c.world.dir, mode, sys.platform), source: "recorded", detail: "the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path" },
+    { id: "environment", label: "Environment", chars: environmentChars(c.world.dir, mode, sys.platform), source: "recorded", detail: "the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path (and by a few characters with the names of the shell and the time zone)" },
     { id: "tools", label: `Tool definitions (${tools.length})`, chars: toolChars, source: "recorded", detail: tools.map((t) => `${t[0]} ${t[1].toLocaleString("en-US")}`).join(", "), items: tools.map((t) => ({ name: t[0], chars: t[1] })) },
   ];
   const enabledServers = c.mcp.filter((s) => s.enabled);

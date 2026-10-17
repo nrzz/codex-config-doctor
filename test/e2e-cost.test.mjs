@@ -18,6 +18,9 @@ const TIMES = { "read-only": 2, "workspace-write": 7, "danger-full-access": 2 };
 // the figures recorded on the system these checks run on
 const REC = recordedFor(process.platform);
 const ENVIRONMENT_CWD_CHARS = REC.cwdChars;
+// the environment block holds the name of the time zone and of the shell, which differ from one machine to another by a few characters
+const ENVIRONMENT_SLACK = 20;
+const nearly = (actual, expected, what) => assert.ok(Math.abs(actual - expected) <= ENVIRONMENT_SLACK, `${what}: ${actual} against ${expected}`);
 
 test("the recorded figures are what this Codex sends: base instructions, tools, permissions and environment, for each sandbox", opts, async () => {
   assert.equal(REC.exact, true, `src/recorded.mjs has no figures for ${process.platform}: run E2E_CODEX=... node test/record-oracles.mjs recorded on this system`);
@@ -30,7 +33,7 @@ test("the recorded figures are what this Codex sends: base instructions, tools, 
     assert.deepEqual(parts.tools, toolList(worldOf(cap)), `${mode}: the tool definitions, by name and size`);
     const shift = mode === "workspace-write" ? cap.cwd.length - ENVIRONMENT_CWD_CHARS : 0;
     assert.equal(parts.chars.permissions, REC.permissions.never[mode] + shift, `${mode}: the permissions block of codex exec (approval never)`);
-    assert.equal(parts.chars.environment, REC.environment[mode] + TIMES[mode] * (cap.cwd.length - ENVIRONMENT_CWD_CHARS), `${mode}: the environment block`);
+    nearly(parts.chars.environment, REC.environment[mode] + TIMES[mode] * (cap.cwd.length - ENVIRONMENT_CWD_CHARS), `${mode}: the environment block; the folder of the run is ${cap.cwd}; Codex sent ${JSON.stringify(parts.text.environment.slice(0, 400))}`);
     assert.equal(parts.model, "gpt-5.5");
   }
   console.log(`# Codex ${RECORDED_CODEX} recorded; now ${seen.join("; ")}`);
@@ -74,7 +77,7 @@ test("cost: every row that is computed or sized agrees with the first request of
   assert.equal(row(r, "skills").chars, cap.parts.chars.skills, "the skills block");
   assert.equal(firstDifference(skillsBlock(c.sys, c).text, cap.parts.text.skills), "", "the skills block, character for character");
   assert.equal(row(r, "permissions").chars, cap.parts.chars.permissions);
-  assert.equal(row(r, "environment").chars, cap.parts.chars.environment);
+  nearly(row(r, "environment").chars, cap.parts.chars.environment, "the environment block");
   assert.equal(row(r, "tools").chars, cap.parts.toolsJsonChars);
   const ratio = r.total / cap.parts.requestChars;
   console.log(`# the rows add up to ${r.total} characters; the whole request is ${cap.parts.requestChars} characters of JSON (${(ratio * 100).toFixed(1)}%)`);
@@ -90,7 +93,7 @@ test("the skills block, character for character, for the places Codex looks in",
     ["a skill in the repository's .agents/skills", {}, (sb) => S(path.join(sb.work, ".agents", "skills"), "beta")],
     ["a skill in the project's .codex/skills, project not trusted", {}, (sb) => S(path.join(sb.work, ".codex", "skills"), "gamma")],
     ["the same skill in the user's and the repository's", {}, (sb) => { S(path.join(sb.codexHome, "skills"), "same"); S(path.join(sb.work, ".agents", "skills"), "same"); }],
-    ["a skill in ~/.agents/skills (not read)", {}, (sb) => { S(path.join(sb.home, ".agents", "skills"), "homeone"); S(path.join(sb.codexHome, "skills"), "useone"); }],
+    ["a skill in ~/.agents/skills and one in the Codex home", { notOnWindows: true }, (sb) => { S(path.join(sb.home, ".agents", "skills"), "homeone"); S(path.join(sb.codexHome, "skills"), "useone"); }],
     ["a description of 3,000 characters", {}, (sb) => S(path.join(sb.codexHome, "skills"), "long", "x".repeat(3000))],
     ["a SKILL.md with no front matter, a hidden folder, a SKILL.MD", {}, (sb) => {
       put(path.join(sb.codexHome, "skills", "plain", "SKILL.md"), "just text\n");
@@ -116,6 +119,8 @@ test("the skills block, character for character, for the places Codex looks in",
     }],
   ];
   for (const [what, extra, setup] of worlds) {
+    // Codex on Windows opens the profile folder that Windows reports, not the one in USERPROFILE: a throwaway home cannot hold ~/.agents/skills there
+    if (extra.notOnWindows && process.platform === "win32") continue;
     const cap = await captureExec({ sandboxMode: "read-only", setup, subdir: extra.subdir, label: "e2e-cost-skills" });
     const c = worldOf(cap);
     const mine = skillsBlock(c.sys, c).text;

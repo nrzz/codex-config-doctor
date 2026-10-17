@@ -137,7 +137,7 @@ const WRITE_PY = 'open("../outside.txt", "w").write("x")\nprint("WROTE-OUTSIDE")
 const UNIX_ROWS = [
   { prefix: ["env"], longer: ["env", "node"], command: "env node write.mjs" },
   { prefix: ["python3"], longer: ["python3", "write.py"], command: "python3 write.py" },
-  { prefix: ["rm"], longer: ["rm", "-f"], command: "rm -f ../victim.txt", victim: true },
+  { prefix: ["rm"], longer: ["rm", "../victim.txt"], command: "rm ../victim.txt", victim: true },
   { prefix: ["git"], longer: ["git", "init"], command: "git init ../outside-repo", repo: true },
 ];
 

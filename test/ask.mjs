@@ -111,7 +111,8 @@ const unrecognized = (notifications) => {
 /** Reads a config.toml through the app server: { ok: true, unrecognized: [keys] } or { ok: false, error, stderr }. */
 export async function warningsFor(toml) {
   const sb = sandbox("ask-schema");
-  fs.writeFileSync(sb.user, toml);
+  // the folders that some keys name are inside the sandbox (forward slashes are a path on every system)
+  fs.writeFileSync(sb.user, toml.split("@SANDBOX@").join(sb.root.split(path.sep).join("/")));
   const s = new AppServer(sb, { cwd: sb.work, online: true });
   try {
     await s.start();

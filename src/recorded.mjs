@@ -17,6 +17,8 @@ export const BASE_INSTRUCTIONS_CHARS = 21299;
  */
 export const BY_SYSTEM = {
   win32: {"on":"2026-10-17","tools":[["exec_command",2635],["write_stdin",784],["request_user_input",1355],["apply_patch",884],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":342,"workspace-write":534,"danger-full-access":363},"on-request":{"read-only":3939,"workspace-write":4131,"danger-full-access":3960}},"environment":{"read-only":519,"workspace-write":1180,"danger-full-access":457},"cwdChars":62},
+  linux: {"on":"2026-10-17","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":543,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4084,"danger-full-access":3903}},"environment":{"read-only":507,"workspace-write":1168,"danger-full-access":445},"cwdChars":62},
+  darwin: {"on":"2026-10-17","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":611,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4152,"danger-full-access":3903}},"environment":{"read-only":503,"workspace-write":1164,"danger-full-access":441},"cwdChars":62},
 };
 
 /**

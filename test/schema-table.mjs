@@ -22,7 +22,10 @@ export const EXCLUDED = {
   "memories.no_memories_if_mcp_or_web_search": "the old name of memories.disable_on_external_context: both in one file is an error (the alias group holds it)",
 };
 
-const ABSOLUTE = process.platform === "win32" ? "C:\\ccd-x" : "/ccd-x";
+// a folder inside the sandbox of the run (warningsFor in test/ask.mjs puts it in place of the placeholder): Codex creates files in the folders
+// some of these keys name, so they must be throwaway ones
+export const SANDBOX_FOLDER = "@SANDBOX@";
+const ABSOLUTE = `${SANDBOX_FOLDER}/state`;
 /** Keys Codex reads as an absolute path: a relative value is refused ("AbsolutePathBuf deserialized without a base path"). */
 const ABSOLUTE_PATHS = new Set(["log_dir", "sqlite_home", "js_repl_node_path", "js_repl_node_module_dirs"]);
 const sample = (type, path = "") => {
