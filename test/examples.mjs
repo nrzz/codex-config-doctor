@@ -15,10 +15,25 @@ export function exampleMachine({ files = {} } = {}) {
   const sys = fakeSys({ platform: "linux", home: HOME, cwd: `${HOME}/shop`, env: { HOME, PATH: "/usr/local/bin:/usr/bin:/bin" } });
   for (const [from, to] of [["examples/codex-home", `${HOME}/.codex`], ["examples/shop", `${HOME}/shop`]]) {
     const base = path.join(ROOT, ...from.split("/"));
-    for (const file of walk(base)) sys.add(`${to}/${path.relative(base, file).split(path.sep).join("/")}`, fs.readFileSync(file));
+    // a checkout on Windows may turn line feeds into CRLF, and the byte counts of the examples are those of the files as they are in the index
+    for (const file of walk(base)) sys.add(`${to}/${path.relative(base, file).split(path.sep).join("/")}`, String(fs.readFileSync(file, "utf8")).replace(/\r\n/g, "\n"));
   }
   sys.add(`${HOME}/shop/.git/HEAD`, "ref: refs/heads/main\n");
   for (const exe of ["node", "git", "npm"]) sys.add(`/usr/bin/${exe}`, "#!/bin/sh\n");
   for (const [rel, text] of Object.entries(files)) sys.add(rel.startsWith("/") ? rel : `${HOME}/${rel}`, text);
+  return sys;
+}
+
+/**
+ * A pretend Windows 11 machine (build 26100) for the two Windows examples of the README: the user is `me`, the project C:\Users\me\shop (a Git
+ * repository, trusted by the entry Codex's own warning spells), and the Codex home asks for workspace-write and selects no Windows sandbox.
+ */
+export function exampleWindows() {
+  const sys = fakeSys({
+    platform: "win32", home: "C:\\Users\\me", cwd: "C:\\Users\\me\\shop", release: "10.0.26100",
+    env: { USERPROFILE: "C:\\Users\\me", ProgramData: "C:\\ProgramData", Path: "C:\\Windows\\System32;C:\\Windows", PATHEXT: ".COM;.EXE;.BAT;.CMD" },
+  });
+  sys.add("C:\\Users\\me\\.codex\\config.toml", 'model = "gpt-5.5"\napproval_policy = "on-request"\nsandbox_mode = "workspace-write"\n\n[projects.\'c:\\users\\me\\shop\']\ntrust_level = "trusted"\n');
+  sys.add("C:\\Users\\me\\shop\\.git\\HEAD", "ref: refs/heads/main\n");
   return sys;
 }
