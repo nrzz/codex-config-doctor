@@ -18,7 +18,7 @@ import { fakeApi, gitInit, hookRecords, isMachineNoise, put, runCodex, sandbox, 
  *   project                the text of work/.codex/config.toml
  *   files                  { path relative to the world's root (work/x, codex-home/y): text }
  *   script                 the fake API's script (shellCall(...), { text })
- *   args / top             arguments after `exec` / before it; prompt, env, path, timeout, git (false: no repository)
+ *   args / top             arguments after `exec` / before it; prompt, env (or a function of the world), path, timeout, git (false: no repository)
  * Resolves { sb, code, out, err, ms, requests, model, hookRuns }.
  */
 export async function exec(spec = {}) {
@@ -37,7 +37,7 @@ export async function exec(spec = {}) {
     const args = [...(spec.top || []), "exec", "--skip-git-repo-check", "-C", cwd, ...(spec.args || []), spec.prompt || "hello"];
     // a raw user config has no fake provider (it cannot have one, or it is the thing being tested): such a run must fail before any request,
     // and every proxy variable of the run names a closed port in case it does not
-    const r = await runCodex(sb, args, { cwd, env: spec.env, path: val(spec.path), timeout: spec.timeout, online: spec.rawUser !== undefined });
+    const r = await runCodex(sb, args, { cwd, env: val(spec.env), path: val(spec.path), timeout: spec.timeout, online: spec.rawUser !== undefined });
     return { sb, code: r.code, out: r.out, err: r.err, ms: r.ms, requests: api.requests, model: api.requests[0] && api.requests[0].model, hookRuns: hookRecords(sb.hookLog) };
   } finally { await api.close(); }
 }

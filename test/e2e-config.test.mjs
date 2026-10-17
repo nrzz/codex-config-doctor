@@ -7,6 +7,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { AppServer } from "./app-server.mjs";
+import { fwd } from "./helpers.mjs";
 import { exec, lintWorld, noise } from "./behave.mjs";
 import { codexInfo, execArgs, fakeApi, gitInit, promptInput, put, runCodex, sandbox, shellCall, skip, skipUnlessWindows, writeUserConfig } from "./codex-sandbox.mjs";
 
@@ -31,6 +32,18 @@ test("codex-home: CODEX_HOME names a folder that is not there, or a file", opts,
     assert.equal(l.find("codex-home").length, 1, `${what}: ${l.ids}`);
     assert.equal(l.find("codex-home")[0].severity, "error");
   }
+});
+
+test("codex-home: a CODEX_HOME with spaces in it, or written with forward slashes and a trailing separator, is read", opts, async () => {
+  // an empty CODEX_HOME or a relative one is not tried: on Windows an empty value sends Codex to the real profile folder
+  const spaced = await exec({ label: "e2e home with spaces" });
+  assert.match(spaced.sb.codexHome, / /, "the folder has spaces in its path");
+  assert.equal(spaced.code, 0, spaced.err);
+  assert.equal(spaced.model, "gpt-5.5", "the config.toml of the folder was read");
+  assert.equal(lintWorld(spaced.sb).find("codex-home").length, 0);
+  const slashed = await exec({ label: "e2e-home-slashes", env: (sb) => ({ CODEX_HOME: `${fwd(sb.codexHome)}/` }) });
+  assert.equal(slashed.code, 0, slashed.err);
+  assert.equal(slashed.model, "gpt-5.5");
 });
 
 test("toml-error: a user config.toml that does not parse stops Codex at the line lint names", opts, async () => {

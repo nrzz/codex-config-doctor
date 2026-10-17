@@ -22,7 +22,8 @@ export const PAGES = {
     means: "CODEX_HOME is set, and the folder it names does not exist or is a file. Codex keeps its configuration, AGENTS.md, rules and hooks in that folder.",
     does: [
       [V, "Codex stops at start (exit code 1) with: CODEX_HOME points to \"<path>\", but that path does not exist (or: but that path is not a directory)."],
-      [V, "An empty CODEX_HOME counts as unset: Codex uses ~/.codex. A relative path is taken from the working folder; a path with spaces, a trailing separator or forward slashes works."],
+      [V, "A CODEX_HOME with spaces in its path, or written with forward slashes and a trailing separator, works: Codex reads the config.toml in it."],
+      [N, "An empty CODEX_HOME counts as unset and a relative one is taken from the working folder: this tool reads them so. The checks never try either, because an empty value makes Codex on Windows open the real profile folder."],
       [V, "With CODEX_HOME unset, Codex on Windows opens the profile folder that Windows reports for the user, not the one in USERPROFILE: a test that only changes HOME and USERPROFILE reaches the real ~/.codex."],
     ],
     fix: ["Create the folder, or unset CODEX_HOME."],

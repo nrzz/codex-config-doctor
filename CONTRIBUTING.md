@@ -65,7 +65,7 @@ The `test/e2e-*.test.mjs` files start a fake Responses API on 127.0.0.1 and run 
 E2E_CODEX=/path/to/codex node --test --test-concurrency=1 "test/e2e-*.test.mjs"
 ```
 
-The checks that are about Windows skip on other systems. When a new Codex comes out, run `node test/record-oracles.mjs all` and `node test/record-oracles.mjs recorded`, read the diff of `test/fixtures/` and `src/recorded.mjs`, and update `src/knowledge.mjs` where it moved.
+The checks that are about Windows skip on other systems. When a new Codex comes out, run `node test/record-oracles.mjs all` and `node test/record-oracles.mjs recorded`, read the diff of `test/fixtures/` and `src/recorded.mjs`, and update `src/knowledge.mjs` where it moved. `recorded` writes only the figures of the system it runs on; the `record` workflow runs it on Linux, macOS and Windows and uploads the three files, whose entries go into `BY_SYSTEM` of `src/recorded.mjs`.
 
 ## Pull requests
 
