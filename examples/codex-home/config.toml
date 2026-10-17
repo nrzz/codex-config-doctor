@@ -1,0 +1,16 @@
+model = "gpt-5.5"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+project_doc_max_bytes = 1900
+aproval_policy = "never"
+
+[features]
+codex_hooks = true
+web_search_request = true
+
+[mcp_servers.docs]
+command = "docs-mcp"
+args = ["--stdio"]
+
+[projects."/home/runner/shop"]
+trust_level = "trusted"

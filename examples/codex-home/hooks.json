@@ -1,0 +1,12 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "node /home/runner/.codex/hooks/guard.mjs", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}

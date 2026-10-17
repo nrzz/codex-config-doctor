@@ -1,0 +1,3 @@
+model = "gpt-5.4"
+notify = ["node", "scripts/notify.mjs"]
+model_reasoning_effort = "high"

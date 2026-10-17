@@ -1,0 +1,6 @@
+# Commands the team has decided about.
+prefix_rule(pattern=["git"], decision="allow")
+prefix_rule(pattern=["git", "status"], decision="allow")
+prefix_rule(pattern=["npm", "test"], decision="allow")
+prefix_rule(pattern=["npm", "publish"], decision="prompt", justification="publishing is a decision for a person")
+prefix_rule(pattern=["rm", "-rf"], decision="forbidden", justification="deleting a tree is never an agent's call")
