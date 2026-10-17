@@ -1,0 +1,6590 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "policies": {
+  "git": "prefix_rule(pattern=[\"git\", \"status\"], decision=\"allow\")\nprefix_rule(pattern=[\"git\", \"push\"], decision=\"prompt\", justification=\"pushes need a look\")\nprefix_rule(pattern=[\"git\", \"push\", \"--force\"], decision=\"forbidden\", justification=\"no force push\")\nprefix_rule(pattern=[\"rm\", \"-rf\"], decision=\"forbidden\")\nprefix_rule(pattern=[\"ls\"])\n",
+  "alternatives": "prefix_rule(pattern=[\"git\", [\"pull\", \"fetch\"], \"origin\"], decision=\"prompt\")\nprefix_rule(pattern=[[\"npm\", \"pnpm\", \"yarn\"], \"install\"], decision=\"allow\")\nprefix_rule(pattern=[[\"cat\", \"bat\"]], decision=\"allow\")\nprefix_rule(pattern=[[\"python\", \"python3\"], \"-c\"], decision=\"forbidden\", justification=\"no inline python\")\n",
+  "overlap": "prefix_rule(pattern=[\"npm\"], decision=\"allow\")\nprefix_rule(pattern=[\"npm\", \"publish\"], decision=\"prompt\", justification=\"publishing\")\nprefix_rule(pattern=[\"npm\", \"publish\", \"--access\", \"public\"], decision=\"forbidden\", justification=\"never public\")\nprefix_rule(pattern=[\"npm\", \"run\"], decision=\"allow\")\nprefix_rule(pattern=[\"npm\", \"run\", \"build\"], decision=\"allow\", justification=\"build is fine\")\nprefix_rule(pattern=[\"npm\", \"run\", \"deploy\"], decision=\"prompt\")\n",
+  "odd": "prefix_rule(pattern=[\"echo\", \"a b\"], decision=\"allow\")\nprefix_rule(pattern=[\"printf\", \"\"], decision=\"prompt\")\nprefix_rule(pattern=[\"éclair\", \"ü\"], decision=\"allow\")\nprefix_rule(pattern=[\"tool\", \"--flag=value\"], decision=\"prompt\", justification=\"a flag with a value\")\nprefix_rule(pattern=[\"a\"], decision=\"allow\")\nprefix_rule(pattern=[\"a\", \"b\"], decision=\"allow\")\nprefix_rule(pattern=[\"a\", \"b\", \"c\"], decision=\"prompt\")\n",
+  "paths": "prefix_rule(pattern=[\"/usr/bin/env\"], decision=\"prompt\")\nprefix_rule(pattern=[\"./run.sh\"], decision=\"allow\")\nprefix_rule(pattern=[\"C:\\\\Windows\\\\System32\\\\cmd.exe\"], decision=\"prompt\")\nprefix_rule(pattern=[\"cmd.exe\", \"/c\"], decision=\"prompt\")\nprefix_rule(pattern=[\"powershell\", \"-Command\"], decision=\"forbidden\", justification=\"no powershell commands\")\nprefix_rule(pattern=[\"~/bin/tool\"], decision=\"allow\")\n",
+  "generated": "SAFE = [\"ls\", \"cat\", \"head\", \"tail\", \"wc\"]\nfor p in SAFE:\n    prefix_rule(pattern=[p], decision=\"allow\")\nRISKY = [[\"rm\", \"-rf\"], [\"dd\", \"if=\"], [\"mkfs\"], [\"shutdown\"]]\n[prefix_rule(pattern=r, decision=\"forbidden\", justification=\"risky: \" + r[0]) for r in RISKY]\ndef ask(a, b=1):\n    pass\nprefix_rule(pattern=[\"git\"] + [\"reset\", \"--hard\"], decision=\"prompt\")\nprefix_rule(pattern=[\"tool\", \"x\" * 3], decision=\"allow\")\n",
+  "cases": "prefix_rule(pattern=[\"LS\"], decision=\"allow\")\nprefix_rule(pattern=[\"Git\", \"Status\"], decision=\"prompt\")\nprefix_rule(pattern=[\"ls\", \"-L\"], decision=\"forbidden\")\n",
+  "justification": "prefix_rule(pattern=[\"a\"], decision=\"prompt\", justification=\"first\")\nprefix_rule(pattern=[\"a\"], decision=\"prompt\", justification=\"second\")\nprefix_rule(pattern=[\"a\"], decision=\"allow\")\nprefix_rule(pattern=[\"b\"], decision=\"forbidden\", justification=\"because \\\"quoted\\\" and unicode é\")\nprefix_rule(pattern=[\"c\"], decision=\"allow\", justification=\"allowed\")\n",
+  "examples": "prefix_rule(\n    pattern = [\"gh\", \"pr\", \"view\"],\n    decision = \"prompt\",\n    justification = \"Viewing GitHub PRs is allowed with approval\",\n    match = [\n        [\"gh\", \"pr\", \"view\", \"7888\"],\n        \"gh pr view 7888 --repo openai/codex\",\n    ],\n    not_match = [\n        [\"gh\", \"pr\", \"--repo\", \"openai/codex\", \"view\", \"7888\"],\n        \"gh pr checkout 7888\",\n    ],\n)\nprefix_rule(pattern=[\"gh\", \"pr\", \"list\"], decision=\"allow\", match=[\"gh pr list --state open\"])\n"
+ },
+ "cases": [
+  {
+   "policy": "git",
+   "tokens": [
+    "git"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "status"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "status"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "status",
+    "-sb"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "status"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "origin",
+    "main"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "--force"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push",
+        "--force"
+       ],
+       "decision": "forbidden",
+       "justification": "no force push"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "--force-with-lease"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "pull"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm",
+    "-rf",
+    "/"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm",
+    "-r",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "ls",
+    "-la",
+    "/tmp"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "LS"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "/bin/ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "sudo",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "-C",
+    "x",
+    "status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "status",
+    "&&",
+    "git",
+    "push"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "status"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "status",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "status"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "status",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "status"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "GIT",
+    "status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "env",
+    "git",
+    "status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "GIT",
+    "push"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "env",
+    "git",
+    "push"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "--force",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push",
+        "--force"
+       ],
+       "decision": "forbidden",
+       "justification": "no force push"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "git",
+    "push",
+    "--force",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push"
+       ],
+       "decision": "prompt",
+       "justification": "pushes need a look"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "push",
+        "--force"
+       ],
+       "decision": "forbidden",
+       "justification": "no force push"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "GIT",
+    "push",
+    "--force"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "env",
+    "git",
+    "push",
+    "--force"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm",
+    "-rf",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "rm",
+    "-rf",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "RM",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "env",
+    "rm",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "ls",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "ls",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "git",
+   "tokens": [
+    "env",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "pull",
+    "origin"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "pull",
+        "origin"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "fetch",
+    "origin",
+    "main"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "fetch",
+        "origin"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "fetch",
+    "upstream"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "pull"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "npm",
+    "install"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "install"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "pnpm",
+    "install",
+    "left-pad"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "pnpm",
+        "install"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "yarn",
+    "install"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "yarn",
+        "install"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "npm",
+    "i"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "cat"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "bat",
+    "file"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "bat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "cat",
+    "a",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python",
+    "-c",
+    "print(1)"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "python",
+        "-c"
+       ],
+       "decision": "forbidden",
+       "justification": "no inline python"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python3",
+    "-c",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "python3",
+        "-c"
+       ],
+       "decision": "forbidden",
+       "justification": "no inline python"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python",
+    "script.py"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python3.12",
+    "-c",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "pull",
+    "origin",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "pull",
+        "origin"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "git",
+    "pull",
+    "origin",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "pull",
+        "origin"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "GIT",
+    "pull",
+    "origin"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "env",
+    "git",
+    "pull",
+    "origin"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "npm",
+    "install",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "install"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "npm",
+    "install",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "install"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "npm"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "NPM",
+    "install"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "env",
+    "npm",
+    "install"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "cat",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "cat",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "CAT"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "env",
+    "cat"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "bat"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "bat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python",
+    "-c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "python",
+        "-c"
+       ],
+       "decision": "forbidden",
+       "justification": "no inline python"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python",
+    "-c",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "python",
+        "-c"
+       ],
+       "decision": "forbidden",
+       "justification": "no inline python"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python",
+    "-c",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "python",
+        "-c"
+       ],
+       "decision": "forbidden",
+       "justification": "no inline python"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "python"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "PYTHON",
+    "-c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "alternatives",
+   "tokens": [
+    "env",
+    "python",
+    "-c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "test"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--tag",
+    "beta"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--access",
+    "public"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish",
+        "--access",
+        "public"
+       ],
+       "decision": "forbidden",
+       "justification": "never public"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--access",
+    "restricted"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "build"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "build"
+       ],
+       "decision": "allow",
+       "justification": "build is fine"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "build",
+    "--",
+    "--watch"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "build"
+       ],
+       "decision": "allow",
+       "justification": "build is fine"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "deploy"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "deploy"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "deploy",
+    "prod"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "deploy"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npx",
+    "npm"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "RUN",
+    "build"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM",
+    "publish"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm",
+    "publish"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--access",
+    "public",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish",
+        "--access",
+        "public"
+       ],
+       "decision": "forbidden",
+       "justification": "never public"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--access",
+    "public",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish",
+        "--access",
+        "public"
+       ],
+       "decision": "forbidden",
+       "justification": "never public"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "publish",
+    "--access"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "publish"
+       ],
+       "decision": "prompt",
+       "justification": "publishing"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM",
+    "publish",
+    "--access",
+    "public"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm",
+    "publish",
+    "--access",
+    "public"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM",
+    "run"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm",
+    "run"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "build",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "build"
+       ],
+       "decision": "allow",
+       "justification": "build is fine"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "build",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "build"
+       ],
+       "decision": "allow",
+       "justification": "build is fine"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM",
+    "run",
+    "build"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm",
+    "run",
+    "build"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "deploy",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "deploy"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "npm",
+    "run",
+    "deploy",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "npm",
+        "run",
+        "deploy"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "NPM",
+    "run",
+    "deploy"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "overlap",
+   "tokens": [
+    "env",
+    "npm",
+    "run",
+    "deploy"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo",
+    "a b"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "echo",
+        "a b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo",
+    "a",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo",
+    "a b",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "echo",
+        "a b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "printf",
+    ""
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "printf",
+        ""
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "printf"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "printf",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "éclair",
+    "ü"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "éclair",
+        "ü"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "éclair"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "tool",
+    "--flag=value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "--flag=value"
+       ],
+       "decision": "prompt",
+       "justification": "a flag with a value"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "tool",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b",
+        "c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "c",
+    "d"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b",
+        "c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo",
+    "a b",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "echo",
+        "a b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "echo",
+    "a b",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "echo",
+        "a b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "ECHO",
+    "a b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "echo",
+    "a b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "printf",
+    "",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "printf",
+        ""
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "printf",
+    "",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "printf",
+        ""
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "PRINTF",
+    ""
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "printf",
+    ""
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "éclair",
+    "ü",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "éclair",
+        "ü"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "éclair",
+    "ü",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "éclair",
+        "ü"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "ÉCLAIR",
+    "ü"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "éclair",
+    "ü"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "tool",
+    "--flag=value",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "--flag=value"
+       ],
+       "decision": "prompt",
+       "justification": "a flag with a value"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "tool",
+    "--flag=value",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "--flag=value"
+       ],
+       "decision": "prompt",
+       "justification": "a flag with a value"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "tool"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "TOOL",
+    "--flag=value"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "tool",
+    "--flag=value"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "A"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "a"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "A",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "a",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "c",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b",
+        "c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "a",
+    "b",
+    "c",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b"
+       ],
+       "decision": "allow"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a",
+        "b",
+        "c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "A",
+    "b",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "odd",
+   "tokens": [
+    "env",
+    "a",
+    "b",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "/usr/bin/env",
+    "bash"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "/usr/bin/env"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "bash"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "./run.sh"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "./run.sh"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "./run.sh",
+    "--fast"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "./run.sh"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "run.sh"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "C:\\Windows\\System32\\cmd.exe",
+    "/c",
+    "dir"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "C:\\Windows\\System32\\cmd.exe"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe",
+    "/c",
+    "dir"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cmd.exe",
+        "/c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe",
+    "/C",
+    "dir"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd",
+    "/c",
+    "dir"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-Command",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "powershell",
+        "-Command"
+       ],
+       "decision": "forbidden",
+       "justification": "no powershell commands"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-command",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell.exe",
+    "-Command",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "~/bin/tool"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "~/bin/tool"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "tool"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "/usr/bin/env"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "/usr/bin/env"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "/usr/bin/env",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "/usr/bin/env"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "/usr/bin/env",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "/usr/bin/env"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "/USR/BIN/ENV"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "/usr/bin/env"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "./run.sh",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "./run.sh"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "./run.sh",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "./run.sh"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "./RUN.SH"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "./run.sh"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "C:\\Windows\\System32\\cmd.exe"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "C:\\Windows\\System32\\cmd.exe"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "C:\\Windows\\System32\\cmd.exe",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "C:\\Windows\\System32\\cmd.exe"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "C:\\Windows\\System32\\cmd.exe",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "C:\\Windows\\System32\\cmd.exe"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "C:\\WINDOWS\\SYSTEM32\\CMD.EXE"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "C:\\Windows\\System32\\cmd.exe"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe",
+    "/c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cmd.exe",
+        "/c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe",
+    "/c",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cmd.exe",
+        "/c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe",
+    "/c",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cmd.exe",
+        "/c"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "cmd.exe"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "CMD.EXE",
+    "/c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "cmd.exe",
+    "/c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-Command"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "powershell",
+        "-Command"
+       ],
+       "decision": "forbidden",
+       "justification": "no powershell commands"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-Command",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "powershell",
+        "-Command"
+       ],
+       "decision": "forbidden",
+       "justification": "no powershell commands"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell",
+    "-Command",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "powershell",
+        "-Command"
+       ],
+       "decision": "forbidden",
+       "justification": "no powershell commands"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "powershell"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "POWERSHELL",
+    "-Command"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "powershell",
+    "-Command"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "~/bin/tool",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "~/bin/tool"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "~/bin/tool",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "~/bin/tool"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "~/BIN/TOOL"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "paths",
+   "tokens": [
+    "env",
+    "~/bin/tool"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "cat",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "head",
+    "-n",
+    "5",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "head"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tail"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tail"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "wc",
+    "-l"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "wc"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "sort"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm",
+    "-rf",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: rm"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm",
+    "-fr",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "dd",
+    "if="
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "dd",
+        "if="
+       ],
+       "decision": "forbidden",
+       "justification": "risky: dd"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "dd",
+    "if=/dev/zero"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "mkfs"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "mkfs"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: mkfs"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "mkfs.ext4",
+    "/dev/sda"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "shutdown",
+    "-h",
+    "now"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "shutdown"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: shutdown"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "git",
+    "reset",
+    "--hard"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "reset",
+        "--hard"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "git",
+    "reset",
+    "--soft"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tool",
+    "xxx"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "xxx"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tool",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "ls",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "ls",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "LS"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "cat"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "cat",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "cat",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "cat"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "CAT"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "cat"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "head"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "head"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "head",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "head"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "head",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "head"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "HEAD"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "head"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tail",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tail"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tail",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tail"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "TAIL"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "tail"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "wc"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "wc"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "wc",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "wc"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "wc",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "wc"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "WC"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "wc"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: rm"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm",
+    "-rf",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: rm"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm",
+    "-rf",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "rm",
+        "-rf"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: rm"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "rm"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "RM",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "rm",
+    "-rf"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "dd",
+    "if=",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "dd",
+        "if="
+       ],
+       "decision": "forbidden",
+       "justification": "risky: dd"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "dd",
+    "if=",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "dd",
+        "if="
+       ],
+       "decision": "forbidden",
+       "justification": "risky: dd"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "dd"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "DD",
+    "if="
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "dd",
+    "if="
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "mkfs",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "mkfs"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: mkfs"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "mkfs",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "mkfs"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: mkfs"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "MKFS"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "mkfs"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "shutdown"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "shutdown"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: shutdown"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "shutdown",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "shutdown"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: shutdown"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "shutdown",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "shutdown"
+       ],
+       "decision": "forbidden",
+       "justification": "risky: shutdown"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "SHUTDOWN"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "shutdown"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "git",
+    "reset",
+    "--hard",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "reset",
+        "--hard"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "git",
+    "reset",
+    "--hard",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "git",
+        "reset",
+        "--hard"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "git",
+    "reset"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "GIT",
+    "reset",
+    "--hard"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "git",
+    "reset",
+    "--hard"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tool",
+    "xxx",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "xxx"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tool",
+    "xxx",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "tool",
+        "xxx"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "tool"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "TOOL",
+    "xxx"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "generated",
+   "tokens": [
+    "env",
+    "tool",
+    "xxx"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "LS"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "LS"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "Ls"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "Git",
+    "Status"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "Git",
+        "Status"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "git",
+    "status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "GIT",
+    "STATUS"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "ls",
+    "-L"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls",
+        "-L"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "ls",
+    "-l"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "LS",
+    "-L"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "LS"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "LS",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "LS"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "LS",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "LS"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "env",
+    "LS"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "Git",
+    "Status",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "Git",
+        "Status"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "Git",
+    "Status",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "Git",
+        "Status"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "Git"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "GIT",
+    "Status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "env",
+    "Git",
+    "Status"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "ls",
+    "-L",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls",
+        "-L"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "ls",
+    "-L",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls",
+        "-L"
+       ],
+       "decision": "forbidden"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "cases",
+   "tokens": [
+    "env",
+    "ls",
+    "-L"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "a"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "first"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "second"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "a",
+    "1"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "first"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "second"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "b"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "b"
+       ],
+       "decision": "forbidden",
+       "justification": "because \"quoted\" and unicode é"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "b",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "b"
+       ],
+       "decision": "forbidden",
+       "justification": "because \"quoted\" and unicode é"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "c"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "c"
+       ],
+       "decision": "allow",
+       "justification": "allowed"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "c",
+    "x"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "c"
+       ],
+       "decision": "allow",
+       "justification": "allowed"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "d"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "a",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "first"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "second"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "a",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "first"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "prompt",
+       "justification": "second"
+      }
+     },
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "a"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "A"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "env",
+    "a"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "b",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "b"
+       ],
+       "decision": "forbidden",
+       "justification": "because \"quoted\" and unicode é"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "b",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "b"
+       ],
+       "decision": "forbidden",
+       "justification": "because \"quoted\" and unicode é"
+      }
+     }
+    ],
+    "decision": "forbidden"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "B"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "env",
+    "b"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "c",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "c"
+       ],
+       "decision": "allow",
+       "justification": "allowed"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "c",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "c"
+       ],
+       "decision": "allow",
+       "justification": "allowed"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "C"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "justification",
+   "tokens": [
+    "env",
+    "c"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "view"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "view"
+       ],
+       "decision": "prompt",
+       "justification": "Viewing GitHub PRs is allowed with approval"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "view",
+    "1"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "view"
+       ],
+       "decision": "prompt",
+       "justification": "Viewing GitHub PRs is allowed with approval"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "list"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "list"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "list",
+    "--state",
+    "open"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "list"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "checkout",
+    "1"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "issue",
+    "view"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "view",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "view"
+       ],
+       "decision": "prompt",
+       "justification": "Viewing GitHub PRs is allowed with approval"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "view",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "view"
+       ],
+       "decision": "prompt",
+       "justification": "Viewing GitHub PRs is allowed with approval"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "GH",
+    "pr",
+    "view"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "env",
+    "gh",
+    "pr",
+    "view"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "list",
+    "extra"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "list"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "gh",
+    "pr",
+    "list",
+    "--flag",
+    "value"
+   ],
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "gh",
+        "pr",
+        "list"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "GH",
+    "pr",
+    "list"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "policy": "examples",
+   "tokens": [
+    "env",
+    "gh",
+    "pr",
+    "list"
+   ],
+   "answer": {
+    "matchedRules": []
+   }
+  }
+ ],
+ "files": [
+  {
+   "name": "empty",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "comment only",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "one rule",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "no newline at the end",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "crlf",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "tabs for indentation",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: tabs are not allowed |      --> <file>:1:17 |       | |     1 | for p in [\"ls\"]: |       |                  |       |"
+  },
+  {
+   "name": "byte order mark",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: invalid input `﻿` |      --> <file>:1:1 |       | |     1 | ﻿prefix_rule(pattern=[\"ls\"], decision=\"allow\") |       |  |       |"
+  },
+  {
+   "name": "unclosed paren",
+   "ok": false,
+   "line": 1,
+   "execLine": 2,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: unexpected new line, expected symbol ')' |     --> <file>:1:1 |      | |      |"
+  },
+  {
+   "name": "unclosed list",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: unexpected symbol '=', expected symbol ']' |      --> <file>:1:36 |       | |     1 | prefix_rule(pattern=[\"ls\", decision=\"allow\") |       |                                    ^ |       |"
+  },
+  {
+   "name": "missing comma",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: unexpected identifier 'decision', expected symbol ')' |      --> <file>:1:28 |       | |     1 | prefix_rule(pattern=[\"ls\"] decision=\"allow\") |       |                            ^^^^^^^^ |       |"
+  },
+  {
+   "name": "bad decision",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\"], decision=\"yes\") |     error: invalid decision: yes |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "decision not a string",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\"], decision=1) |     error: Type of parameter `decision` doesn't match, expected `str`, actual `int (repr: 1)` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "empty pattern",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[], decision=\"allow\") |     error: invalid pattern element: pattern cannot be empty |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "no pattern",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(decision=\"allow\") |     error: Missing parameter `pattern` for call to `prefix_rule` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "pattern is a string",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=\"ls\", decision=\"allow\") |     error: Type of parameter `pattern` doesn't match, expected `list`, actual `string (repr: \"ls\")` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "pattern holds a number",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\", 1], decision=\"allow\") |     error: invalid pattern element: pattern element must be a string or list of strings (got int) |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "pattern holds an empty list",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\", []], decision=\"allow\") |     error: invalid pattern element: pattern alternatives cannot be empty |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "unknown keyword",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\"], decision=\"allow\", bogus=1) |     error: Found `bogus` extra named parameter(s) for call to prefix_rule |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "positional arguments",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "unknown function",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Variable `foo` not found, did you mean `bool`? |      --> <file>:1:1 |       | |     1 | foo(pattern=[\"ls\"]) |       | ^^^ |       |"
+  },
+  {
+   "name": "justification not a string",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\"], justification=1) |     error: Type of parameter `justification` doesn't match, expected `str`, actual `int (repr: 1)` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "empty justification",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"ls\"], justification=\"\") |     error: invalid rule: justification cannot be empty |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "match example that matches",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "match example that does not match",
+   "ok": false,
+   "line": null,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     expected every example to match at least one rule. rules: [\"PrefixRule { pattern: PrefixPattern { first: \\\"git\\\", rest: [Single(\\\"pull\\\")] }, decision: Allow, justification: None }\"]; unmatched examples: [\"git push\"]"
+  },
+  {
+   "name": "match example matched by another rule",
+   "ok": false,
+   "line": null,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     expected every example to match at least one rule. rules: [\"PrefixRule { pattern: PrefixPattern { first: \\\"git\\\", rest: [Single(\\\"pull\\\")] }, decision: Allow, justification: None }\"]; unmatched examples: [\"git push\"]"
+  },
+  {
+   "name": "match example matched by a later rule",
+   "ok": false,
+   "line": null,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     expected every example to match at least one rule. rules: [\"PrefixRule { pattern: PrefixPattern { first: \\\"git\\\", rest: [Single(\\\"pull\\\")] }, decision: Allow, justification: None }\"]; unmatched examples: [\"git push\"]"
+  },
+  {
+   "name": "not_match example that matches",
+   "ok": false,
+   "line": null,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     expected example to not match rule `PrefixRuleMatch { matched_prefix: [\"git\", \"pull\"], decision: Allow, resolved_program: None, justification: None }`: git pull x"
+  },
+  {
+   "name": "not_match example that does not match",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "not_match matched by another rule only",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "match example as a list",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "match example is a number",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"git\", \"pull\"], match=[1]) |     error: invalid example: example must be a string or list of strings (got int) |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "match is a string",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"git\", \"pull\"], match=\"git pull\") |     error: Type of parameter `match` doesn't match, expected `list`, actual `string (repr: \"git pull\")` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "example with an unterminated quote",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=[\"git\", \"pull\"], match=[\"git 'pull\"]) |     error: invalid example: example string has invalid shell syntax |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "variable",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "undefined variable",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Variable `Y` not found |      --> <file>:1:22 |       | |     1 | prefix_rule(pattern=[Y], decision=\"allow\") |       |                      ^ |       |"
+  },
+  {
+   "name": "for loop",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "list comprehension",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "function",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "function with a default",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "prompt"
+      }
+     }
+    ],
+    "decision": "prompt"
+   }
+  },
+  {
+   "name": "function with a missing argument",
+   "ok": false,
+   "line": 3,
+   "execLine": 3,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:3, in <module> |           f() |     error: Missing parameter `x` for call to <file>.f` |      --> <file>:3:1 |       |"
+  },
+  {
+   "name": "if statement",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "string concatenation",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "string format",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "percent format",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "list multiplication",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "lambda",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "while",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: cannot use reserved keyword `while` |      --> <file>:1:1 |       | |     1 | while True: |       | ^^^^^ |       |"
+  },
+  {
+   "name": "indentation error",
+   "ok": false,
+   "line": 2,
+   "execLine": 2,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: unexpected new indentation block, expected expression |      --> <file>:2:1 |       | |     2 |     prefix_rule(pattern=[\"cat\"]) |       | ^^^^ |       |"
+  },
+  {
+   "name": "unexpected indent first line",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: unexpected new indentation block, expected expression |      --> <file>:1:1 |       | |     1 |   prefix_rule(pattern=[\"ls\"]) |       | ^^ |       |"
+  },
+  {
+   "name": "tuple pattern",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: Traceback (most recent call last): |       * <file>:1, in <module> |           prefix_rule(pattern=(\"ls\",), decision=\"allow\") |     error: Type of parameter `pattern` doesn't match, expected `list`, actual `tuple (repr: (\"ls\",))` |      --> <file>:1:1 |       |"
+  },
+  {
+   "name": "single quoted strings",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "triple quoted justification",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow",
+       "justification": "long\ntext"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "raw string",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "unicode escape",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "bad escape",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "semicolons",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "dict",
+   "ok": true,
+   "answer": {
+    "matchedRules": [
+     {
+      "prefixRuleMatch": {
+       "matchedPrefix": [
+        "ls"
+       ],
+       "decision": "allow"
+      }
+     }
+    ],
+    "decision": "allow"
+   }
+  },
+  {
+   "name": "len and range",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  },
+  {
+   "name": "load statement",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: No imports are available, you tried `x.rules` (no call to `Evaluator.set_loader`) |      --> <file>:1:1 |       | |     1 | load(\"x.rules\", \"y\") |       | ^^^^^^^^^^^^^^^^^^^^ |       |"
+  },
+  {
+   "name": "print",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Variable `print` not found, did you mean `int`? |      --> <file>:1:1 |       | |     1 | print(\"hello\") |       | ^^^^^ |       |"
+  },
+  {
+   "name": "assert",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: Parse error: cannot use reserved keyword `assert` |      --> <file>:1:1 |       | |     1 | assert 1 == 1 |       | ^^^^^^ |       |"
+  },
+  {
+   "name": "return outside a function",
+   "ok": false,
+   "line": 1,
+   "execLine": 1,
+   "execExit": 1,
+   "message": "Error: failed to parse policy at <file> | Caused by: |     starlark error: error: `return` cannot be used outside of a `def` function |      --> <file>:1:1 |       | |     1 | return 1 |       | ^^^^^^^^ |       |"
+  },
+  {
+   "name": "integer division",
+   "ok": true,
+   "answer": {
+    "matchedRules": []
+   }
+  }
+ ]
+}
