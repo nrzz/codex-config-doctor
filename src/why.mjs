@@ -4,6 +4,7 @@
 // the app server and `codex exec` (test/e2e-why.test.mjs). Each line of the explanation says which: `verified` (put to the binary,
 // on Windows 11 for the sandbox parts) or `documented`.
 import { STRICTNESS, effective } from "./execpolicy.mjs";
+import { dangerOf } from "./danger.mjs";
 import { judgedCommands } from "./shellsplit.mjs";
 
 const V = "verified";
@@ -21,7 +22,8 @@ export function why(c, script, opts = {}) {
   const rules = c.rules.rules;
   const segments = judged.commands.map((tokens) => {
     const e = effective(rules, tokens);
-    return { tokens, matched: e.matched.map(brief), counted: e.counted.map(brief), ignored: e.ignored.map(brief), decision: e.decision };
+    // a command that no rule decides is looked at by Codex itself: it asks about (or, with approval never, refuses) what it finds dangerous
+    return { tokens, matched: e.matched.map(brief), counted: e.counted.map(brief), ignored: e.ignored.map(brief), decision: e.decision, danger: e.decision ? null : dangerOf(tokens, judged.shell) };
   });
   let decision = null;
   for (const s of segments) if (s.decision && (decision === null || STRICTNESS[s.decision] > STRICTNESS[decision])) decision = s.decision;
@@ -36,8 +38,10 @@ export function why(c, script, opts = {}) {
   const ruleWords = (m) => `${patternOf(m)} (${shortFile(sys, m.file)}:${m.line})`;
   let outcome;
   let headline;
-  if (judged.split) say(judged.shell === "powershell" ? V : D, `The script is a plain list of ${segments.length} commands (${segments.map((s) => s.tokens[0]).join(", ")}), so Codex judges each one on its own and the strictest answer counts.`);
-  else if (!judged.plain) say(judged.shell === "powershell" ? V : D, `The script has ${judged.reason}, so Codex does not split it: the whole script is judged as one command.`);
+  // the split was put to Codex for the shell it uses on the system: PowerShell on Windows, bash on Linux and macOS (test/e2e-why.test.mjs)
+  const ownShell = (judged.shell === "powershell") === win;
+  if (judged.split) say(ownShell ? V : D, `The script is a plain list of ${segments.length} commands (${segments.map((s) => s.tokens[0]).join(", ")}), so Codex judges each one on its own and the strictest answer counts.`);
+  else if (!judged.plain) say(ownShell ? V : D, `The script has ${judged.reason}, so Codex does not split it: the whole script is judged as one command.`);
 
   for (const s of segments) {
     for (const m of s.ignored) say(V, `The allow rule ${ruleWords(m)} is not honoured: Codex ignores an allow rule for ${m.matchedPrefix.join(" ")}, so this part is handled as if no rule matched.`);
@@ -60,6 +64,17 @@ export function why(c, script, opts = {}) {
       outcome = "asks";
       headline = `Codex asks you first: a prompt rule matches \`${s.tokens.slice(0, m.matchedPrefix.length).join(" ")}\`.`;
       say(V, `The rule ${ruleWords(m)} asks every time${m.justification ? `; the question says "requires approval: ${m.justification}"` : ""}, in the full-access sandbox as well.`);
+    }
+  } else if (segments.some((s) => s.danger)) {
+    const s = segments.find((x) => x.danger);
+    if (approval === "never") {
+      outcome = "refused";
+      headline = `Codex refuses to run it: \`${s.danger}\` is a command it finds dangerous, and approval_policy is "never".`;
+      say(ownShell ? V : D, `No rule decides \`${s.tokens.join(" ")}\`, and Codex asks before it runs \`${s.danger}\` whatever the sandbox; with approval_policy "never" there is nobody to ask, so the model gets a "rejected" message and the command does not start.`);
+    } else {
+      outcome = "asks";
+      headline = `Codex asks you first: \`${s.danger}\` is a command it finds dangerous.`;
+      say(ownShell ? V : D, `No rule decides \`${s.tokens.join(" ")}\`, and Codex asks before it runs \`${s.danger}\` whatever the sandbox${sandbox === "danger-full-access" ? ", also in danger-full-access" : ""}.`);
     }
   } else if (allAllowed) {
     if (sandbox === "danger-full-access") {

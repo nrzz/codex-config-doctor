@@ -42,7 +42,7 @@ async function observe({ rules = "", command, approval = "on-request", sandbox =
   const out = r.outputs[0] || "";
   let seen;
   if (r.asked.length) seen = "asked";
-  else if (/AskForApproval is set to Never|blocked by policy/.test(out)) seen = "refused";
+  else if (/AskForApproval is set to Never|blocked by policy|style commands are not permitted/.test(out)) seen = "refused";
   else if (/rejected: /.test(out)) seen = "forbidden";
   else if (wrote(r.sb.root)) seen = "outside";
   else seen = "inside";
@@ -69,6 +69,56 @@ const ROWS = [
   { name: "a prompt rule on a banned prefix still asks", rules: 'prefix_rule(pattern=["node"], decision="prompt")\n', command: "node write.mjs" },
   { name: "an allow rule on a banned prefix is ignored: inside", rules: allow("node"), command: "node write.mjs" },
 ];
+// Commands that Codex finds dangerous: with no rule it asks (whatever the sandbox), and with approval never it refuses. The lists are the
+// ones in src/danger.mjs: for bash and zsh, rm -f, rm -rf, git reset, git rm and sudo in front of them; for PowerShell, Remove-Item and its
+// aliases with -Force, and Start-Process with a web address.
+if (!IS_WIN) {
+  ROWS.push(
+    { name: "dangerous: rm -f asks", command: "rm -f x.txt" },
+    { name: "dangerous: rm -rf asks", command: "rm -rf build" },
+    { name: "dangerous: rm -fr is not on the list, it runs", command: "rm -fr build" },
+    { name: "dangerous: rm -r -f is not on the list, it runs", command: "rm -r -f build" },
+    { name: "dangerous: plain rm runs", command: "rm x.txt" },
+    { name: "dangerous: git reset asks", command: "git reset --hard" },
+    { name: "dangerous: git rm asks", command: "git rm x.txt" },
+    { name: "dangerous: git status runs", command: "git status" },
+    { name: "dangerous: a part of a list asks for the whole", command: "echo hi && rm -f x.txt" },
+    { name: "dangerous: sudo in front of rm -rf asks", command: "sudo rm -rf build" },
+    { name: "dangerous: a script Codex does not split is not looked into", command: "echo $(date) && rm -rf build" },
+    { name: "dangerous: with approval never it is refused", command: "rm -rf build", approval: "never" },
+    { name: "dangerous: it asks in danger-full-access too", command: "rm -rf build", sandbox: "danger-full-access" },
+    // the command removes a file outside the project, which only a command that runs outside the sandbox can do
+    { name: "dangerous: a longer allow rule wins over the list, and runs outside the sandbox", rules: allow("rm", "-rf"), command: "rm -rf ../victim.txt", extraFiles: { "victim.txt": "x" }, wrote: (root) => !fs.existsSync(path.join(root, "victim.txt")) },
+    { name: "dangerous: an allow rule for rm alone is ignored, so it asks", rules: allow("rm"), command: "rm -rf build" },
+  );
+}
+if (IS_WIN) {
+  ROWS.push(
+    { name: "dangerous: PowerShell Remove-Item -Force asks", command: "Remove-Item -Force x.txt" },
+    { name: "dangerous: PowerShell rm -Force asks", command: "rm -Force x.txt" },
+    { name: "dangerous: PowerShell Remove-Item -Recurse runs", command: "Remove-Item -Recurse build" },
+    { name: "dangerous: PowerShell Start-Process with a web address asks", command: "Start-Process https://example.com" },
+    { name: "dangerous: PowerShell rm -rf is not on the list, it runs", command: "rm -rf build" },
+    { name: "dangerous: PowerShell git reset --hard is not on the list, it runs", command: "git reset --hard" },
+    { name: "dangerous: PowerShell Remove-Item -Force with approval never is refused", command: "Remove-Item -Force x.txt", approval: "never" },
+  );
+}
+if (!IS_WIN) {
+  // bash is the shell on Linux and macOS: the separators it splits on, the shapes it does not split, and a script that is already bash -lc
+  const both = allow("node", "write.mjs") + allow("echo", "done");
+  ROWS.push(
+    { name: "bash: && between two allowed commands: outside", rules: both, command: "node write.mjs && echo done" },
+    { name: "bash: || between two allowed commands: outside", rules: both, command: "node write.mjs || echo done" },
+    { name: "bash: a pipe between two allowed commands: outside", rules: allow("node", "write.mjs") + allow("cat"), command: "node write.mjs | cat" },
+    { name: "bash: && with a part that has no rule: the whole stays inside", rules: allow("node", "write.mjs"), command: "node write.mjs && echo done" },
+    { name: "bash: a forbidden part refuses the whole", rules: allow("node", "write.mjs") + 'prefix_rule(pattern=["echo"], decision="forbidden", justification="no echo")\n', command: "node write.mjs && echo done" },
+    { name: "bash: a redirection is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "node write.mjs > out.txt" },
+    { name: "bash: a variable is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "node write.mjs $HOME" },
+    { name: "bash: a wildcard is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "node write.mjs *.txt" },
+    { name: "bash: control flow is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "if true; then node write.mjs; fi" },
+    { name: "bash -lc with a script of two allowed commands: outside", rules: both, command: 'bash -lc "node write.mjs && echo done"' },
+  );
+}
 if (IS_WIN) {
   ROWS.push(
     { name: "Windows, no sandbox selected, on-request: every command asks", command: "node write.mjs", select: false },

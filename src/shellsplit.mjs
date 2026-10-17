@@ -2,8 +2,9 @@
 // bash or zsh on Linux and macOS, PowerShell on Windows). Codex reads the script: when it is a plain list of commands joined by &&,
 // ||, ; and |, each command is judged on its own and the strictest answer counts; when it has redirections, substitutions, variables,
 // wildcards or control flow, the whole script is one command. Put to Codex 0.163.0 on Windows with PowerShell (a rule on `node`
-// rejected `echo a; node ...` and `echo a | node ...`; a redirection kept the script whole). On Linux and macOS this follows the
-// documentation (https://learn.chatgpt.com/docs/agent-configuration/rules.md) and is checked by CI.
+// rejected `echo a; node ...` and `echo a | node ...`; a redirection kept the script whole) and, for bash, to the Linux and macOS binaries in CI
+// (&&, ||, ;, a pipe, a redirection, a variable, a wildcard, control flow and a script that already is `bash -lc`). The documentation says
+// the same: https://learn.chatgpt.com/docs/agent-configuration/rules.md.
 //
 //   splitBash(script)       -> { plain: true, commands: [[word, ...], ...] } | { plain: false, reason }
 //   splitPowerShell(script) -> the same for a PowerShell script

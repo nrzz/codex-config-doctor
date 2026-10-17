@@ -37,7 +37,7 @@ npm test
 | `src/hooks.mjs`, `src/mcp.mjs`, `src/providers.mjs`, `src/winsandbox.mjs`, `src/pathsearch.mjs` | hooks and their trust hash, MCP servers, model providers, the Windows sandbox, the search for a program |
 | `src/collect.mjs` | collects all of the above once for a project |
 | `src/catalog.mjs`, `src/lint.mjs`, `src/explain.mjs` | the findings, the code that says them, the pages of `explain` |
-| `src/why.mjs`, `src/cost.mjs`, `src/recorded.mjs` | what happens to a command; what the first request carries (the figures recorded from Codex are in `recorded.mjs`) |
+| `src/why.mjs`, `src/danger.mjs`, `src/cost.mjs`, `src/recorded.mjs` | what happens to a command, and the commands Codex finds dangerous when no rule decides; what the first request carries (the figures recorded from Codex, by system, are in `recorded.mjs`) |
 | `src/report.mjs` | the text, markdown and JSON of every command |
 | `test/*.test.mjs` | unit tests; the `e2e-*.test.mjs` files run against the real binary |
 | `test/ask.mjs`, `test/*-table.mjs`, `test/fixtures/` | the tables of cases, how each is put to Codex, and the recorded answers the unit tests hold the code to |
