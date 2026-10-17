@@ -1,0 +1,39 @@
+{
+  "name": "codex-config-doctor",
+  "version": "1.0.0",
+  "description": "What Codex CLI will actually do with your configuration: every layer and the merged result with the source of each key, the AGENTS.md files against their size cap, rules, hooks, MCP servers and the Windows sandbox, linted, and checked against the real codex binary. Zero tokens.",
+  "type": "module",
+  "bin": {
+    "codex-config-doctor": "bin/codex-config-doctor.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": "github:nrzz/codex-config-doctor",
+  "homepage": "https://nrzz.github.io/claude-code-toolkit/",
+  "bugs": "https://github.com/nrzz/codex-config-doctor/issues",
+  "keywords": [
+    "codex",
+    "openai-codex",
+    "codex-cli",
+    "config",
+    "toml",
+    "agents-md",
+    "execpolicy",
+    "sandbox",
+    "mcp",
+    "hooks",
+    "diagnostics"
+  ],
+  "author": "Naresh Prabu",
+  "license": "MIT"
+}
