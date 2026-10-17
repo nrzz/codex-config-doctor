@@ -54,16 +54,17 @@ test("splitCommandLine: the words of one command, or null", () => {
   assert.equal(splitCommandLine("a && b"), null);
 });
 
-test("judgedCommands: the shell follows the platform; a command that already is `bash -lc` is read through", () => {
+test("judgedCommands: the shell follows the platform; a command that starts with `bash -lc` is one command of three words", () => {
   const linux = judgedCommands("git pull && ls", "linux");
   assert.deepEqual([linux.shell, linux.split, linux.plain, linux.commands], ["bash", true, true, [["git", "pull"], ["ls"]]]);
   const win = judgedCommands("git pull; ls", "win32");
   assert.deepEqual([win.shell, win.split, win.commands], ["powershell", true, [["git", "pull"], ["ls"]]]);
   const whole = judgedCommands("ls > out.txt", "linux");
   assert.deepEqual([whole.plain, whole.split, whole.commands], [false, false, [["bash", "-lc", "ls > out.txt"]]]);
+  // Codex wraps the model's command in a bash -lc of its own and does not open an inner one
   const wrapped = judgedCommands("bash -lc 'git pull && ls'", "linux");
-  assert.deepEqual([wrapped.shell, wrapped.split, wrapped.commands], ["bash", true, [["git", "pull"], ["ls"]]]);
+  assert.deepEqual([wrapped.shell, wrapped.split, wrapped.plain, wrapped.commands], ["bash", false, true, [["bash", "-lc", "git pull && ls"]]]);
   const wrappedWhole = judgedCommands("sh -c 'ls > x'", "linux");
-  assert.deepEqual([wrappedWhole.plain, wrappedWhole.commands], [false, [["sh", "-c", "ls > x"]]]);
+  assert.deepEqual([wrappedWhole.plain, wrappedWhole.commands], [true, [["sh", "-c", "ls > x"]]]);
   assert.equal(judgedCommands("ls", "linux", "powershell").shell, "powershell");
 });

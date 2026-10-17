@@ -50,7 +50,7 @@ export const PAGES = {
   "unknown-key": {
     means: "The file sets a key that Codex does not know: a typo (aproval_policy), a key that moved, a key from a newer or older Codex, or a top-level key written under a [table] header (keys after a header belong to that table).",
     does: [
-      [V, "Codex ignores the key and prints: \"warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings.\" and a line `user (<path>): `foo` is ignored.` in the terminal UI and in `codex exec`."],
+      [V, "Codex ignores the key and prints: \"warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings.\" and a line `user (<path>): `foo` is ignored.` in `codex exec`; the app server that the terminal UI is built on sends the same text as a configWarning."],
       [V, "`codex exec --json` prints nothing on stderr; the same text arrives in the event stream as an `item.completed` event whose item has the type `error` (twice). A project's file and a profile file are treated the same."],
       [V, "`codex --strict-config exec` refuses to start: \"Error loading config.toml:\" <path>:5:1: unknown configuration field `foo`."],
       [V, "A feature flag that does not exist is reported as `features.hoks` is ignored; `--enable nosuch` stops with \"Error: Unknown feature flag: nosuch\"."],
@@ -137,7 +137,7 @@ export const PAGES = {
       [V, "\"untrusted\": Codex stops: \"Error: approval_policy = \"untrusted\" is no longer supported; remove this setting\" (exit code 1)."],
       [V, "\"on-failure\": Codex starts. The permissions text it gives the model is the same as for \"on-request\" (same characters), and `codex exec` printed no warning."],
       [D, "The documentation calls \"on-failure\" deprecated and lists on-request, never and { granular = { ... } } as the values."],
-      [V, "`codex exec` always runs with approval \"never\", whatever the file says; the setting counts in the terminal UI and in the app server."],
+      [V, "`codex exec` always runs with approval \"never\", whatever the file says; the setting counts in the app server, which the terminal UI is built on."],
     ],
     fix: ["Use \"on-request\" or \"never\"."],
     docs: [DOC.config],
@@ -235,7 +235,7 @@ export const PAGES = {
     does: [
       [V, "Codex skips the hook. In `codex exec` it says nothing at all. The trust is a record in the user's config.toml: [hooks.state.\"<key>\"] trusted_hash = \"sha256:...\", where the key is <path of the file>:<event>:<group>:<handler>."],
       [V, "The app server reports the hook as \"untrusted\"; `--dangerously-bypass-hook-trust` runs hooks without the record (and also runs the hooks of a project that is not trusted)."],
-      [D, "In the terminal UI, /hooks lists the hooks for review."],
+      [D, "The documentation says that /hooks, in the terminal UI, lists the hooks for review; the terminal UI was not driven."],
     ],
     fix: ["Review and trust the hook with /hooks, or add the record the finding prints (its hash is the SHA-256 of the hook's canonical JSON; `show` prints each hook's key and hash)."],
     docs: [DOC.hooks],

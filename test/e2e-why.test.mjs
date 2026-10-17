@@ -70,22 +70,35 @@ const ROWS = [
   { name: "an allow rule on a banned prefix is ignored: inside", rules: allow("node"), command: "node write.mjs" },
 ];
 // Commands that Codex finds dangerous: with no rule it asks (whatever the sandbox), and with approval never it refuses. The lists are the
-// ones in src/danger.mjs: for bash and zsh, rm -f, rm -rf, git reset, git rm and sudo in front of them; for PowerShell, Remove-Item and its
-// aliases with -Force, and Start-Process with a web address.
+// ones in src/danger.mjs: for bash and zsh, rm with a force option wherever it is in the script (git reset and git rm are not on the list of
+// this Codex); for PowerShell, Remove-Item and its aliases with -Force, and Start-Process with a web address.
 if (!IS_WIN) {
   ROWS.push(
     { name: "dangerous: rm -f asks", command: "rm -f x.txt" },
     { name: "dangerous: rm -rf asks", command: "rm -rf build" },
-    { name: "dangerous: rm -fr is not on the list, it runs", command: "rm -fr build" },
-    { name: "dangerous: rm -r -f is not on the list, it runs", command: "rm -r -f build" },
+    { name: "dangerous: rm -fr asks", command: "rm -fr build" },
+    { name: "dangerous: rm -r -f asks", command: "rm -r -f build" },
+    { name: "dangerous: a force option after the operand asks", command: "rm x.txt -f" },
+    { name: "dangerous: rm --force asks", command: "rm --force x.txt" },
     { name: "dangerous: plain rm runs", command: "rm x.txt" },
-    { name: "dangerous: git reset asks", command: "git reset --hard" },
-    { name: "dangerous: git rm asks", command: "git rm x.txt" },
+    { name: "dangerous: rm -r without a force option runs", command: "rm -r build" },
+    { name: "dangerous: git reset is not on the list of this Codex, it runs", command: "git reset --hard" },
+    { name: "dangerous: git rm is not on the list of this Codex, it runs", command: "git rm x.txt" },
     { name: "dangerous: git status runs", command: "git status" },
     { name: "dangerous: a part of a list asks for the whole", command: "echo hi && rm -f x.txt" },
     { name: "dangerous: sudo in front of rm -rf asks", command: "sudo rm -rf build" },
-    { name: "dangerous: a script Codex does not split is not looked into", command: "echo $(date) && rm -rf build" },
+    { name: "dangerous: env in front of rm -rf asks", command: "env rm -rf build" },
+    { name: "dangerous: a variable in front of rm -rf asks", command: "FOO=1 rm -rf build" },
+    { name: "dangerous: xargs rm -rf is not looked into, it runs", command: "xargs rm -rf" },
+    { name: "dangerous: rm as an argument of echo runs", command: "echo $(date) rm -rf build" },
+    // a script that Codex does not split is looked into all the same: the rm in it is found
+    { name: "dangerous: a substitution and a list: the rm is found", command: "echo $(date) && rm -rf build" },
+    { name: "dangerous: a loop: the rm is found", command: "if true; then rm -rf build; fi" },
+    { name: "dangerous: a subshell: the rm is found", command: "(rm -rf build)" },
+    { name: "dangerous: a redirection: the rm is found", command: "rm -rf build > out.txt" },
+    { name: "dangerous: the script of bash -c: the rm is found", command: 'bash -c "rm -rf build"' },
     { name: "dangerous: with approval never it is refused", command: "rm -rf build", approval: "never" },
+    { name: "dangerous: a script that is not split is refused too with approval never", command: "echo $(date) && rm -rf build", approval: "never" },
     { name: "dangerous: it asks in danger-full-access too", command: "rm -rf build", sandbox: "danger-full-access" },
     // the command removes a file outside the project, which only a command that runs outside the sandbox can do
     { name: "dangerous: a longer allow rule wins over the list, and runs outside the sandbox", rules: allow("rm", "-rf"), command: "rm -rf ../victim.txt", extraFiles: { "victim.txt": "x" }, wrote: (root) => !fs.existsSync(path.join(root, "victim.txt")) },
@@ -116,7 +129,7 @@ if (!IS_WIN) {
     { name: "bash: a variable is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "node write.mjs $HOME" },
     { name: "bash: a wildcard is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "node write.mjs *.txt" },
     { name: "bash: control flow is not split, and its rule does not match", rules: allow("node", "write.mjs"), command: "if true; then node write.mjs; fi" },
-    { name: "bash -lc with a script of two allowed commands: outside", rules: both, command: 'bash -lc "node write.mjs && echo done"' },
+    { name: "bash -lc is not opened: the rules for the commands inside do not match, so it stays inside", rules: both, command: 'bash -lc "node write.mjs && echo done"' },
   );
 }
 if (IS_WIN) {

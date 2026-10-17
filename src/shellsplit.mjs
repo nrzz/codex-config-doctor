@@ -3,7 +3,7 @@
 // ||, ; and |, each command is judged on its own and the strictest answer counts; when it has redirections, substitutions, variables,
 // wildcards or control flow, the whole script is one command. Put to Codex 0.163.0 on Windows with PowerShell (a rule on `node`
 // rejected `echo a; node ...` and `echo a | node ...`; a redirection kept the script whole) and, for bash, to the Linux and macOS binaries in CI
-// (&&, ||, ;, a pipe, a redirection, a variable, a wildcard, control flow and a script that already is `bash -lc`). The documentation says
+// (&&, ||, ;, a pipe, a redirection, a variable, a wildcard, control flow, and a script that starts with `bash -lc`, which is not opened). The documentation says
 // the same: https://learn.chatgpt.com/docs/agent-configuration/rules.md.
 //
 //   splitBash(script)       -> { plain: true, commands: [[word, ...], ...] } | { plain: false, reason }
@@ -143,12 +143,8 @@ export function splitPowerShell(script) {
 /** The commands Codex judges for a script on this platform: a list of token lists, and whether the script was split. */
 export function judgedCommands(script, platform, shell = null) {
   const win = platform === "win32";
-  // a command line that already is `bash -lc "<script>"`
-  const words = splitCommandLine(script);
-  if (words && words.length >= 3 && ["bash", "sh", "zsh"].includes(words[0].replace(/^.*[\\/]/, "")) && ["-c", "-lc"].includes(words[1])) {
-    const inner = splitBash(words[2]);
-    return inner.plain ? { shell: "bash", split: inner.commands.length > 1, plain: true, commands: inner.commands, wrapper: words.slice(0, 2) } : { shell: "bash", split: false, plain: false, reason: inner.reason, commands: [words], wrapper: null };
-  }
+  // a script that starts with `bash -lc "..."` is one command of three words, bash, -lc and the script: Codex wraps the model's command in a
+  // `bash -lc` of its own and does not open the inner one, so a rule for what is inside does not match it (put to Codex 0.163.0 on Linux and macOS)
   const which = shell || (win ? "powershell" : "bash");
   const r = which === "powershell" ? splitPowerShell(script) : splitBash(script);
   if (r.plain) return { shell: which, split: r.commands.length > 1, plain: true, commands: r.commands, wrapper: null };

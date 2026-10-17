@@ -82,7 +82,7 @@ export function lint(c) {
       add(p.id, {
         file: layer.path, line: p.line, column: p.column,
         message: `${p.message}${p.hint ? `. ${p.hint}` : ""}`,
-        effect: `Codex ignores \`${p.key}\`. It prints "warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings." (in the terminal UI and in \`codex exec\`; with \`--json\` it is an error item in the event stream). \`--strict-config\` refuses to start.`,
+        effect: `Codex ignores \`${p.key}\`. It prints "warning: Codex is ignoring 1 unrecognized configuration setting. Check for typos or deprecated settings." (in \`codex exec\`, and the app server that the terminal UI is built on sends it as a warning; with \`--json\` it is an error item in the event stream). \`--strict-config\` refuses to start.`,
         fix: p.hint && /^Did you mean/.test(p.hint) ? `${p.hint.replace(/\?$/, "")}, or remove the key.` : p.hint ? `${p.hint}.` : "Remove the key, or check the name in the configuration reference. A newer Codex may know it: this list is Codex 0.163.0's.",
       });
     } else if (p.id === "key-removed") {
@@ -280,7 +280,7 @@ export function lint(c) {
       }
     }
     if (h.status === "untrusted") {
-      add("hook-untrusted", { file: where, message: `${label} is not trusted: there is no record for it in ${userFile}`, effect: "Codex skips it. `codex exec` says nothing; in the terminal UI, `/hooks` lists it for review.", fix: `Review and trust it with /hooks in Codex, or add to ${userFile}:\n[hooks.state.${JSON.stringify(h.key)}]\ntrusted_hash = "${h.hash}"` });
+      add("hook-untrusted", { file: where, message: `${label} is not trusted: there is no record for it in ${userFile}`, effect: "Codex skips it. `codex exec` says nothing; the app server lists it as untrusted, and the documentation says `/hooks` in the terminal UI lists it for review.", fix: `Review and trust it with /hooks in Codex, or add to ${userFile}:\n[hooks.state.${JSON.stringify(h.key)}]\ntrusted_hash = "${h.hash}"` });
     } else if (h.status === "modified") {
       add("hook-modified", { file: where, message: `${label} changed since it was trusted`, effect: "Codex skips it until it is trusted again (the record holds a hash of the definition). `codex exec` says nothing.", fix: `Review it with /hooks, or update trusted_hash in ${userFile} to ${h.hash}.` });
     }
@@ -300,7 +300,7 @@ export function lint(c) {
       message: f.status === "cut"
         ? `${f.path} is the first file that does not fit: Codex reads ${bytes(f.includedBytes)} of its ${bytes(f.bytes)}${left.length ? ` and leaves out ${left.length} more file${left.length === 1 ? "" : "s"}` : ""} (${bytes(missing)} in all do not reach the model; the cap is ${bytes(ag.cap)})`
         : `${f.path} is the first file Codex leaves out (${bytes(f.bytes)}): the files before it use the whole cap of ${bytes(ag.cap)}`,
-      effect: "Codex adds the files in order until project_doc_max_bytes is reached, cuts the file that crosses it at the byte and drops the rest. It prints nothing about it, in `codex exec` or in the terminal UI (put to Codex 0.163.0 with `codex exec`).",
+      effect: "Codex adds the files in order until project_doc_max_bytes is reached, cuts the file that crosses it at the byte and drops the rest. It prints nothing about it in `codex exec` (put to Codex 0.163.0; the terminal UI was not driven).",
       fix: `Raise \`project_doc_max_bytes\` (it is ${bytes(ag.cap)}), shorten the files, or move guidance into the folders where it applies. The files nearest the working folder come last, so they are the ones that go.`,
     });
   }

@@ -90,8 +90,8 @@ test("Codex ignores a bare allow rule for a shell or an interpreter, and says so
   assert.ok(ignored.length >= 1, JSON.stringify(r.parts));
   assert.ok(r.lines.some((l) => /is not honoured: Codex ignores an allow rule for bash, so this part is handled as if no rule matched/.test(l.text)));
   assert.notEqual(r.outcome, "outside-sandbox");
-  // a script given with -c is opened: the inner commands are judged, and the shell's own rule is not asked
-  assert.equal(ask("bash -c 'echo hi'").parts[0].tokens[0], "echo");
+  // a script given with -c is not opened (Codex wraps the command in a bash -lc of its own): the command is bash, -c and the script
+  assert.deepEqual(ask("bash -c 'echo hi'").parts[0].tokens, ["bash", "-c", "echo hi"]);
 });
 
 test("a plain list of commands is split; a script with a loop or a variable is judged whole", () => {
@@ -107,10 +107,11 @@ test("a plain list of commands is split; a script with a loop or a variable is j
   assert.ok(whole.reason);
 });
 
-test("bash -lc is opened and its script judged", () => {
+test("a command that starts with bash -lc is one command, and the rules for what is inside it do not match (Codex does not open it)", () => {
   const r = ask('bash -lc "git status && ls"');
-  assert.equal(r.parts.length, 2);
-  assert.equal(r.outcome, "outside-sandbox");
+  assert.equal(r.parts.length, 1);
+  assert.deepEqual(r.parts[0].tokens, ["bash", "-lc", "git status && ls"]);
+  assert.equal(r.outcome, "sandboxed");
 });
 
 test("the shell can be forced: a PowerShell script on Linux, a bash script on Windows", () => {

@@ -70,7 +70,7 @@ export function why(c, script, opts = {}) {
     if (approval === "never") {
       outcome = "refused";
       headline = `Codex refuses to run it: \`${s.danger}\` is a command it finds dangerous, and approval_policy is "never".`;
-      say(ownShell ? V : D, `No rule decides \`${s.tokens.join(" ")}\`, and Codex asks before it runs \`${s.danger}\` whatever the sandbox; with approval_policy "never" there is nobody to ask, so the model gets a "rejected" message and the command does not start.`);
+      say(ownShell ? V : D, `No rule decides \`${s.tokens.join(" ")}\`, and Codex asks before it runs \`${s.danger}\` whatever the sandbox; with approval_policy "never" there is nobody to ask, so the model gets "rejected: ${judged.shell === "powershell" ? "blocked by policy" : "rm -f style commands are not permitted. Use a safer approach"}" and the command does not start.`);
     } else {
       outcome = "asks";
       headline = `Codex asks you first: \`${s.danger}\` is a command it finds dangerous.`;

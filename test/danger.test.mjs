@@ -2,18 +2,34 @@
 // same rows to the binary on Windows, Linux and macOS); here the lists and the outcomes on pretend machines.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { dangerOf } from "../src/danger.mjs";
+import { commandsOfScript, dangerOf } from "../src/danger.mjs";
 import { why } from "../src/why.mjs";
 import { world } from "./world.mjs";
 
-test("bash and zsh: rm -f and rm -rf as the first argument, git reset and git rm, sudo in front of them", () => {
+test("bash and zsh: rm with a force option, wherever the command is in the script", () => {
   for (const [tokens, what] of [
-    [["rm", "-f", "x"], "rm -f"], [["rm", "-rf", "build"], "rm -rf"], [["git", "reset", "--hard"], "git reset"], [["git", "rm", "x"], "git rm"],
-    [["/usr/bin/git", "reset"], "git reset"], [["sudo", "rm", "-rf", "x"], "rm -rf"], [["sudo", "sudo", "git", "rm", "x"], "git rm"],
+    [["rm", "-f", "x"], "rm -f"], [["rm", "-rf", "build"], "rm -rf"], [["rm", "-fr", "x"], "rm -fr"], [["rm", "-rfv", "x"], "rm -rfv"], [["rm", "-Rf", "x"], "rm -Rf"],
+    [["rm", "-r", "-f", "x"], "rm -f"], [["rm", "x", "-f"], "rm -f"], [["rm", "--force", "x"], "rm --force"], [["rm", "--recursive", "--force", "x"], "rm --force"],
+    [["/bin/rm", "-rf", "x"], "rm -rf"], [["sudo", "rm", "-rf", "x"], "rm -rf"], [["env", "rm", "-rf", "x"], "rm -rf"], [["FOO=1", "rm", "-rf", "x"], "rm -rf"],
+    [["sudo", "-n", "rm", "-f", "x"], "rm -f"], [["sudo", "env", "A=1", "rm", "-f", "x"], "rm -f"],
+    // a script that Codex does not split is one command of three words, bash, -lc and the script: the commands in it are looked at all the same
+    [["bash", "-lc", "echo $(date) && rm -rf x"], "rm -rf"], [["bash", "-lc", "if true; then rm -rf x; fi"], "rm -rf"], [["bash", "-lc", "(rm -rf x)"], "rm -rf"],
+    [["bash", "-lc", "rm -rf x > out.txt"], "rm -rf"], [["bash", "-lc", "echo hi | rm -rf x"], "rm -rf"], [["bash", "-lc", "for f in a b; do rm -rf $f; done"], "rm -rf"],
+    [["bash", "-lc", "echo `rm -rf x`"], "rm -rf"], [["bash", "-c", "rm -rf x"], "rm -rf"], [["sh", "-c", "rm -rf x"], "rm -rf"], [["bash", "-lc", "bash -c 'rm -rf x'"], "rm -rf"],
   ]) assert.equal(dangerOf(tokens, "bash"), what, tokens.join(" "));
-  for (const tokens of [["rm", "x"], ["rm", "-fr", "x"], ["rm", "-r", "-f", "x"], ["rm", "build", "-f"], ["git", "status"], ["git", "push", "--force"], ["ls"], ["sudo", "ls"], ["bash", "-lc", "rm -rf x"], []]) {
-    assert.equal(dangerOf(tokens, "bash"), null, tokens.join(" "));
-  }
+  for (const tokens of [
+    ["rm", "x"], ["rm", "-r", "x"], ["rm", "--recursive", "x"], ["rm", "-v", "x"], ["rm", "-i", "x"], ["xargs", "rm", "-rf"], ["find", ".", "-exec", "rm", "-rf", "{}", "+"], ["find", ".", "-delete"],
+    ["git", "reset", "--hard"], ["git", "rm", "x"], ["git", "clean", "-fd"], ["git", "push", "--force"], ["sudo", "ls"], ["ls", "-f"], ["echo", "rm", "-rf", "x"], ["bash", "-lc", "echo rm -rf x"], ["bash", "-lc", "ls -f"], [],
+  ]) assert.equal(dangerOf(tokens, "bash"), null, tokens.join(" "));
+});
+
+test("the words of a script: lists, pipes, subshells, substitutions, quotes, redirections and loops", () => {
+  assert.deepEqual(commandsOfScript("a b && c | d; e\nf"), [["a", "b"], ["c"], ["d"], ["e"], ["f"]]);
+  assert.deepEqual(commandsOfScript("echo $(date +%s) \"a b\" 'c d' > out.txt && ls"), [["date", "+%s"], ["echo", "a b", "c d"], ["ls"]]);
+  assert.deepEqual(commandsOfScript("echo `date` rm -rf x"), [["date"], ["echo", "rm", "-rf", "x"]], "the words after a substitution go on with the command");
+  assert.deepEqual(commandsOfScript("echo $(date) rm -rf x"), [["date"], ["echo", "rm", "-rf", "x"]]);
+  assert.deepEqual(commandsOfScript("if true; then rm -rf x; fi"), [["if", "true"], ["then", "rm", "-rf", "x"], ["fi"]]);
+  assert.deepEqual(commandsOfScript("# a comment\nls # another"), [["ls"]]);
 });
 
 test("PowerShell: Remove-Item and its aliases rm, ri and del with -Force anywhere, and Start-Process with a web address; rm -rf and git reset are not", () => {
@@ -40,11 +56,15 @@ test("a dangerous command that no rule decides asks, whatever the sandbox; with 
   r = ask("rm -rf build", { "config.toml": NEVER });
   assert.deepEqual([r.outcome, r.refused], ["refused", true]);
   assert.match(r.headline, /Codex refuses to run it: `rm -rf` is a command it finds dangerous, and approval_policy is "never"/);
-  assert.equal(ask("git reset --hard").outcome, "asks");
+  assert.match(r.lines[0].text, /"rejected: rm -f style commands are not permitted\. Use a safer approach"/);
+  assert.equal(ask("rm -fr build").outcome, "asks");
   assert.equal(ask("echo hi && rm -f x").outcome, "asks", "a dangerous part makes the whole ask");
   assert.equal(ask("echo hi && rm -f x", { "config.toml": NEVER }).outcome, "refused");
-  assert.equal(ask("rm -fr build").outcome, "sandboxed", "only -f and -rf as the first argument are on the list");
-  assert.equal(ask("echo $(date) && rm -rf build").outcome, "sandboxed", "a script that is not split is one command whose first word is the shell");
+  assert.equal(ask("echo $(date) && rm -rf build").outcome, "asks", "a script that is not split is looked into all the same");
+  assert.equal(ask("rm x").outcome, "sandboxed");
+  assert.equal(ask("rm -r build").outcome, "sandboxed", "only a force option counts");
+  assert.equal(ask("git reset --hard").outcome, "sandboxed", "git reset is not on the list of this Codex");
+  assert.equal(ask("xargs rm -rf").outcome, "sandboxed");
 });
 
 test("a rule decides before the list: an honoured allow rule runs it outside the sandbox, an ignored one changes nothing, a forbidden rule refuses", () => {
@@ -69,5 +89,7 @@ test("on Windows the list is PowerShell's, and a bash script given with --shell 
   r = ask("rm -f x", { "config.toml": sandbox }, win, { shell: "bash" });
   assert.equal(r.outcome, "asks");
   assert.equal(r.lines.find((l) => /rm -f/.test(l.text)).source, "documented");
-  assert.equal(ask("Remove-Item -Force x", { "config.toml": `${NEVER}${sandbox}` }, win).outcome, "refused");
+  r = ask("Remove-Item -Force x", { "config.toml": `${NEVER}${sandbox}` }, win);
+  assert.equal(r.outcome, "refused");
+  assert.match(r.lines[0].text, /"rejected: blocked by policy"/);
 });
