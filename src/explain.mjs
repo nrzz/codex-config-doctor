@@ -350,7 +350,7 @@ export const PAGES = {
     means: "An MCP server with a `command` whose program is not found. A common cause is a command line in `command` (\"node server.js\"): `command` is the program, `args` the arguments.",
     does: [
       [V, "Codex skips the server and says nothing in `codex exec` (exit code 0). The model never sees its tools; the request still carries the three resource tools that any enabled MCP server brings."],
-      [V, "With `required = true` Codex stops: \"required MCP servers failed to initialize: x: program not found\" (exit code 1)."],
+      [V, "With `required = true` Codex stops (exit code 1). On Windows it says \"required MCP servers failed to initialize: x: program not found\"; on Linux and macOS, \"required MCP servers failed to initialize: x: No such file or directory (os error 2)\"."],
       [V, "On Windows `tool` finds tool.cmd and tool.bat through PATHEXT, and a full path without the extension is completed the same way; tool.ps1 and a file with no extension are not found."],
     ],
     fix: ["Install the program, fix PATH, split command and args."],

@@ -80,9 +80,10 @@ test("untrusted-project: a run with sandbox_mode danger-full-access writes a tru
     assert.equal(first.code, 0, first.err);
     assert.equal(first.model, "gpt-5.5", `${how}: the first run did not load the project's file`);
     const text = readUser(first.sb);
-    const entry = /^\[projects\.'([^']+)'\]\ntrust_level = "trusted"$/m.exec(text);
+    // Codex writes the key in single quotes on Windows (the path has backslashes) and in double quotes elsewhere
+    const entry = /^\[projects\.(?:'([^']+)'|"([^"]+)")\]\ntrust_level = "trusted"$/m.exec(text);
     assert.ok(entry, `${how}: an entry was written:\n${text}`);
-    assert.equal(entry[1], process.platform === "win32" ? first.sb.work.toLowerCase() : first.sb.work, `${how}: the folder, lower-cased on Windows`);
+    assert.equal(entry[1] ?? entry[2], process.platform === "win32" ? first.sb.work.toLowerCase() : first.sb.work, `${how}: the folder, lower-cased on Windows`);
     assert.equal(lintWorld(first.sb).find("untrusted-project").length, 0, "after the run the project is trusted");
   }
   for (const [how, spec] of [["workspace-write", { args: ["--sandbox", "workspace-write"] }], ["read-only", { args: ["--sandbox", "read-only"] }], ["the default", {}]]) {

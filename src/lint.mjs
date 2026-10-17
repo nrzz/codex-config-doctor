@@ -369,7 +369,7 @@ export function lint(c) {
       add("mcp-command-missing", {
         severity: s.required ? "error" : "warning", file: at.file || userFile, line: at.line,
         message: `[mcp_servers.${s.id}] starts \`${s.command}\`, and no such program is found${s.argsInCommand ? ` (\`command\` is a program name: put the arguments in \`args\`)` : ""}`,
-        effect: s.required ? "Codex does not start: \"required MCP servers failed to initialize: " + s.id + ": program not found\" (exit code 1)." : "Codex skips the server in silence (nothing is printed in `codex exec`, and the exit code is 0), and the model never sees its tools.",
+        effect: s.required ? "Codex does not start: \"required MCP servers failed to initialize: " + s.id + (win ? ": program not found" : ": No such file or directory (os error 2)") + "\" (exit code 1)." : "Codex skips the server in silence (nothing is printed in `codex exec`, and the exit code is 0), and the model never sees its tools.",
         fix: s.argsInCommand ? `Set command = "${s.command.trim().split(/\s+/)[0]}" and args = ${JSON.stringify(s.command.trim().split(/\s+/).slice(1))}.` : `Install the program, put its folder in PATH${win ? " (a .cmd or .bat file is found; a .ps1 script is not)" : ""}, or write its full path.`,
       });
     }

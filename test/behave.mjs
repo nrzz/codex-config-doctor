@@ -6,7 +6,7 @@ import { collect } from "../src/collect.mjs";
 import { lint } from "../src/lint.mjs";
 import { makeSys } from "../src/sys.mjs";
 import { withAppServer } from "./app-server.mjs";
-import { fakeApi, gitInit, hookRecords, put, runCodex, sandbox, toolOutputs, writeUserConfig } from "./codex-sandbox.mjs";
+import { fakeApi, gitInit, hookRecords, isMachineNoise, put, runCodex, sandbox, toolOutputs, writeUserConfig } from "./codex-sandbox.mjs";
 
 /**
  * `codex exec` in a new world, against the fake API. The spec:
@@ -83,7 +83,7 @@ export async function thread(spec = {}) {
       const t = await s.request("thread/start", { cwd: sb.work, approvalPolicy: spec.approval || "on-request", sandbox: spec.sandbox || "workspace-write", ephemeral: true, ...(spec.threadParams || {}) });
       await s.request("turn/start", { threadId: t.thread.id, input: [{ type: "text", text: spec.prompt || "hello", text_elements: [] }] });
       await s.waitFor("turn/completed", () => true, spec.timeout || 90000);
-      warnings = s.notifications.filter((n) => n.method === "configWarning" || n.method === "warning").map((n) => (n.params && (n.params.summary || n.params.message)) || n.method);
+      warnings = s.notifications.filter((n) => n.method === "configWarning" || n.method === "warning").map((n) => (n.params && (n.params.summary || n.params.message)) || n.method).filter((w) => !isMachineNoise(w));
       items = s.notifications.map((n) => ({ method: n.method, params: n.params }));
     });
     const outputs = [];

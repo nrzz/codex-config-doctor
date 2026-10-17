@@ -68,7 +68,8 @@ test("mcp-command-missing: a server whose program is not found is skipped in sil
   assert.equal(found[0].line, header, "the line of the table header");
   const required = await exec({ label: "e2e-mcp-required", userTables: '[mcp_servers.x]\ncommand = "nosuchprogxyz"\nrequired = true\n' });
   assert.equal(required.code, 1);
-  assert.match(required.err, /required MCP servers failed to initialize: x: program not found/);
+  // Windows says what the tool found; Linux and macOS pass on the error of the operating system
+  assert.match(required.err, /required MCP servers failed to initialize: x: (?:program not found|No such file or directory \(os error 2\))/);
   assert.equal(lintWorld(required.sb).find("mcp-command-missing")[0].severity, "error");
   // and no complaint when the program is there
   const ok = await exec({ label: "e2e-mcp-found", userTables: mcpServer("stub", ["a"]) });

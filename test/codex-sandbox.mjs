@@ -232,7 +232,11 @@ export function startCodex(sb, args, { env = {}, cwd, path: pathFirst, stdin = "
 
 /** The line Codex prints when its home is under the temporary folder, which it always is here. */
 const TEMP_WARNING = /^WARNING: proceeding, even though we could not create PATH aliases: Refusing to create helper binaries under temporary dir .*$/;
-export const cleanStderr = (text) => String(text).split(/\r?\n/).filter((l) => !TEMP_WARNING.test(l)).join("\n").replace(/^\n+|\n+$/g, "");
+/** The line Codex prints on a Linux where bubblewrap is not on PATH (the CI runners): a fact about the machine, not about the configuration under test. */
+const BWRAP_WARNING = /^(?:warning: )?Codex could not find bubblewrap on PATH\..*$/;
+/** True for a warning that is about the machine the checks run on. */
+export const isMachineNoise = (text) => BWRAP_WARNING.test(String(text).trim());
+export const cleanStderr = (text) => String(text).split(/\r?\n/).filter((l) => !TEMP_WARNING.test(l) && !isMachineNoise(l)).join("\n").replace(/^\n+|\n+$/g, "");
 
 /** The JSON lines of `codex exec --json`, parsed; lines that are not JSON are skipped. */
 export const parseEvents = (out) => String(out).split(/\r?\n/).filter((l) => l.startsWith("{")).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);

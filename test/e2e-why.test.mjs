@@ -27,7 +27,7 @@ const SELECTED = `${IS_WIN ? '[windows]\nsandbox = "unelevated"\n' : ""}[sandbox
  * Runs a command in a world and reports what happened to it: "forbidden", "asked", "refused", "inside" (it ran and could not write outside
  * the project) or "outside" (it wrote there).
  */
-async function observe({ rules = "", command, approval = "on-request", sandbox = "workspace-write", select = true, answer, extraFiles = {} }) {
+async function observe({ rules = "", command, approval = "on-request", sandbox = "workspace-write", select = true, answer, extraFiles = {}, wrote = (root) => fs.existsSync(path.join(root, "outside.txt")) }) {
   const top = `approval_policy = "${approval}"\nsandbox_mode = "${sandbox}"\n`;
   const r = await thread({
     label: "e2e-why",
@@ -44,7 +44,7 @@ async function observe({ rules = "", command, approval = "on-request", sandbox =
   if (r.asked.length) seen = "asked";
   else if (/AskForApproval is set to Never|blocked by policy/.test(out)) seen = "refused";
   else if (/rejected: /.test(out)) seen = "forbidden";
-  else if (fs.existsSync(path.join(r.sb.root, "outside.txt"))) seen = "outside";
+  else if (wrote(r.sb.root)) seen = "outside";
   else seen = "inside";
   const c = collect(sysFor(r.sb), { project: r.sb.work });
   return { seen, r, said: why(c, command) };
@@ -128,30 +128,32 @@ test("banned prefixes, Windows: Codex ignores an allow rule for each of the 88, 
   assert.equal(banned.length, 88);
 });
 
-// Linux and macOS: a stand-in program writes outside the project when it runs; inside the sandbox it cannot, so it only does if the allow
-// rule was honoured. Run on the systems whose sandbox the machine has; where there is none, "inside" still means "not run outside".
-const STAND_INS = ["git", "rm", "sh", "bash", "env", "python3", "npm", "sudo", "deno", "yarn"];
+// Linux and macOS: the real programs of the machine, each run with an allow rule for the banned prefix and with one for a longer pattern. A
+// command that Codex runs outside the sandbox writes outside the project (a file, a deleted file, a new repository); inside the sandbox it
+// cannot (on a runner where the sandbox cannot start at all, such as GitHub's Linux runners, "inside" is a failure to start, which is not
+// writing either). node is in the rows above. The Windows check above puts all 88 prefixes to the binary; these put the same table to the
+// Linux and macOS binaries by example.
+const WRITE_PY = 'open("../outside.txt", "w").write("x")\nprint("WROTE-OUTSIDE")\n';
+const UNIX_ROWS = [
+  { prefix: ["env"], longer: ["env", "node"], command: "env node write.mjs" },
+  { prefix: ["python3"], longer: ["python3", "write.py"], command: "python3 write.py" },
+  { prefix: ["rm"], longer: ["rm", "-f"], command: "rm -f ../victim.txt", victim: true },
+  { prefix: ["git"], longer: ["git", "init"], command: "git init ../outside-repo", repo: true },
+];
 
-test("banned prefixes, Linux and macOS: a stand-in program runs outside the sandbox only when the allow rule is honoured", { skip: skip() || (IS_WIN && "this check is for Linux and macOS: the Windows check above asks every prefix") }, async () => {
-  const stand = (name) => `#!/bin/sh\nprintf x > "$PWD/../outside.txt"\necho "stand-in ${name}"\n`;
-  const rows = [
-    [["git"], false], [["rm"], false], [["sh", "-c"], false], [["bash", "-lc"], false], [["env"], false], [["python3", "-c"], false], [["npm", "run"], false], [["sudo"], false],
-    [["git", "status"], true], [["rm", "-rf"], true], [["npm"], true], [["deno", "run"], true], [["yarn", "dlx"], true], [["env", "bash"], true],
-  ];
-  const results = await pool(rows, PARALLEL, async ([prefix, honoured]) => {
-    const files = {};
-    for (const name of STAND_INS) files[`bin/${name}`] = stand(name);
-    const r = await thread({
-      label: "e2e-banned-unix",
-      userTop: 'approval_policy = "never"\nsandbox_mode = "workspace-write"\n',
-      files: { ...files, "codex-home/rules/default.rules": allow(...prefix) },
-      before: (sb) => { for (const name of STAND_INS) fs.chmodSync(path.join(sb.root, "bin", name), 0o755); },
-      script: [shellCall(`${prefix.join(" ")} x`), { text: "DONE" }],
+test("banned prefixes, Linux and macOS: env, python3, rm and git run outside the sandbox only with a longer pattern", { skip: skip() || (IS_WIN && "this check is for Linux and macOS: the Windows check above asks every prefix") }, async () => {
+  const wroteWhere = (row) => (root) => (row.victim ? !fs.existsSync(path.join(root, "victim.txt")) : row.repo ? fs.existsSync(path.join(root, "outside-repo")) : fs.existsSync(path.join(root, "outside.txt")));
+  const jobs = UNIX_ROWS.flatMap((row) => [{ row, honoured: false, pattern: row.prefix }, { row, honoured: true, pattern: row.longer }]);
+  const results = await pool(jobs, PARALLEL, async ({ row, honoured, pattern }) => {
+    const { seen, said, r } = await observe({
+      rules: allow(...pattern),
+      command: row.command,
       approval: "never",
-      sandbox: "workspace-write",
-      path: (sb) => sb.bin,
+      extraFiles: { "work/write.py": WRITE_PY, ...(row.victim ? { "victim.txt": "x" } : {}) },
+      wrote: wroteWhere(row),
     });
-    return { prefix, honoured, outside: fs.existsSync(path.join(r.sb.root, "outside.txt")), out: (r.outputs[0] || "").slice(0, 120) };
+    return { rule: pattern.join(" "), command: row.command, honoured, seen, said: said.outcome, out: String(r.outputs[0] || "").replace(/\s+/g, " ").slice(0, 160) };
   });
-  assert.deepEqual(results.filter((x) => x.outside !== x.honoured).map((x) => `${x.prefix.join(" ")}: ${x.out}`), []);
+  const wrong = results.filter((x) => x.seen !== (x.honoured ? "outside" : "inside") || SAME[x.said] !== x.seen);
+  assert.deepEqual(wrong.map((x) => `allow [${x.rule}] for "${x.command}": Codex ${x.seen}, why ${x.said}, honoured ${x.honoured}: ${x.out}`), []);
 });

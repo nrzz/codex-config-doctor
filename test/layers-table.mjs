@@ -3,7 +3,7 @@
 // entry: { of: "root" | "cwd" | "parent" | "a" ..., level, style } where the style is how the path is written (native, forward, trailing,
 // upper, unc, hint). test/record-oracles.mjs builds each on disk and asks Codex's app server (`config/read`, with the layers) which layers it loaded,
 // whether each is disabled, and what each key came from; the record is test/fixtures/layers-oracle.json. test/layers.test.mjs holds
-// src/layers.mjs to it; test/e2e-layers.test.mjs asks Codex again.
+// src/layers.mjs to it; test/e2e-tables.test.mjs asks Codex again.
 export const KEYS = ["model", "model_verbosity", "model_reasoning_effort", "service_tier", "project_doc_max_bytes", "sandbox_mode", "approval_policy", "tool_output_token_limit", "file_opener"];
 
 const T = (of = "root", level = "trusted", style = "native") => ({ of, level, style });

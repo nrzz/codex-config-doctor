@@ -9,7 +9,8 @@ import assert from "node:assert/strict";
 import { askHooks, pool, PARALLEL } from "./ask.mjs";
 import { exec, lintWorld, noise } from "./behave.mjs";
 import { AppServer } from "./app-server.mjs";
-import { fakeApi, gitInit, sandbox, shellCall, skip, writeUserConfig } from "./codex-sandbox.mjs";
+import { hookHash } from "../src/hooks.mjs";
+import { IS_WIN, fakeApi, gitInit, sandbox, shellCall, skip, writeUserConfig } from "./codex-sandbox.mjs";
 import { ROOT, fwd } from "./helpers.mjs";
 import { SCENARIOS } from "./hooks-table.mjs";
 
@@ -23,7 +24,9 @@ const ran = (r) => r.hookRuns.map((h) => h.event);
 
 test("the hooks Codex lists in every world of the table are the recorded ones: keys, hashes, statuses", opts, async () => {
   const fixture = JSON.parse(fs.readFileSync(path.join(ROOT, "test", "fixtures", "hooks-oracle.json"), "utf8"));
-  const live = await pool(SCENARIOS, PARALLEL, askHooks);
+  // the scenario with a commandWindows is the Windows one: elsewhere Codex lists the command, and the next test holds that
+  const usable = SCENARIOS.filter((s) => !s.windowsOnly || IS_WIN);
+  const live = await pool(usable, PARALLEL, askHooks);
   const wrong = [];
   for (const s of live) {
     const want = fixture.scenarios.find((x) => x.name === s.name);
@@ -37,7 +40,14 @@ test("the hooks Codex lists in every world of the table are the recorded ones: k
     }
   }
   assert.deepEqual(wrong, []);
-  assert.equal(live.length, SCENARIOS.length);
+  assert.equal(live.length, usable.length);
+});
+
+test("a handler with commandWindows: off Windows Codex lists the command, and its hash is the one this tool computes", { skip: skip() || (IS_WIN && "this check is for Linux and macOS: the recorded scenario is the Windows one") }, async () => {
+  const live = await askHooks(SCENARIOS.find((s) => s.windowsOnly));
+  assert.equal(live.hooks.length, 1);
+  assert.equal(live.hooks[0].command, "echo posix");
+  assert.equal(live.hooks[0].hash, hookHash("PreToolUse", "*", { async: false, command: "echo posix", timeout: 600, type: "command" }));
 });
 
 test("hooks-both-formats: a layer with a hooks.json and a [hooks] table loads both and warns", opts, async () => {

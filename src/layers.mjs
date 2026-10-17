@@ -1,12 +1,12 @@
 // The configuration layers Codex loads for a project, in the order it applies them, and what each one is worth: read, missing,
-// skipped (a project the user has not trusted) or broken. Put to Codex 0.163.0 (test/e2e-layers.test.mjs compares this with the
-// app-server's `config/read`):
+// skipped (a project the user has not trusted) or broken. Put to Codex 0.163.0 (test/e2e-tables.test.mjs compares this with the
+// app-server's `config/read`, and test/e2e-config.test.mjs puts the errors and the trust to `codex exec`):
 //   - from the lowest layer to the highest: the system config.toml, the user's config.toml, the profile file (`--profile x` reads
 //     x.config.toml next to config.toml), then the .codex/config.toml of each folder from the project root down to the working folder
 //     (the closest wins);
 //   - a project layer applies only when `projects.<path>.trust_level = "trusted"` is in the user config for that folder or for the Git root
 //     of the project (the path is compared as the operating system spells it; on Windows without regard to case); a layer that is not
-//     trusted is not used, hooks and rules of it either, but a syntax error in it still stops Codex;
+//     trusted is not opened, so it is not used, its hooks and rules are not either, and a syntax error in it does not stop Codex;
 //   - ten keys are ignored in a project layer, with a warning;
 //   - tables merge key by key; arrays and values are replaced.
 import { IGNORED_IN_PROJECT } from "./knowledge.mjs";

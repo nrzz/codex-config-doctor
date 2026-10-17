@@ -28,7 +28,13 @@ export class AppServer {
     this.child = startCodex(this.sb, [...pre, "app-server", ...args], { env, cwd, path, online, stdin: "pipe" });
     this.child.stdout.on("data", (d) => this.#read(String(d)));
     this.child.stderr.on("data", (d) => { this.stderr += d; });
-    this.exited = new Promise((resolve) => this.child.on("close", (code) => { this.closed = true; for (const [, p] of this.pending) p.reject(new Error(`app-server exited (${code}) before it answered`)); resolve(code); }));
+    this.exited = new Promise((resolve) => this.child.on("close", (code) => {
+      this.closed = true;
+      // what the server said on standard error is the reason: the last lines go into the message
+      const said = String(this.stderr).trim().split(/\r?\n/).slice(-5).join(" | ").slice(-600);
+      for (const [, p] of this.pending) p.reject(new Error(`app-server exited (${code}) before it answered${said ? `: ${said}` : ""}`));
+      resolve(code);
+    }));
     this.child.on("error", (e) => { this.stderr += String(e); });
     const result = await this.request("initialize", { clientInfo: { name: "codex-config-doctor-tests", version: "1.0.0" }, capabilities: { experimentalApi: true } });
     this.notify("initialized");

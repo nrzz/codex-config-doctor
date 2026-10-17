@@ -1,7 +1,7 @@
 // The MCP servers of the merged configuration: how each is reached, whether it is on, and whether its program can be found.
 // Put to Codex 0.163.0 (test/e2e-mcp.test.mjs): a server with a `command` is a stdio server and one with a `url` is an HTTP server; both
 // at once, or neither, is a configuration error that stops Codex; a stdio server whose program is not found is skipped without a word
-// unless `required = true`, which stops Codex with "program not found".
+// unless `required = true`, which stops Codex ("program not found" on Windows, "No such file or directory (os error 2)" elsewhere).
 import { which } from "./pathsearch.mjs";
 
 const isTable = (v) => v && typeof v === "object" && !Array.isArray(v);

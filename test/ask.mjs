@@ -6,7 +6,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { AppServer } from "./app-server.mjs";
-import { codexInfo, gitInit, promptInput, put, runCodex, sandbox, writeUserConfig } from "./codex-sandbox.mjs";
+import { codexInfo, gitInit, isMachineNoise, promptInput, put, runCodex, sandbox, writeUserConfig } from "./codex-sandbox.mjs";
 
 /** Runs fn(item, index) over the items, `size` at a time; the results are in the order of the items. */
 export async function pool(items, size, fn) {
@@ -119,7 +119,7 @@ export async function warningsFor(toml) {
     await new Promise((r) => setTimeout(r, 700));
     return { ok: true, unrecognized: unrecognized(s.notifications) };
   } catch (e) {
-    return { ok: false, error: String(e.message || e).slice(0, 200), stderr: s.stderr.split("\n").filter((l) => l.trim() && !/^WARNING: proceeding/.test(l)).slice(0, 4).join(" | ").slice(0, 300) };
+    return { ok: false, error: String(e.message || e).slice(0, 700), stderr: s.stderr.split("\n").filter((l) => l.trim() && !/^WARNING: proceeding/.test(l)).slice(0, 4).join(" | ").slice(0, 300) };
   } finally { await s.close(); }
 }
 
@@ -240,7 +240,7 @@ export async function askLayers(s) {
       if (!o) continue;
       values.push({ key, value: get(cfg.config, key), origin: { type: o.name.type, path: norm(o.name.file || o.name.dotCodexFolder || "", sb.root) } });
     }
-    return { name: s.name, layers, values, warnings: srv.notifications.filter((n) => n.method === "configWarning").map((n) => norm(n.params.summary, sb.root)) };
+    return { name: s.name, layers, values, warnings: srv.notifications.filter((n) => n.method === "configWarning" && !isMachineNoise(n.params.summary)).map((n) => norm(n.params.summary, sb.root)) };
   } catch (e) {
     return { name: s.name, error: String(e.message || e).slice(0, 200), stderr: srv.stderr.slice(0, 300) };
   } finally { await srv.close(); }
