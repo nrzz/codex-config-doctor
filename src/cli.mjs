@@ -28,11 +28,11 @@ It reads your Codex CLI configuration and changes nothing. Zero tokens: it runs 
            rules: runs inside the sandbox, asks first, runs outside the sandbox through an allow
            rule, is forbidden, or is split into parts that are judged separately. Exit 1 when
            Codex would refuse it. Quote the command: why "git status && rm -rf build"
-  agents   [--project <dir>] [--print]
+  agents   [--project <dir>] [--profile <name>] [--print]
            the AGENTS.md files in order, each included, cut or left out against
            project_doc_max_bytes, and the size of the text; --print prints that text exactly as
            Codex sends it. Exit 1 when a file is cut or left out
-  cost     [--project <dir>]
+  cost     [--project <dir>] [--profile <name>]
            what the first request of a session carries before your words: base instructions,
            skills, permissions, AGENTS.md, tool definitions; yours are computed, Codex's recorded
   explain  [--list] <finding-id>
@@ -57,8 +57,8 @@ const COMMANDS = {
   show: { options: ["project", "profile", "json"], positional: 0 },
   lint: { options: ["project", "profile", "json", "markdown"], positional: 0 },
   why: { options: ["project", "profile", "json", "shell"], positional: 1 },
-  agents: { options: ["project", "json", "print"], positional: 0 },
-  cost: { options: ["project", "json"], positional: 0 },
+  agents: { options: ["project", "profile", "json", "print"], positional: 0 },
+  cost: { options: ["project", "profile", "json"], positional: 0 },
   explain: { options: ["json", "list"], positional: 1 },
 };
 

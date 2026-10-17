@@ -85,6 +85,13 @@ test("untrusted-project: a run with sandbox_mode danger-full-access writes a tru
     assert.ok(entry, `${how}: an entry was written:\n${text}`);
     assert.equal(entry[1] ?? entry[2], process.platform === "win32" ? first.sb.work.toLowerCase() : first.sb.work, `${how}: the folder, lower-cased on Windows`);
     assert.equal(lintWorld(first.sb).find("untrusted-project").length, 0, "after the run the project is trusted");
+    // and the next session loads the folder's file: the app server reads the project's model, which wins over the user's
+    const srv = new AppServer(first.sb, { cwd: first.sb.work, online: true });
+    try {
+      await srv.start();
+      const cfg = await srv.request("config/read", { cwd: first.sb.work, includeLayers: false });
+      assert.equal(cfg.config.model, "gpt-5.4", `${how}: the next session loads the folder's file`);
+    } finally { await srv.close(); }
   }
   // the other sandbox modes: read-only and the default (read-only for a folder that is not trusted) write nothing; workspace-write writes the
   // entry where a sandbox can run it (Linux and macOS), and on Windows with no sandbox selected it is read-only, so it writes nothing

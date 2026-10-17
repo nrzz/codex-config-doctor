@@ -64,7 +64,7 @@ test("the usage errors, one by one", () => {
   bad(["show", "extra"], /show takes no argument, not "extra"/);
   bad(["show", "--markdown"], /show does not take --markdown/);
   bad(["lint", "--print"], /lint does not take --print/);
-  bad(["agents", "--profile", "x"], /agents does not take --profile/);
+  bad(["explain", "--profile", "x", "unknown-key"], /explain does not take --profile/);
   bad(["why"], /why needs the command, in quotes/);
   bad(["why", "git", "status"], /why takes one argument, the command in quotes: why "git status"/);
   bad(["why", "x", "--shell", "fish"], /--shell is bash or powershell/);
