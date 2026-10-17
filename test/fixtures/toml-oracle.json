@@ -1,0 +1,668 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "cases": [
+  {
+   "name": "bare key",
+   "valid": true
+  },
+  {
+   "name": "bare key with dashes and digits",
+   "valid": true
+  },
+  {
+   "name": "quoted key",
+   "valid": true
+  },
+  {
+   "name": "literal quoted key",
+   "valid": true
+  },
+  {
+   "name": "dotted key",
+   "valid": true
+  },
+  {
+   "name": "dotted key with spaces",
+   "valid": true
+  },
+  {
+   "name": "dotted key with a quoted part",
+   "valid": true
+  },
+  {
+   "name": "empty quoted key",
+   "valid": true
+  },
+  {
+   "name": "key without value",
+   "valid": false,
+   "line": 1,
+   "column": 2,
+   "message": "key with no value, expected `=`"
+  },
+  {
+   "name": "key then equals then nothing",
+   "valid": false,
+   "line": 1,
+   "column": 4,
+   "message": "string values must be quoted, expected literal string"
+  },
+  {
+   "name": "two keys on one line",
+   "valid": false,
+   "line": 1,
+   "column": 9,
+   "message": "unexpected key or value, expected newline, `#`"
+  },
+  {
+   "name": "value then comment",
+   "valid": true
+  },
+  {
+   "name": "comment line",
+   "valid": true
+  },
+  {
+   "name": "empty file",
+   "valid": true
+  },
+  {
+   "name": "blank lines",
+   "valid": true
+  },
+  {
+   "name": "duplicate key",
+   "valid": false,
+   "line": 2,
+   "column": 1,
+   "message": "duplicate key"
+  },
+  {
+   "name": "duplicate key in a table",
+   "valid": false,
+   "line": 3,
+   "column": 1,
+   "message": "duplicate key"
+  },
+  {
+   "name": "key redefines a table",
+   "valid": false,
+   "line": 3,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "table after dotted key table",
+   "valid": false,
+   "line": 2,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "sub table of a dotted table",
+   "valid": true
+  },
+  {
+   "name": "redefine dotted table by header",
+   "valid": false,
+   "line": 3,
+   "column": 8,
+   "message": "duplicate key"
+  },
+  {
+   "name": "no end of line at the end",
+   "valid": true
+  },
+  {
+   "name": "CRLF",
+   "valid": true
+  },
+  {
+   "name": "a lone CR",
+   "valid": false,
+   "line": 1,
+   "column": 7,
+   "message": "carriage return must be followed by newline, expected newline"
+  },
+  {
+   "name": "byte order mark",
+   "valid": true
+  },
+  {
+   "name": "tab as space",
+   "valid": true
+  },
+  {
+   "name": "non-ascii bare key",
+   "valid": false,
+   "line": 1,
+   "column": 1,
+   "message": "invalid unquoted key, expected letters, numbers, `-`, `_`"
+  },
+  {
+   "name": "bare key with a dot at the end",
+   "valid": false,
+   "line": 1,
+   "column": 4,
+   "message": "unquoted keys cannot be empty, expected letters, numbers, `-`, `_`"
+  },
+  {
+   "name": "bare key with a space",
+   "valid": false,
+   "line": 1,
+   "column": 3,
+   "message": "key with no value, expected `=`"
+  },
+  {
+   "name": "basic string",
+   "valid": true
+  },
+  {
+   "name": "basic string with escapes",
+   "valid": true
+  },
+  {
+   "name": "basic string with a bad escape",
+   "valid": false,
+   "line": 1,
+   "column": 7,
+   "message": "missing escaped value, expected `b`, `e`, `f`, `n`, `r`, `\\`, `\"`, `x`, `u`, `U`"
+  },
+  {
+   "name": "basic string with a short unicode escape",
+   "valid": false,
+   "line": 1,
+   "column": 10,
+   "message": "too few unicode value digits, expected unicode hexadecimal value"
+  },
+  {
+   "name": "basic string with a surrogate escape",
+   "valid": false,
+   "line": 1,
+   "column": 8,
+   "message": "invalid value, expected unicode hexadecimal value"
+  },
+  {
+   "name": "unterminated basic string",
+   "valid": false,
+   "line": 1,
+   "column": 9,
+   "message": "invalid basic string, expected `\"`"
+  },
+  {
+   "name": "basic string with a raw newline",
+   "valid": false,
+   "line": 2,
+   "column": 4,
+   "message": "key with no value, expected `=`"
+  },
+  {
+   "name": "basic string with a control character",
+   "valid": false,
+   "line": 1,
+   "column": 7,
+   "message": "invalid basic string, expected non-double-quote visible characters, `\\`"
+  },
+  {
+   "name": "basic string with a tab",
+   "valid": true
+  },
+  {
+   "name": "literal string",
+   "valid": true
+  },
+  {
+   "name": "unterminated literal string",
+   "valid": false,
+   "line": 1,
+   "column": 9,
+   "message": "invalid literal string, expected `'`"
+  },
+  {
+   "name": "multi-line basic string",
+   "valid": true
+  },
+  {
+   "name": "multi-line basic string with a line ending backslash",
+   "valid": true
+  },
+  {
+   "name": "multi-line basic string with quotes",
+   "valid": true
+  },
+  {
+   "name": "unterminated multi-line string",
+   "valid": false,
+   "line": 1,
+   "column": 12,
+   "message": "invalid multi-line basic string, expected `\"`"
+  },
+  {
+   "name": "multi-line literal string",
+   "valid": true
+  },
+  {
+   "name": "unterminated multi-line literal string",
+   "valid": false,
+   "line": 1,
+   "column": 12,
+   "message": "invalid multi-line literal string, expected `'`"
+  },
+  {
+   "name": "escape e (TOML 1.1)",
+   "valid": true
+  },
+  {
+   "name": "escape x (TOML 1.1)",
+   "valid": true
+  },
+  {
+   "name": "integer",
+   "valid": true
+  },
+  {
+   "name": "negative integer",
+   "valid": true
+  },
+  {
+   "name": "positive integer",
+   "valid": true
+  },
+  {
+   "name": "integer with underscores",
+   "valid": true
+  },
+  {
+   "name": "integer with a double underscore",
+   "valid": false,
+   "line": 1,
+   "column": 6,
+   "message": "`_` may only go between digits, expected nothing"
+  },
+  {
+   "name": "integer with a trailing underscore",
+   "valid": false,
+   "line": 1,
+   "column": 6,
+   "message": "`_` may only go between digits, expected nothing"
+  },
+  {
+   "name": "integer with a leading zero",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "unexpected leading zero, expected nothing"
+  },
+  {
+   "name": "zero",
+   "valid": true
+  },
+  {
+   "name": "negative zero",
+   "valid": true
+  },
+  {
+   "name": "hex",
+   "valid": true
+  },
+  {
+   "name": "hex with underscore",
+   "valid": true
+  },
+  {
+   "name": "octal",
+   "valid": true
+  },
+  {
+   "name": "binary",
+   "valid": true
+  },
+  {
+   "name": "signed hex",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "integers with a radix cannot be signed, expected nothing"
+  },
+  {
+   "name": "float",
+   "valid": true
+  },
+  {
+   "name": "float with exponent",
+   "valid": true
+  },
+  {
+   "name": "float with a capital exponent",
+   "valid": true
+  },
+  {
+   "name": "float without a digit after the dot",
+   "valid": false,
+   "line": 1,
+   "column": 7,
+   "message": "invalid fraction, expected digits"
+  },
+  {
+   "name": "float without a digit before the dot",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "invalid mantissa, expected digits"
+  },
+  {
+   "name": "infinity",
+   "valid": true
+  },
+  {
+   "name": "negative infinity",
+   "valid": true
+  },
+  {
+   "name": "not a number",
+   "valid": true
+  },
+  {
+   "name": "boolean true",
+   "valid": true
+  },
+  {
+   "name": "boolean false",
+   "valid": true
+  },
+  {
+   "name": "capital boolean",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "invalid boolean, expected `true`"
+  },
+  {
+   "name": "bare word value",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "string values must be quoted, expected literal string"
+  },
+  {
+   "name": "offset date-time",
+   "valid": true
+  },
+  {
+   "name": "offset date-time with offset",
+   "valid": true
+  },
+  {
+   "name": "date-time with a space",
+   "valid": true
+  },
+  {
+   "name": "local date-time",
+   "valid": true
+  },
+  {
+   "name": "local date",
+   "valid": true
+  },
+  {
+   "name": "local time",
+   "valid": true
+  },
+  {
+   "name": "local time with fraction",
+   "valid": true
+  },
+  {
+   "name": "time without seconds (TOML 1.1)",
+   "valid": true
+  },
+  {
+   "name": "invalid month",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "invalid date, expected month between 01 and 12"
+  },
+  {
+   "name": "invalid day",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "invalid date, expected day between 01 and 28"
+  },
+  {
+   "name": "lower-case t and z",
+   "valid": true
+  },
+  {
+   "name": "empty array",
+   "valid": true
+  },
+  {
+   "name": "array of integers",
+   "valid": true
+  },
+  {
+   "name": "array with a trailing comma",
+   "valid": true
+  },
+  {
+   "name": "array with two trailing commas",
+   "valid": false,
+   "line": 1,
+   "column": 11,
+   "message": "extra comma in array, expected value"
+  },
+  {
+   "name": "array with a leading comma",
+   "valid": false,
+   "line": 1,
+   "column": 6,
+   "message": "extra comma in array, expected value"
+  },
+  {
+   "name": "multi-line array",
+   "valid": true
+  },
+  {
+   "name": "mixed types array",
+   "valid": true
+  },
+  {
+   "name": "unterminated array",
+   "valid": false,
+   "line": 1,
+   "column": 10,
+   "message": "unclosed array, expected `]`"
+  },
+  {
+   "name": "array without commas",
+   "valid": false,
+   "line": 1,
+   "column": 6,
+   "message": "string values must be quoted, expected literal string"
+  },
+  {
+   "name": "nested arrays",
+   "valid": true
+  },
+  {
+   "name": "empty inline table",
+   "valid": true
+  },
+  {
+   "name": "inline table",
+   "valid": true
+  },
+  {
+   "name": "inline table with a dotted key",
+   "valid": true
+  },
+  {
+   "name": "inline table with a trailing comma",
+   "valid": true
+  },
+  {
+   "name": "inline table over two lines",
+   "valid": true
+  },
+  {
+   "name": "inline table with a duplicate key",
+   "valid": false,
+   "line": 1,
+   "column": 14,
+   "message": "duplicate key"
+  },
+  {
+   "name": "unterminated inline table",
+   "valid": false,
+   "line": 1,
+   "column": 12,
+   "message": "unclosed inline table, expected `}`"
+  },
+  {
+   "name": "table extended after an inline table",
+   "valid": false,
+   "line": 2,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "key added to an inline table",
+   "valid": false,
+   "line": 2,
+   "column": 1,
+   "message": "cannot extend value of type inline table with a dotted key"
+  },
+  {
+   "name": "table",
+   "valid": true
+  },
+  {
+   "name": "table with a dotted name",
+   "valid": true
+  },
+  {
+   "name": "table name with spaces",
+   "valid": true
+  },
+  {
+   "name": "table with a quoted name",
+   "valid": true
+  },
+  {
+   "name": "empty table name",
+   "valid": false,
+   "line": 1,
+   "column": 2,
+   "message": "unquoted keys cannot be empty, expected letters, numbers, `-`, `_`"
+  },
+  {
+   "name": "unterminated table header",
+   "valid": false,
+   "line": 1,
+   "column": 3,
+   "message": "unclosed table, expected `]`"
+  },
+  {
+   "name": "table header then text",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "unexpected key or value, expected newline, `#`"
+  },
+  {
+   "name": "table header then comment",
+   "valid": true
+  },
+  {
+   "name": "super table defined later",
+   "valid": true
+  },
+  {
+   "name": "table defined twice",
+   "valid": false,
+   "line": 3,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "table clashes with a value",
+   "valid": false,
+   "line": 2,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "table clashes with an array",
+   "valid": false,
+   "line": 2,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "array of tables",
+   "valid": true
+  },
+  {
+   "name": "array of tables with a sub table",
+   "valid": true
+  },
+  {
+   "name": "array of tables inside one",
+   "valid": true
+  },
+  {
+   "name": "array of tables unterminated",
+   "valid": false,
+   "line": 1,
+   "column": 5,
+   "message": "unclosed array table, expected `]`"
+  },
+  {
+   "name": "array of tables on a table",
+   "valid": false,
+   "line": 3,
+   "column": 3,
+   "message": "duplicate key"
+  },
+  {
+   "name": "table on an array of tables",
+   "valid": false,
+   "line": 3,
+   "column": 2,
+   "message": "duplicate key"
+  },
+  {
+   "name": "static array extended",
+   "valid": false,
+   "line": 2,
+   "column": 3,
+   "message": "duplicate key"
+  },
+  {
+   "name": "mcp server table",
+   "valid": true
+  },
+  {
+   "name": "hooks as arrays of tables",
+   "valid": true
+  },
+  {
+   "name": "a Windows path in a literal string",
+   "valid": true
+  },
+  {
+   "name": "a Windows path in a basic string with single backslashes",
+   "valid": false,
+   "line": 1,
+   "column": 10,
+   "message": "too few unicode value digits, expected unicode hexadecimal value"
+  },
+  {
+   "name": "a Windows path in a quoted key",
+   "valid": true
+  }
+ ]
+}
