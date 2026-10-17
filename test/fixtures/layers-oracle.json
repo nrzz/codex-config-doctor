@@ -1,0 +1,612 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "scenarios": [
+  {
+   "name": "user config only",
+   "layers": [
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    },
+    {
+     "key": "model_verbosity",
+     "value": "low",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "no config at all",
+   "layers": [
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [],
+   "warnings": []
+  },
+  {
+   "name": "a project layer, project not trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "a project layer, project root trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "p",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    },
+    {
+     "key": "model_verbosity",
+     "value": "high",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "a project layer, trust_level untrusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       <root>/work is marked as untrusted in the effective configuration. To load project-local config, hooks, and exec policies, update its trust setting. If that setting is managed by your organization, contact your administrator.\n"
+   ]
+  },
+  {
+   "name": "layers at the root and in a/b, the root trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/b/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "ab",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/b/.codex"
+     }
+    },
+    {
+     "key": "model_verbosity",
+     "value": "low",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/b/.codex"
+     }
+    },
+    {
+     "key": "project_doc_max_bytes",
+     "value": 2000,
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "layers at the root, a and a/b, the root trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/b/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/a/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "ab",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/b/.codex"
+     }
+    },
+    {
+     "key": "file_opener",
+     "value": "cursor",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "only a is trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/b/.codex",
+     "disabled": true
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/a/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "a",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/.codex"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n    2. <root>/work/a/b/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "only the working folder is trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/b/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/a/.codex",
+     "disabled": true
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "ab",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/b/.codex"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n    2. <root>/work/a/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "the root trusted, a marked untrusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/.codex",
+     "disabled": true
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "r",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/a/.codex\n       <root>/work/a is marked as untrusted in the effective configuration. To load project-local config, hooks, and exec policies, update its trust setting. If that setting is managed by your organization, contact your administrator.\n"
+   ]
+  },
+  {
+   "name": "the parent of the repository trusted",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "the ten keys a project may not set",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "p",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": [
+    "Ignored unsupported project-local config keys in <root>/work/.codex/config.toml: openai_base_url, chatgpt_base_url, apps_mcp_product_sku, model_provider, model_providers, notify, profile, profiles, experimental_realtime_ws_base_url, otel. If you want these settings to apply, manually set them in your user-level config.toml."
+   ]
+  },
+  {
+   "name": "tables merge key by key and arrays are replaced",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "features.hooks",
+     "value": true,
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    },
+    {
+     "key": "features.memories",
+     "value": true,
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    },
+    {
+     "key": "project_doc_fallback_filenames",
+     "value": [
+      "three.md"
+     ],
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    },
+    {
+     "key": "sandbox_workspace_write.network_access",
+     "value": true,
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "project_root_markers decide where the layers start",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/a/.codex",
+     "disabled": false
+    },
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "a",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/a/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "the trust key written with forward slashes",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "the trust key with a trailing separator",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  },
+  {
+   "name": "the trust key in capital letters",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "p",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "the trust key as Codex's own warning spells it (lower case)",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": false
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "p",
+     "origin": {
+      "type": "project",
+      "path": "<root>/work/.codex"
+     }
+    }
+   ],
+   "warnings": []
+  },
+  {
+   "name": "the trust key with the \\\\?\\ prefix",
+   "layers": [
+    {
+     "type": "project",
+     "path": "<root>/work/.codex",
+     "disabled": true
+    },
+    {
+     "type": "user",
+     "path": "<root>/codex-home/config.toml",
+     "disabled": false
+    }
+   ],
+   "values": [
+    {
+     "key": "model",
+     "value": "u",
+     "origin": {
+      "type": "user",
+      "path": "<root>/codex-home/config.toml"
+     }
+    }
+   ],
+   "warnings": [
+    "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load.\n    1. <root>/work/.codex\n       To load project-local config, hooks, and exec policies, add <root>/work as a trusted project in <root>/codex-home/config.toml.\n"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,387 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "scenarios": [
+  {
+   "name": "no file at all",
+   "present": false
+  },
+  {
+   "name": "a project file",
+   "present": true,
+   "bytes": 72,
+   "chars": 72,
+   "sha256": "d03a341edd4a0717839e6affdb975cc30574670ee3cbf2d2889541aabc870954",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n</I",
+   "tail": "instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a global file only",
+   "present": true,
+   "bytes": 63,
+   "chars": 63,
+   "sha256": "6b70b94a35e89541a6c2b6b6295dacd1d3d9658ab5b0ecce96bd8551c1db2b6b",
+   "head": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nGLOBAL\n</INSTRUCTIO",
+   "tail": "GENTS.md instructions\n\n<INSTRUCTIONS>\nGLOBAL\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a global file and a project file",
+   "present": true,
+   "bytes": 101,
+   "chars": 101,
+   "sha256": "4e1e13408e5ca9d4332ec01ecaf2c0af29f4d2e6a58418ab2783087be492c710",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\n\n-",
+   "tail": "RUCTIONS>\nGLOBAL\n\n--- project-doc ---\n\nROOT\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "the chain root, a, a/b",
+   "present": true,
+   "bytes": 109,
+   "chars": 109,
+   "sha256": "e4d75b1dcd718426b107d3247ce8c6a0869ca55e7757e80913a4895f1926aed8",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\n\n-",
+   "tail": ">\nGLOBAL\n\n--- project-doc ---\n\nROOT\n\n\nA\n\n\nB\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "files without a final newline",
+   "present": true,
+   "bytes": 106,
+   "chars": 106,
+   "sha256": "7d6db1d49a60a40e6ec663dc72f1ae1caf391fdc8fc8a14c3c1734bf90bcb5ae",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\n\n-",
+   "tail": "ONS>\nGLOBAL\n\n--- project-doc ---\n\nROOT\n\nA\n\nB\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "extra newlines",
+   "present": true,
+   "bytes": 115,
+   "chars": 115,
+   "sha256": "d070bbd24c0e9af0872a81c9b447ed7ff57c5f1475bf007f72c53243a85147ea",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\n\n-",
+   "tail": "AL\n\n--- project-doc ---\n\nROOT\n\n\n\n\n\n\nA\n\n\nB  \n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "CRLF files",
+   "present": true,
+   "bytes": 116,
+   "chars": 116,
+   "sha256": "56426fd75ef5605a7fdcd774ebb9a4d2a7343f280724be3b7a3e5440aa027576",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\r\nl",
+   "tail": "L\r\nline2\n\n--- project-doc ---\n\nROOT\r\nline2\r\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a folder in the chain without a file",
+   "present": true,
+   "bytes": 76,
+   "chars": 76,
+   "sha256": "f1e2284fac57c80b5acb60db7883f80ddf28191b4c661049362a82b91950866b",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nB\n",
+   "tail": "ructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nB\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "override beside AGENTS.md in a project folder",
+   "present": true,
+   "bytes": 76,
+   "chars": 76,
+   "sha256": "24e290ecd3bdcd0e4122e8f672bf86b99b506f62928a75deb18d5055f29e3bae",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nOVERRIDE\n",
+   "tail": "ructions for <cwd>\n\n<INSTRUCTIONS>\nOVERRIDE\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "override in the Codex home",
+   "present": true,
+   "bytes": 102,
+   "chars": 102,
+   "sha256": "08313354b98db8953cd26ede7bd890ec69762b0ae272df6ec0659e87ba841581",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nG-OVERRID",
+   "tail": "UCTIONS>\nG-OVERRIDE\n\n--- project-doc ---\n\nP\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "an empty override in a project folder hides AGENTS.md",
+   "present": false
+  },
+  {
+   "name": "an override with only spaces hides AGENTS.md",
+   "present": false
+  },
+  {
+   "name": "an empty override in the Codex home does not hide AGENTS.md",
+   "present": true,
+   "bytes": 102,
+   "chars": 102,
+   "sha256": "599774ab13ae4456296002d894337b94548470dcfc6a3e5d4e0e9cf3ab6ac503",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nG-STANDAR",
+   "tail": "UCTIONS>\nG-STANDARD\n\n--- project-doc ---\n\nP\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "an empty project file",
+   "present": true,
+   "bytes": 58,
+   "chars": 58,
+   "sha256": "6813f33a1319c4fd49bddf66bb611ff7b67bd697a2d4fe6f0547868c9e44918e",
+   "head": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>",
+   "tail": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a project file with only white space",
+   "present": true,
+   "bytes": 58,
+   "chars": 58,
+   "sha256": "6813f33a1319c4fd49bddf66bb611ff7b67bd697a2d4fe6f0547868c9e44918e",
+   "head": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>",
+   "tail": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a folder named AGENTS.md is passed over",
+   "present": true,
+   "bytes": 71,
+   "chars": 71,
+   "sha256": "162bd4d080bf68b10d4aae31551e8a8a37574d21abd96a28507b80370b068472",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nOVR\n\n</IN",
+   "tail": " instructions for <cwd>\n\n<INSTRUCTIONS>\nOVR\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "fallback name, no AGENTS.md",
+   "present": true,
+   "bytes": 75,
+   "chars": 75,
+   "sha256": "3ba8e6dbf00a7f955e05bd03f4e428b0c77e564b64b0f989fbfcf3b7b690366d",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nTEAMDOC\n\n",
+   "tail": "tructions for <cwd>\n\n<INSTRUCTIONS>\nTEAMDOC\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "fallback names, AGENTS.md first",
+   "present": true,
+   "bytes": 69,
+   "chars": 69,
+   "sha256": "76a1e3a06eb5480fef1484015ee66ef0649a76fa199b432d41581969cb691053",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INST",
+   "tail": "md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "two fallback names in order",
+   "present": true,
+   "bytes": 73,
+   "chars": 73,
+   "sha256": "860ba9a580de20a8f4115174199e2e904ae0a7d7bcba6fed77f9b66f6a6add5e",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nfirst\n\n</",
+   "tail": "nstructions for <cwd>\n\n<INSTRUCTIONS>\nfirst\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "fallback names with a path",
+   "present": true,
+   "bytes": 70,
+   "chars": 70,
+   "sha256": "ce7ea5dd14617db7b749adf834ba00803c1eae1527a1a93bf12cd5a2b338b905",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nOK\n\n</INS",
+   "tail": "d instructions for <cwd>\n\n<INSTRUCTIONS>\nOK\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a fallback name in the Codex home is not read",
+   "present": true,
+   "bytes": 69,
+   "chars": 69,
+   "sha256": "a0cc5f0f59c6f00c5e1f14f262b77ac002b8bdcf5813838c57f575e475387196",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nP\n\n</INST",
+   "tail": "md instructions for <cwd>\n\n<INSTRUCTIONS>\nP\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "the cap with 20K, 20K and 5K",
+   "present": true,
+   "bytes": 32837,
+   "chars": 32837,
+   "sha256": "4db0f5fed5eb0c03892bf7b3e2280b6ccec14f535b5bd5df94d74c1cac33cbbc",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nRRRRRRRRR",
+   "tail": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a global file of 40K does not count",
+   "present": true,
+   "bytes": 73820,
+   "chars": 73820,
+   "sha256": "84ddc59098b6ecf274f86fcd7796fd3286142e66973fcafa5390934e3a4306ec",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGGGGGGGGG",
+   "tail": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "one file of exactly the cap",
+   "present": true,
+   "bytes": 32835,
+   "chars": 32835,
+   "sha256": "94fa0d74c154a47f5a3a8206d75e7b04b6911251155dd2e51be246037953ad23",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nRRRRRRRRR",
+   "tail": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "one file of the cap minus one",
+   "present": true,
+   "bytes": 32837,
+   "chars": 32837,
+   "sha256": "aff14a82e1621abdb86dea587c325674696bd3409ff2ee8b32709f2499fa8682",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nRRRRRRRRR",
+   "tail": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\n\nA\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "one file of 40K",
+   "present": true,
+   "bytes": 32835,
+   "chars": 32835,
+   "sha256": "94fa0d74c154a47f5a3a8206d75e7b04b6911251155dd2e51be246037953ad23",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nRRRRRRRRR",
+   "tail": "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "cap 0",
+   "present": true,
+   "bytes": 58,
+   "chars": 58,
+   "sha256": "6813f33a1319c4fd49bddf66bb611ff7b67bd697a2d4fe6f0547868c9e44918e",
+   "head": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>",
+   "tail": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "cap 3",
+   "present": true,
+   "bytes": 99,
+   "chars": 99,
+   "sha256": "3c1d99973bc63974be405e29f4e4282950db765661c32b89878857e908ffb510",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nGLOBAL\n\n-",
+   "tail": "STRUCTIONS>\nGLOBAL\n\n--- project-doc ---\n\nROO\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "cap 8 over two files",
+   "present": true,
+   "bytes": 79,
+   "chars": 79,
+   "sha256": "e874139872d8253b18acd8f89b1e478ada6f04abf0ac056bc9981e64a3cf7f9a",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n",
+   "tail": "tions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n\n\nB\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "cap exactly the size of the first file",
+   "present": true,
+   "bytes": 72,
+   "chars": 72,
+   "sha256": "d03a341edd4a0717839e6affdb975cc30574670ee3cbf2d2889541aabc870954",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n</I",
+   "tail": "instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "cap 1 and a first byte that is a newline",
+   "present": true,
+   "bytes": 58,
+   "chars": 58,
+   "sha256": "6813f33a1319c4fd49bddf66bb611ff7b67bd697a2d4fe6f0547868c9e44918e",
+   "head": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>",
+   "tail": "# AGENTS.md instructions\n\n<INSTRUCTIONS>\nG\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a multibyte letter cut by the cap",
+   "present": true,
+   "bytes": 74,
+   "chars": 71,
+   "sha256": "b405894b3f2f10726b3d99e3492ad93eeaecf31e773d4b590923b19a795cc337",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nabé�\n</IN",
+   "tail": " instructions for <cwd>\n\n<INSTRUCTIONS>\nabé�\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a multibyte letter kept by the cap",
+   "present": true,
+   "bytes": 71,
+   "chars": 70,
+   "sha256": "40d6ed9f5fddec65df3872ada732fd26c1a958061b2886cd2d12c1871bf6d6b0",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nabé\n</INS",
+   "tail": "d instructions for <cwd>\n\n<INSTRUCTIONS>\nabé\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "an emoji cut by the cap",
+   "present": true,
+   "bytes": 71,
+   "chars": 69,
+   "sha256": "d79571d3fcfb76080bda4a2585ff5945a1dabe2309d7d82cb329e1516cc70108",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\na�\n</INST",
+   "tail": "md instructions for <cwd>\n\n<INSTRUCTIONS>\na�\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a byte order mark",
+   "present": true,
+   "bytes": 75,
+   "chars": 73,
+   "sha256": "fbcfb61727093e54066df243b1310fad50f0a7f250b48e02f95d880883f6febf",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\n﻿ROOT\n\n</",
+   "tail": "nstructions for <cwd>\n\n<INSTRUCTIONS>\n﻿ROOT\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "an invalid byte",
+   "present": true,
+   "bytes": 75,
+   "chars": 73,
+   "sha256": "095c9eefdd2e56e0b7ac6517dcc51e905a4a5de7a4ef05109e25e0657d4ad499",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nRO�OT\n\n</",
+   "tail": "nstructions for <cwd>\n\n<INSTRUCTIONS>\nRO�OT\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "UTF-16 with a byte order mark",
+   "present": true,
+   "bytes": 83,
+   "chars": 79,
+   "sha256": "c169422b8a7792091ef32fae17cc7afc6b1574154f957fa05a25f07e76dadc32",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\n��R\u0000O\u0000O\u0000T",
+   "tail": "tions for <cwd>\n\n<INSTRUCTIONS>\n��R\u0000O\u0000O\u0000T\u0000\n\u0000\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "no .git above the working folder",
+   "present": true,
+   "bytes": 69,
+   "chars": 69,
+   "sha256": "76a1e3a06eb5480fef1484015ee66ef0649a76fa199b432d41581969cb691053",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INST",
+   "tail": "md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "project_root_markers with a marker that is there",
+   "present": true,
+   "bytes": 76,
+   "chars": 76,
+   "sha256": "da53412d3575876d30fa8a529e9a3797c4834df2dcae5d72ca62271cfa8890aa",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n",
+   "tail": "ructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "project_root_markers empty",
+   "present": true,
+   "bytes": 69,
+   "chars": 69,
+   "sha256": "76a1e3a06eb5480fef1484015ee66ef0649a76fa199b432d41581969cb691053",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INST",
+   "tail": "md instructions for <cwd>\n\n<INSTRUCTIONS>\nA\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": ".git as a file",
+   "present": true,
+   "bytes": 76,
+   "chars": 76,
+   "sha256": "da53412d3575876d30fa8a529e9a3797c4834df2dcae5d72ca62271cfa8890aa",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n",
+   "tail": "ructions for <cwd>\n\n<INSTRUCTIONS>\nROOT\n\n\nA\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "unicode text",
+   "present": true,
+   "bytes": 98,
+   "chars": 84,
+   "sha256": "77ee7f53fae4ebc18e9e68a0b7414471eafa84f1f3d4f4692c1afcafa4c45511",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nÜnïcödé —",
+   "tail": " for <cwd>\n\n<INSTRUCTIONS>\nÜnïcödé — 日本語 🚀\n\n</INSTRUCTIONS>"
+  },
+  {
+   "name": "a long line",
+   "present": true,
+   "bytes": 5067,
+   "chars": 5067,
+   "sha256": "c98b6487e6039e8b18cb9e1eedd553fd55faf91d23f88a1765443da65cabe1b3",
+   "head": "# AGENTS.md instructions for <cwd>\n\n<INSTRUCTIONS>\nxxxxxxxxx",
+   "tail": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n</INSTRUCTIONS>"
+  }
+ ]
+}

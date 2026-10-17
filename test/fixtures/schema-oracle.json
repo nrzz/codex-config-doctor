@@ -1,0 +1,1608 @@
+{
+ "codex": "0.163.0",
+ "recorded": "2026-10-17",
+ "groups": [
+  {
+   "name": "top-level keys and small tables",
+   "covers": 102,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "an MCP server with a command",
+   "covers": 13,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "a model provider",
+   "covers": 20,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "the environment policy with filters",
+   "covers": 7,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "the environment policy with the legacy arrays",
+   "covers": 2,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "every feature flag",
+   "covers": 175,
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "name": "the old names of two keys",
+   "covers": 2,
+   "ok": true,
+   "unrecognized": []
+  }
+ ],
+ "typos": [
+  {
+   "toml": "aproval_policy = \"never\"",
+   "ok": true,
+   "unrecognized": [
+    "aproval_policy"
+   ]
+  },
+  {
+   "toml": "sandbox-mode = \"read-only\"",
+   "ok": true,
+   "unrecognized": [
+    "sandbox-mode"
+   ]
+  },
+  {
+   "toml": "modle = \"gpt-5.5\"",
+   "ok": true,
+   "unrecognized": [
+    "modle"
+   ]
+  },
+  {
+   "toml": "project_doc_max_byte = 100",
+   "ok": true,
+   "unrecognized": [
+    "project_doc_max_byte"
+   ]
+  },
+  {
+   "toml": "project_root_marker = []",
+   "ok": true,
+   "unrecognized": [
+    "project_root_marker"
+   ]
+  },
+  {
+   "toml": "[features]\nhoks = true",
+   "ok": true,
+   "unrecognized": [
+    "features.hoks"
+   ]
+  },
+  {
+   "toml": "[features]\ncodex_hook = true",
+   "ok": true,
+   "unrecognized": [
+    "features.codex_hook"
+   ]
+  },
+  {
+   "toml": "[features]\nsandbox = true",
+   "ok": true,
+   "unrecognized": [
+    "features.sandbox"
+   ]
+  },
+  {
+   "toml": "[windows]\nsandbx = \"mxc\"",
+   "ok": true,
+   "unrecognized": [
+    "windows.sandbx"
+   ]
+  },
+  {
+   "toml": "[tui]\nnotification = true",
+   "ok": true,
+   "unrecognized": []
+  },
+  {
+   "toml": "[history]\npersistance = \"none\"",
+   "ok": true,
+   "unrecognized": [
+    "history.persistance"
+   ]
+  },
+  {
+   "toml": "[mcp_servers.x]\ncommand = \"x\"\nargz = []",
+   "ok": true,
+   "unrecognized": [
+    "mcp_servers.x.argz"
+   ]
+  },
+  {
+   "toml": "[mcp_servers.x]\ncommand = \"x\"\nenabeld = true",
+   "ok": true,
+   "unrecognized": [
+    "mcp_servers.x.enabeld"
+   ]
+  },
+  {
+   "toml": "[sandbox_workspace_write]\nnetwork = true",
+   "ok": true,
+   "unrecognized": [
+    "sandbox_workspace_write.network"
+   ]
+  },
+  {
+   "toml": "[shell_environment_policy]\ninherits = \"all\"",
+   "ok": true,
+   "unrecognized": [
+    "shell_environment_policy.inherits"
+   ]
+  },
+  {
+   "toml": "[model_providers.p]\nname = \"p\"\nbase_url = \"http://127.0.0.1:9/v1\"\nwire = \"responses\"",
+   "ok": true,
+   "unrecognized": [
+    "model_providers.p.wire"
+   ]
+  },
+  {
+   "toml": "[projects.'C:\\x']\ntrust = \"trusted\"",
+   "ok": true,
+   "unrecognized": [
+    "projects.C:\\x.trust"
+   ]
+  },
+  {
+   "toml": "foo = 1",
+   "ok": true,
+   "unrecognized": [
+    "foo"
+   ]
+  },
+  {
+   "toml": "[foo]\nbar = 1",
+   "ok": true,
+   "unrecognized": [
+    "foo"
+   ]
+  },
+  {
+   "toml": "[agents]\nenable = true",
+   "ok": false,
+   "error": "config/read: invalid configuration: invalid type: boolean `true`, expected struct AgentRoleToml\nin `agents`\n",
+   "stderr": "2026-10-17T19:41:42.678200Z ERROR codex_app_server: Invalid configuration; using defaults. C:\\Users\\nares\\AppData\\Local\\Temp\\ccd-e2e-rec-schema-24iswK\\codex-home\\config.toml:1:1: invalid type: boolean `true`, expected struct AgentRoleToml"
+  },
+  {
+   "toml": "[memories]\nuse_memory = true",
+   "ok": true,
+   "unrecognized": [
+    "memories.use_memory"
+   ]
+  }
+ ],
+ "wrong": [
+  {
+   "path": "model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "review_model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "openai_base_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "chatgpt_base_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "apps_mcp_product_sku",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_context_window",
+   "type": "i",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "model_context_window",
+   "type": "i",
+   "value": 1.5,
+   "refused": true,
+   "message": "invalid type: floating point `1.5`, expected i64"
+  },
+  {
+   "path": "model_auto_compact_token_limit",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "model_auto_compact_token_limit_scope",
+   "type": "e:total|body_after_prefix",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `total` or `body_after_prefix`"
+  },
+  {
+   "path": "model_auto_compact_token_limit_scope",
+   "type": "e:total|body_after_prefix",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "model_post_turn_compact_threshold_percent",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u8"
+  },
+  {
+   "path": "approvals_reviewer",
+   "type": "e:user|auto_review|guardian_subagent",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `user`, `auto_review`, `guardian_subagent`"
+  },
+  {
+   "path": "approvals_reviewer",
+   "type": "e:user|auto_review|guardian_subagent",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "allow_login_shell",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "allow_symlinked_codex_home",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "sandbox_mode",
+   "type": "e:read-only|workspace-write|danger-full-access",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `read-only`, `workspace-write`, `danger-full-access`"
+  },
+  {
+   "path": "sandbox_mode",
+   "type": "e:read-only|workspace-write|danger-full-access",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "sandbox_workspace_write.writable_roots",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "sandbox_workspace_write.writable_roots",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "sandbox_workspace_write.network_access",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "sandbox_workspace_write.exclude_tmpdir_env_var",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "sandbox_workspace_write.exclude_slash_tmp",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "windows.sandbox",
+   "type": "e:mxc|elevated|unelevated",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `elevated`, `unelevated`, `mxc`"
+  },
+  {
+   "path": "windows.sandbox",
+   "type": "e:mxc|elevated|unelevated",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "check_for_update_on_startup",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "feedback.enabled",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "analytics.enabled",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "instructions",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "developer_instructions",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "include_permissions_instructions",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "include_apps_instructions",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "include_collaboration_mode_instructions",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "include_environment_context",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "include_environment_context_time",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "log_dir",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "sqlite_home",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "compact_prompt",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "personality",
+   "type": "e:none|friendly|pragmatic",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `none`, `friendly`, `pragmatic`"
+  },
+  {
+   "path": "personality",
+   "type": "e:none|friendly|pragmatic",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "service_tier",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_optional_startup_grace_ms",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "mcp_oauth_credentials_store",
+   "type": "e:auto|file|keyring",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `auto`, `file`, `keyring`"
+  },
+  {
+   "path": "mcp_oauth_credentials_store",
+   "type": "e:auto|file|keyring",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "mcp_oauth_callback_port",
+   "type": "i",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u16"
+  },
+  {
+   "path": "mcp_oauth_callback_port",
+   "type": "i",
+   "value": 1.5,
+   "refused": true,
+   "message": "invalid type: floating point `1.5`, expected u16"
+  },
+  {
+   "path": "mcp_oauth_callback_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.command",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.args",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "mcp_servers.*.args",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.env",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "mcp_servers.*.env.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.cwd",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.auth",
+   "type": "e:oauth|chatgpt",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `oauth`, `chatgpt`, `ema_auth`"
+  },
+  {
+   "path": "mcp_servers.*.auth",
+   "type": "e:oauth|chatgpt",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "mcp_servers.*.oauth.client_id",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.oauth.client_secret",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.oauth.callback_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.oauth.callback_port",
+   "type": "i",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u16"
+  },
+  {
+   "path": "mcp_servers.*.oauth.callback_port",
+   "type": "i",
+   "value": 1.5,
+   "refused": true,
+   "message": "invalid type: floating point `1.5`, expected u16"
+  },
+  {
+   "path": "mcp_servers.*.bearer_token_env_var",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.http_headers",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "mcp_servers.*.http_headers.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.http_headers_helper",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.env_http_headers",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "mcp_servers.*.env_http_headers.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.enabled",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "mcp_servers.*.required",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "mcp_servers.*.startup_timeout_sec",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected f64"
+  },
+  {
+   "path": "mcp_servers.*.startup_timeout_ms",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "mcp_servers.*.tool_timeout_sec",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected f64"
+  },
+  {
+   "path": "mcp_servers.*.enabled_tools",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "mcp_servers.*.enabled_tools",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.disabled_tools",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "mcp_servers.*.disabled_tools",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.default_tools_approval_mode",
+   "type": "e:auto|prompt|writes|approve",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `auto`, `prompt`, `writes`, `approve`"
+  },
+  {
+   "path": "mcp_servers.*.default_tools_approval_mode",
+   "type": "e:auto|prompt|writes|approve",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "mcp_servers.*.scopes",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "mcp_servers.*.scopes",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "mcp_servers.*.oauth_resource",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "agents.enabled",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "agents.max_concurrent_threads_per_session",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "agents.max_depth",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i32"
+  },
+  {
+   "path": "agents.default_subagent_model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "agents.default_subagent_reasoning_effort",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "agents.job_max_runtime_seconds",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "agents.interrupt_message",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "agents.*.description",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "agents.*.config_file",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "agents.*.nickname_candidates",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "agents.*.nickname_candidates",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "memories.generate_memories",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "memories.use_memories",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "memories.disable_on_external_context",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "memories.max_raw_memories_for_consolidation",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "memories.max_unused_days",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "memories.max_rollout_age_days",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "memories.max_rollouts_per_startup",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "memories.min_rollout_idle_hours",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "memories.min_rate_limit_remaining_percent",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected i64"
+  },
+  {
+   "path": "memories.extract_model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "memories.consolidation_model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.name",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.base_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.model_catalog_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.env_key",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.env_key_instructions",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.experimental_bearer_token",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.requires_openai_auth",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "model_providers.*.wire_api",
+   "type": "e:responses",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `responses`"
+  },
+  {
+   "path": "model_providers.*.wire_api",
+   "type": "e:responses",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.query_params",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "model_providers.*.query_params.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.http_headers",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "model_providers.*.http_headers.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.env_http_headers",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "model_providers.*.env_http_headers.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_providers.*.request_max_retries",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "model_providers.*.stream_max_retries",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "model_providers.*.stream_idle_timeout_ms",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "model_providers.*.websocket_connect_timeout_ms",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "model_providers.*.supports_websockets",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "model_providers.*.supports_standalone_web_search",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "model_reasoning_effort",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "plan_mode_reasoning_effort",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "model_reasoning_summary",
+   "type": "e:auto|concise|detailed|none",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `auto`, `concise`, `detailed`, `none`"
+  },
+  {
+   "path": "model_reasoning_summary",
+   "type": "e:auto|concise|detailed|none",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "model_verbosity",
+   "type": "e:low|medium|high",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `low`, `medium`, `high`"
+  },
+  {
+   "path": "model_verbosity",
+   "type": "e:low|medium|high",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "shell_environment_policy.inherit",
+   "type": "e:all|core|none",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `core`, `all`, `none`"
+  },
+  {
+   "path": "shell_environment_policy.inherit",
+   "type": "e:all|core|none",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "shell_environment_policy.ignore_default_excludes",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "shell_environment_policy.filters",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "shell_environment_policy.filters.*",
+   "type": "e:include|exclude",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `include` or `exclude`"
+  },
+  {
+   "path": "shell_environment_policy.filters.*",
+   "type": "e:include|exclude",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: unit variant, expected string only"
+  },
+  {
+   "path": "shell_environment_policy.exclude",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "shell_environment_policy.exclude",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "shell_environment_policy.include_only",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "shell_environment_policy.include_only",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "shell_environment_policy.set",
+   "type": "t",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a map"
+  },
+  {
+   "path": "shell_environment_policy.set.*",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "shell_environment_policy.experimental_use_profile",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "project_root_markers",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "project_root_markers",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "project_doc_max_bytes",
+   "type": "u",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "project_doc_max_bytes",
+   "type": "u",
+   "value": -1,
+   "refused": true,
+   "message": "invalid value: integer `-1`, expected usize"
+  },
+  {
+   "path": "project_doc_fallback_filenames",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "project_doc_fallback_filenames",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "history.persistence",
+   "type": "e:save-all|none",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `save-all` or `none`"
+  },
+  {
+   "path": "history.persistence",
+   "type": "e:save-all|none",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "history.max_bytes",
+   "type": "u",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "history.max_bytes",
+   "type": "u",
+   "value": -1,
+   "refused": true,
+   "message": "invalid value: integer `-1`, expected usize"
+  },
+  {
+   "path": "tool_output_token_limit",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected usize"
+  },
+  {
+   "path": "background_terminal_max_timeout",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "thread_unload_delay_secs",
+   "type": "n",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected u64"
+  },
+  {
+   "path": "js_repl_node_path",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "js_repl_node_module_dirs",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "js_repl_node_module_dirs",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected path string"
+  },
+  {
+   "path": "file_opener",
+   "type": "e:vscode|vscode-insiders|windsurf|cursor|none",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `vscode`, `vscode-insiders`, `windsurf`, `cursor`, `none`"
+  },
+  {
+   "path": "file_opener",
+   "type": "e:vscode|vscode-insiders|windsurf|cursor|none",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "tui.notifications",
+   "type": "bs",
+   "value": 1,
+   "refused": true,
+   "message": "data did not match any variant of untagged enum Notifications"
+  },
+  {
+   "path": "tui.notification_method",
+   "type": "e:auto|osc9|bel",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `auto`, `osc9`, `bel`"
+  },
+  {
+   "path": "tui.notification_method",
+   "type": "e:auto|osc9|bel",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected string or map"
+  },
+  {
+   "path": "tui.notification_condition",
+   "type": "e:unfocused|always",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `unfocused` or `always`"
+  },
+  {
+   "path": "tui.notification_condition",
+   "type": "e:unfocused|always",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected string or map"
+  },
+  {
+   "path": "tui.animations",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.disable_paste_burst",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.alternate_screen",
+   "type": "e:auto|always|never",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `auto`, `always`, `never`"
+  },
+  {
+   "path": "tui.alternate_screen",
+   "type": "e:auto|always|never",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "tui.resume_cwd",
+   "type": "e:current|session",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `current` or `session`"
+  },
+  {
+   "path": "tui.resume_cwd",
+   "type": "e:current|session",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "tui.vim_mode_default",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.raw_output_mode",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.show_tooltips",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.auto_recap",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.show_server_version_notice",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "tui.status_line",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "tui.status_line",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "tui.terminal_title",
+   "type": "a:s",
+   "value": "x",
+   "refused": true,
+   "message": "invalid type: string \"x\", expected a sequence"
+  },
+  {
+   "path": "tui.terminal_title",
+   "type": "a:s",
+   "value": [
+    1
+   ],
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "tui.theme",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "hide_agent_reasoning",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "show_raw_agent_reasoning",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "disable_paste_burst",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "cli_auth_credentials_store",
+   "type": "e:file|keyring|auto|ephemeral",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `file`, `keyring`, `auto`, `ephemeral`"
+  },
+  {
+   "path": "cli_auth_credentials_store",
+   "type": "e:file|keyring|auto|ephemeral",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "experimental_use_unified_exec_tool",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  },
+  {
+   "path": "experimental_realtime_ws_base_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "experimental_realtime_webrtc_call_base_url",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "experimental_realtime_ws_model",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "experimental_realtime_ws_backend_prompt",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "experimental_realtime_ws_startup_context",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "experimental_realtime_start_instructions",
+   "type": "s",
+   "value": 1,
+   "refused": true,
+   "message": "invalid type: integer `1`, expected a string"
+  },
+  {
+   "path": "web_search",
+   "type": "e:disabled|cached|indexed|live",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected one of `disabled`, `cached`, `indexed`, `live`"
+  },
+  {
+   "path": "web_search",
+   "type": "e:disabled|cached|indexed|live",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "projects.*.trust_level",
+   "type": "e:trusted|untrusted",
+   "value": "bogus-word",
+   "refused": true,
+   "message": "unknown variant `bogus-word`, expected `trusted` or `untrusted`"
+  },
+  {
+   "path": "projects.*.trust_level",
+   "type": "e:trusted|untrusted",
+   "value": 1,
+   "refused": true,
+   "message": "wanted string or table"
+  },
+  {
+   "path": "suppress_unstable_features_warning",
+   "type": "b",
+   "value": "yes",
+   "refused": true,
+   "message": "invalid type: string \"yes\", expected a boolean"
+  }
+ ]
+}
