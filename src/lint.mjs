@@ -399,7 +399,7 @@ export function lint(c) {
     if (ws.selection === "none" && !fullAccess) {
       add("windows-sandbox", {
         file: userFile,
-        message: `No Windows sandbox is selected: windows.sandbox is not set and features.prefer_mxc is not true${ws.sandboxMode.downgraded ? `; ${ws.sandboxMode.asked ? "sandbox_mode" : "the default sandbox_mode"} workspace-write becomes read-only` : ""}`,
+        message: `No Windows sandbox is selected: windows.sandbox is not set and ${ws.preferUnavailable ? "features.prefer_mxc is true, but MXC is not available here (" + (ws.log && ws.log.mxcAvailable === false ? "Codex's sandbox log says \"MXC availability: false\"" : `this Windows is build ${ws.build}`) + "), which Codex does not make up for with another sandbox" : "features.prefer_mxc is not true"}${ws.sandboxMode.downgraded ? `; ${ws.sandboxMode.asked ? "sandbox_mode" : "the default sandbox_mode"} workspace-write becomes read-only` : ""}`,
         effect: "Codex has no sandbox to run commands in. The prompt tells the model sandbox_mode is read-only; with approval_policy on-request every command that no rule allows asks first (even `echo hi`), with never it is refused (\"blocked by policy\"). Put to Codex 0.163.0 on Windows 11; the sandbox log says \"Windows sandbox selection: disabled\".",
         fix: "Add to config.toml:\n[windows]\nsandbox = \"unelevated\"\nwhich needs no administrator; \"mxc\" (or `[features] prefer_mxc = true`) needs Windows 11 24H2 build 26100.9278 or 25H2 build 26200.9278 or newer; \"elevated\" needs a one-time administrator setup.",
       });

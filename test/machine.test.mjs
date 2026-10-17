@@ -162,6 +162,20 @@ test("the Windows sandbox: what is selected, what sandbox_mode becomes, the buil
   assert.deepEqual([w.selection, w.selectionHow, w.sandboxMode.effective], ["unelevated", "windows.sandbox", "workspace-write"]);
   w = at({ features: { prefer_mxc: true } });
   assert.deepEqual([w.selection, w.selectionHow], ["mxc", "features.prefer_mxc"]);
+  // prefer_mxc picks MXC only when there is one, and Codex does not fall back to another sandbox: the log of the last run says whether there
+  // was, else the build does (Windows Server 2025, build 26100, logged "MXC availability: false" and got "Windows sandbox selection: disabled")
+  const prefer = (release, logged) => {
+    const s = WIN({ release });
+    if (logged !== undefined) s.add("C:\\codex\\.sandbox\\sandbox.2026-10-17.log", `[2026-10-17 09:00:00.100 codex.exe] MXC availability: ${logged}\n`);
+    return windowsSandbox(s, { features: { prefer_mxc: true } }, { codexHomeDir: "C:\\codex", trusted: true });
+  };
+  w = prefer("10.0.26100", false);
+  assert.deepEqual([w.selection, w.preferUnavailable, w.sandboxMode.effective], ["none", true, "read-only"]);
+  assert.match(w.selectionHow, /no MXC to pick/);
+  assert.deepEqual([prefer("10.0.26100", true).selection, prefer("10.0.26100", true).preferUnavailable], ["mxc", false]);
+  assert.equal(prefer("10.0.22631").selection, "none", "a build too old for MXC, and no log");
+  assert.equal(prefer("10.0.26300").selection, "mxc", "a build that has MXC, and no log yet");
+  assert.equal(windowsSandbox(WIN({ release: "10.0.22631" }), { windows: { sandbox: "mxc" }, features: { prefer_mxc: true } }, { codexHomeDir: "C:\\codex", trusted: true }).selection, "mxc", "an explicit mxc is selected whether or not there is one");
   assert.equal(windowsSandbox(WIN({ release: "10.0.22631" }), { windows: { sandbox: "mxc" } }, { codexHomeDir: "C:\\c", trusted: true }).mxcBuild, "too-old");
   assert.equal(windowsSandbox(WIN({ release: "10.0.26100" }), { windows: { sandbox: "mxc" } }, { codexHomeDir: "C:\\c", trusted: true }).mxcBuild, "check-update");
   assert.equal(windowsSandbox(WIN({ release: "10.0.26200" }), { windows: { sandbox: "mxc" } }, { codexHomeDir: "C:\\c", trusted: true }).mxcBuild, "check-update");

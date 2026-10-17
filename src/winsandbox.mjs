@@ -1,7 +1,9 @@
 // The Windows sandbox: which implementation Codex picks, and what that does to sandbox_mode. Put to Codex 0.163.0 on Windows 11
 // (test/e2e-windows.test.mjs):
-//   - `windows.sandbox` names the implementation (mxc, elevated or unelevated); `features.prefer_mxc = true` selects mxc;
-//     with neither, no implementation is selected ("Windows sandbox selection: disabled" in the sandbox log);
+//   - `windows.sandbox` names the implementation (mxc, elevated or unelevated), and an explicit "mxc" is selected whether or not MXC is
+//     available; `features.prefer_mxc = true` selects mxc only when it is available (the log says "MXC availability: true"); on Windows Server 2025
+//     build 26100 it said false and the selection was "disabled", not a fallback; with neither, no implementation is selected
+//     ("Windows sandbox selection: disabled" in the sandbox log);
 //   - with none selected, `sandbox_mode = "workspace-write"` (the default of a trusted project) becomes `read-only` in the prompt the model
 //     gets, and nothing can run inside a sandbox: with approval_policy on-request every command that no rule allows asks first, with
 //     never it is refused ("blocked by policy");
@@ -38,24 +40,29 @@ export function windowsSandbox(sys, merged, { codexHomeDir, trusted }) {
   const features = merged.features && typeof merged.features === "object" ? merged.features : {};
   const configured = merged.windows && typeof merged.windows === "object" && typeof merged.windows.sandbox === "string" ? merged.windows.sandbox : null;
   const preferMxc = features.prefer_mxc === true;
-  const selection = configured || (preferMxc ? "mxc" : "none");
+  const build = sys.isWin ? windowsBuild(sys.release) : null;
+  const log = sys.isWin ? readSandboxLog(sys, codexHomeDir) : null;
+  // a build that cannot have MXC: Windows 11 24H2 (26100) and 25H2 (26200) need the update revision of the documentation; older builds cannot
+  const mxcBuild = build === null ? null : build < 26100 ? "too-old" : build === 26100 || build === 26200 ? "check-update" : "ok";
+  // prefer_mxc picks MXC when there is one; the log of the last run says whether there was, else the build does
+  const preferUnavailable = preferMxc && !configured && (log && log.mxcAvailable !== null ? log.mxcAvailable === false : mxcBuild === "too-old");
+  const selection = configured || (preferMxc && !preferUnavailable ? "mxc" : "none");
   const asked = typeof merged.sandbox_mode === "string" ? merged.sandbox_mode : null;
   const wanted = asked || (trusted ? "workspace-write" : "read-only");
   const effective = sys.isWin && selection === "none" && wanted === "workspace-write" ? "read-only" : wanted;
-  const build = sys.isWin ? windowsBuild(sys.release) : null;
   const out = {
     applicable: sys.isWin,
     configured,
     preferMxc,
     selection,
-    selectionHow: configured ? "windows.sandbox" : preferMxc ? "features.prefer_mxc" : "nothing is set",
+    selectionHow: configured ? "windows.sandbox" : preferMxc ? (preferUnavailable ? "features.prefer_mxc, with no MXC to pick" : "features.prefer_mxc") : "nothing is set",
+    preferUnavailable: Boolean(preferUnavailable),
     sandboxMode: { asked, wanted, effective, downgraded: effective !== wanted },
     build,
     release: sys.isWin ? sys.release : null,
     mxcMinimum: MXC_MINIMUM,
-    log: sys.isWin ? readSandboxLog(sys, codexHomeDir) : null,
+    log,
+    mxcBuild,
   };
-  // a build that cannot have MXC: Windows 11 24H2 (26100) and 25H2 (26200) need the update revision of the documentation; older builds cannot
-  out.mxcBuild = build === null ? null : build < 26100 ? "too-old" : build === 26100 || build === 26200 ? "check-update" : "ok";
   return out;
 }

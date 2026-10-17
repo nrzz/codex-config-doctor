@@ -367,6 +367,14 @@ test("windows-sandbox: none selected, the build for mxc, the log, elevated; and 
   assert.match(f.effect, /Windows sandbox selection: disabled/);
   none(win('[windows]\nsandbox = "unelevated"\n'), "windows-sandbox");
   none(win("[features]\nprefer_mxc = true\n"), "windows-sandbox");
+  // prefer_mxc picks MXC only when there is one, and Codex puts no other sandbox in its place: with the log saying there is none, or with a
+  // build that is too old, nothing is selected
+  r = run({ "config.toml": "[features]\nprefer_mxc = true\n", ".sandbox/sandbox.2026-10-17.log": "[2026-10-17 23:51:02.106 codex.exe] MXC availability: false\n[2026-10-17 23:51:02.107 codex.exe] Windows sandbox selection: disabled\n" }, { platform: "win32", extra: { release: "10.0.26100" } });
+  f = one(r, "windows-sandbox");
+  assert.match(f.message, /features\.prefer_mxc is true, but MXC is not available here \(Codex's sandbox log says "MXC availability: false"\)/);
+  assert.match(f.message, /workspace-write becomes read-only/);
+  r = run({ "config.toml": "[features]\nprefer_mxc = true\n" }, { platform: "win32", extra: { release: "10.0.22631" } });
+  assert.match(one(r, "windows-sandbox").message, /this Windows is build 22631/);
   none(win('sandbox_mode = "danger-full-access"\n'), "windows-sandbox");
   none(run({ "config.toml": "" }, { platform: "linux" }), "windows-sandbox");
   none(run({ "config.toml": "" }, { platform: "darwin" }), "windows-sandbox");

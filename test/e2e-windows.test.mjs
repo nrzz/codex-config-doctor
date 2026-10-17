@@ -41,8 +41,12 @@ test("windows-sandbox: unelevated, mxc and prefer_mxc select an implementation; 
   const mxc = await exec({ label: "e2e-win-mxc", userTop: MODE, userTables: '[windows]\nsandbox = "mxc"\n' });
   assert.ok(lines(mxc.sb).includes("Windows sandbox selection: mxc"), lines(mxc.sb).join(" | "));
   const prefer = await exec({ label: "e2e-win-prefer", userTop: MODE, userTables: "[features]\nprefer_mxc = true\n" });
-  assert.ok(lines(prefer.sb).includes("Windows sandbox selection: mxc"), `prefer_mxc selects mxc: the log says ${lines(prefer.sb).join(" | ")}`);
-  assert.equal(win(prefer.sb).length === 0, readSandboxLog(sysFor(prefer.sb), prefer.sb.codexHome).mxcAvailable !== false, "lint complains about mxc exactly when the log says MXC is not available (or the build is too old)");
+  // prefer_mxc picks MXC when there is one; when there is none Codex selects nothing (it does not fall back to unelevated): "disabled", as on
+  // Windows Server 2025 build 26100
+  const preferred = lines(prefer.sb).includes("MXC availability: true");
+  assert.ok(lines(prefer.sb).includes(`Windows sandbox selection: ${preferred ? "mxc" : "disabled"}`), `prefer_mxc selects mxc only when it is available: the log says ${lines(prefer.sb).join(" | ")}`);
+  assert.equal(win(prefer.sb).length === 0, preferred, `lint complains about prefer_mxc exactly when the log says MXC is not available: ${win(prefer.sb).map((f) => f.message).join(" | ")}`);
+  assert.equal(readSandboxLog(sysFor(prefer.sb), prefer.sb.codexHome).mxcAvailable, preferred);
   // lint reads the same log
   const available = lines(mxc.sb).includes("MXC availability: true");
   const flagged = win(mxc.sb).some((f) => f.severity !== "note");
