@@ -1,0 +1,44 @@
+name: e2e
+
+# The checks that run the real Codex CLI: the TOML reader, the schema of config.toml, the layers and where each key comes from, the AGENTS.md
+# message, several hundred commands put to `codex execpolicy check`, the findings of `lint` one by one (a world with the problem is run with
+# `codex exec` and with a thread of the app server, and what Codex does is compared with what the finding says), what `why` says about a
+# command and what Codex does with it, the first request that `cost` accounts for, and `codex doctor`. They cost nothing: Codex talks to a fake
+# Responses API on 127.0.0.1, and every proxy variable of a run names a closed port. On Windows they run in full, including the Windows
+# sandbox; on Linux and macOS the checks that are about Windows skip. Optional by design: if the binary cannot be installed, the checks skip.
+# Weekly, so a Codex release that changes how it reads its configuration shows up here.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "37 6 * * 1"
+  workflow_dispatch:
+    inputs:
+      codex_version:
+        description: "Version of @openai/codex to install (default: the newest)"
+        required: false
+        default: "latest"
+
+jobs:
+  codex:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Install the Codex CLI (the checks skip if this fails)
+        run: npm install -g @openai/codex@${{ inputs.codex_version || 'latest' }}
+        continue-on-error: true
+      - run: codex --version
+        continue-on-error: true
+      - name: Real-binary checks
+        run: node --test --test-concurrency=1 "test/e2e-*.test.mjs"
+        env:
+          E2E_CODEX: codex

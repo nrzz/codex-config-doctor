@@ -1,0 +1,46 @@
+name: Feature request
+description: An idea for codex-config-doctor
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What goes wrong in Codex's configuration that this tool does not show? A link to the Codex issue helps.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: How should it work? What should a command say, and what does Codex really do in that case?
+    validations:
+      required: true
+  - type: dropdown
+    id: tokens
+    attributes:
+      label: Token cost
+      description: Would it put anything new in front of a model? Every user pays for that.
+      options:
+        - "No: it runs outside the model"
+        - "Only when the user asks for it"
+        - "A few tokens per session"
+        - "Not sure"
+    validations:
+      required: true
+  - type: dropdown
+    id: changes
+    attributes:
+      label: Would it change anything on the computer?
+      description: Today nothing does: every command only reads.
+      options:
+        - "No: it only reads"
+        - "Yes: it would write something (say what in the idea, and how it would be undone)"
+        - "Not sure"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered

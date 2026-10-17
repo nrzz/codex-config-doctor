@@ -1,0 +1,9 @@
+# Roadmap
+
+What could come next. None of it is promised; all of it is open to contributors. Comment on an issue or start a [discussion](https://github.com/nrzz/codex-config-doctor/discussions) before a large change.
+
+- `why --file <list>`: judge many commands at once, one per line of a file, and print one verdict for each (exit 1 if Codex would refuse any of them). It is a way to check a rules file against the commands a team really runs. This is the open good first issue: [#1](https://github.com/nrzz/codex-config-doctor/issues/1).
+- Admin files: `requirements.toml` and the managed configuration are listed by `show` and not merged, because writing them needs an administrator and the tests cannot put them to the binary. The app server answers `configRequirements/read`; a job on a runner that has an administrator could write each file and compare what `show` says with what the server enforces.
+- Linux and macOS sandboxes: the checks about the sandbox are Windows checks (MXC, `elevated`, `unelevated`). Codex on Linux needs `bwrap` or Landlock to run a command inside its sandbox; a finding that says so, from the binary's own report, would help the people on a runner or a container where it does not work.
+- HTTP MCP servers: a server with a `url` is accounted for as one that starts, because the tool opens no connection. The stand-in server of the tests speaks stdio only; an HTTP stand-in on 127.0.0.1 would put the `bearer_token_env_var` and `http_headers` findings, and the cost of an HTTP server, to the binary.
+- A newer Codex: the lists in `src/knowledge.mjs` (the keys and their types, the 175 feature flags, the 88 banned rule prefixes) are Codex 0.163.0's, and `test/record-oracles.mjs` writes the records again from any Codex. A weekly job that runs it against the newest release and opens an issue with the diff would catch a key that moved before a user does.

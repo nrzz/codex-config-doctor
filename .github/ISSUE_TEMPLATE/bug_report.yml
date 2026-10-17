@@ -1,0 +1,68 @@
+name: Bug report
+description: Something in codex-config-doctor does not work as described
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please remove secrets, tokens and private paths from anything you paste. The tool reads your Codex configuration and prints paths and key names; it prints the value of a key only where a command says so.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead. For a verdict that disagrees with Codex (a finding that is wrong, a finding that is missing, a `why` answer that is not what Codex did), say what Codex really did.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. A config.toml with ...
+        2. Run codex-config-doctor lint ...
+        3. See ...
+    validations:
+      required: true
+  - type: input
+    id: codex
+    attributes:
+      label: Codex CLI version
+      description: The output of `codex --version`.
+      placeholder: codex-cli 0.163.0
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: How do you run Codex?
+      options:
+        - Terminal (the CLI)
+        - codex exec
+        - Desktop app
+        - VS Code or another editor
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Operating system, Node and Git versions
+      description: The system, `node --version`, and `git --version`.
+      placeholder: "Windows 11 24H2 (x64), Node 22.11, Git 2.51.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: How did you install it?
+      options:
+        - npx from GitHub
+        - git clone
+        - Other
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The exact output of the command (with `--json` if you can), with secrets removed. For a wrong verdict, the relevant part of your config.toml, rules or AGENTS.md.
+      render: text
