@@ -60,7 +60,7 @@ It reads your Codex CLI configuration and changes nothing. Zero tokens: it runs 
            what is wrong: each finding has an id, a severity (error, warning, note), the file and
            line, what Codex does about it, and the fix. Exit 1 on an error or a warning.
            --markdown is the short form to paste into an agent (at most 12 findings)
-  why      <command> [--project <dir>] [--profile <name>] [--shell bash|powershell]
+  why      [--file <list>] [<command>] [--project <dir>] [--profile <name>] [--shell bash|powershell]
            what Codex does with this shell command under the approval policy, the sandbox and the
            rules: runs inside the sandbox, asks first, runs outside the sandbox through an allow
            rule, is forbidden, or is split into parts that are judged separately. Exit 1 when
@@ -298,6 +298,17 @@ Judged as 1 command:
       prompt   ["npm", "publish"]  default.rules:5  "publishing is a decision for a person"
 
   (verified) The rule ["npm", "publish"] (default.rules:5) asks every time; the question says "requires approval: publishing is a decision for a person", in the full-access sandbox as well.
+```
+
+`why --file <list>` judges many commands at once: one command per line of a file, one verdict for each. Blank lines and lines that start with `#` are skipped. Exit 1 if Codex would refuse any of them:
+
+```text
+$ codex-config-doctor why --file commands.txt
+outside-sandbox   git status
+asks              npm publish
+forbidden         git status && rm -rf build
+
+3 commands: 1 outside-sandbox, 1 asks, 1 forbidden.
 ```
 
 On Windows with no sandbox selected there is nothing to run a command in, so every command that no allow rule covers asks, even `echo hi`:
@@ -541,7 +552,7 @@ Each row is a finding id (the argument of `explain`), its severity, its basis (`
 
 Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 24.19.0 and Codex CLI 0.163.0, the npm release of that day. CI runs the unit tests on Linux, macOS and Windows with Node 20, 22 and 24 and on Linux with Node 18, and the real-binary checks on Ubuntu 24.04.5, macOS 26.6.2 and Windows Server 2025 (build 10.0.26100) with Codex 0.163.0 installed from npm. On commit 1686302 all 10 jobs of the unit tests (run 39077259593) and all 3 jobs of the real-binary checks (run 39077259606) were green; it is the last commit that changed the code. The badges at the top show the latest runs.
 
-- **299 automated tests** on Windows and **332** on Linux and macOS (`npm test`, Node's own runner, no dependencies, about 10 seconds on this machine). `node --test` also reports each of the 19 helper files under `test/` as a passing test, on every Node version CI runs (18 to 24); those are not counted here (the runner's total was 318 on Windows and 351 on Linux and macOS). Without a Codex binary, on Windows 184 pass and 115 are skipped; on Linux and macOS 184 pass and 148 are skipped. The skipped ones are the real-binary checks below, which are not the same set on Windows (some rows and checks are about Windows only). The tests cover:
+- **300 automated tests** on Windows and **333** on Linux and macOS (`npm test`, Node's own runner, no dependencies, about 10 seconds on this machine). `node --test` also reports each of the 19 helper files under `test/` as a passing test, on every Node version CI runs (18 to 24); those are not counted here (the runner's total was 319 on Windows and 352 on Linux and macOS). Without a Codex binary, on Windows 185 pass and 115 are skipped; on Linux and macOS 185 pass and 148 are skipped. The skipped ones are the real-binary checks below, which are not the same set on Windows (some rows and checks are about Windows only). The tests cover:
   - the readers, held to tables recorded from Codex 0.163.0: the TOML reader (128 files that Codex accepted or rejected, with the line and column of each error), the Starlark subset of the rules files, the checks of `prefix_rule()` and of the examples of a rule;
   - the layers (19 worlds: which folders Codex loads, which it skips, where each key came from, every spelling of a trust entry), the settings (321 keys in seven groups that Codex reads without a warning, 21 typos it lists as ignored, 198 values of the wrong type it refuses), the AGENTS.md message (44 worlds, byte for byte), the hooks (41 worlds: the key, the hash and the status of each hook), and the rules (327 commands under nine rule sets, and 63 rules files, as `codex execpolicy check` answered them);
   - each of the 44 findings, from a pretend machine that a test spoils in one way: said when it should be, with its effect and its fix, and not otherwise; the pages of `explain` (one for every id, every line marked verified, documented or not verified); the table of banned allow-rule prefixes;

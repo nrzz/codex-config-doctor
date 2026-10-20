@@ -4,6 +4,8 @@ All notable changes to codex-config-doctor are written here. The format follows 
 
 ## [Unreleased]
 
+- `why`: `--file <list>` judges many commands at once, one per line of a file, skipping comments and blank lines, with a summary count and an exit code of 1 if any command is refused.
+
 ## [1.0.0] - 2026-10-17
 
 - First release. A command line tool that reads a Codex CLI configuration and says what Codex will do with it. It changes nothing, starts no program and opens no connection. Six commands: `show`, `lint`, `why`, `agents`, `cost` and `explain`, each with `--json`; `--project` and `--profile` on the five that read the configuration.
