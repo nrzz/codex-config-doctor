@@ -192,6 +192,44 @@ export function whyDoc(c, r) {
   return { ok: !r.refused, tool: "codex-config-doctor", version: VERSION, command: "why", shellCommand: command, platform: c.sys.platform, project: c.world.dir, ...rest };
 }
 
+export function whyFileDoc(c, results, opts = {}) {
+  const shell = results.length > 0 ? results[0].shell : (opts.shell || (c.sys.isWin ? "powershell" : "bash"));
+  const settings = results.length > 0 ? results[0].settings : {
+    approval: c.effective.approval,
+    sandbox: c.effective.sandbox,
+    sandboxAsked: c.effective.sandboxAsked,
+    windowsSandbox: c.windows.applicable ? c.windows.selection : null,
+  };
+  return {
+    ok: !results.some((r) => r.refused),
+    tool: "codex-config-doctor",
+    version: VERSION,
+    command: "why",
+    platform: c.sys.platform,
+    project: c.world.dir,
+    shell,
+    settings,
+    results: results.map((r) => whyDoc(c, r)),
+  };
+}
+
+export function whyFileText(c, results) {
+  const lines = [];
+  const counts = new Map();
+  for (const r of results) {
+    lines.push(`${r.outcome.padEnd(18)}${r.command}`);
+    counts.set(r.outcome, (counts.get(r.outcome) || 0) + 1);
+  }
+  lines.push("");
+  const total = results.length;
+  const parts = [];
+  for (const o of ["sandboxed", "unsandboxed", "outside-sandbox", "asks", "refused", "forbidden"]) {
+    if (counts.has(o)) parts.push(`${counts.get(o)} ${o}`);
+  }
+  lines.push(`${total} ${total === 1 ? "command" : "commands"}${parts.length ? `: ${parts.join(", ")}.` : "."}`);
+  return `${lines.join("\n")}\n`;
+}
+
 export function whyText(c, r) {
   const L = [];
   L.push(`codex-config-doctor ${VERSION}  why`);

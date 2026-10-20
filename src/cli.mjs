@@ -4,7 +4,7 @@ import { cost } from "./cost.mjs";
 import { listPages, nearIds, pageFor } from "./explain.mjs";
 import { IDS } from "./catalog.mjs";
 import { lint } from "./lint.mjs";
-import { agentsDoc, agentsText, costDoc, costText, explainDoc, explainListDoc, explainListText, explainText, lintDoc, lintMarkdown, lintText, showDoc, showText, whyDoc, whyText } from "./report.mjs";
+import { agentsDoc, agentsText, costDoc, costText, explainDoc, explainListDoc, explainListText, explainText, lintDoc, lintMarkdown, lintText, showDoc, showText, whyDoc, whyFileDoc, whyFileText, whyText } from "./report.mjs";
 import { makeSys } from "./sys.mjs";
 import { VERSION } from "./version.mjs";
 import { why } from "./why.mjs";
@@ -23,7 +23,7 @@ It reads your Codex CLI configuration and changes nothing. Zero tokens: it runs 
            what is wrong: each finding has an id, a severity (error, warning, note), the file and
            line, what Codex does about it, and the fix. Exit 1 on an error or a warning.
            --markdown is the short form to paste into an agent (at most 12 findings)
-  why      <command> [--project <dir>] [--profile <name>] [--shell bash|powershell]
+  why      [--file <list>] [<command>] [--project <dir>] [--profile <name>] [--shell bash|powershell]
            what Codex does with this shell command under the approval policy, the sandbox and the
            rules: runs inside the sandbox, asks first, runs outside the sandbox through an allow
            rule, is forbidden, or is split into parts that are judged separately. Exit 1 when
@@ -56,20 +56,20 @@ and sends nothing anywhere.
 const COMMANDS = {
   show: { options: ["project", "profile", "json"], positional: 0 },
   lint: { options: ["project", "profile", "json", "markdown"], positional: 0 },
-  why: { options: ["project", "profile", "json", "shell"], positional: 1 },
+  why: { options: ["project", "profile", "json", "shell", "file"], positional: 1 },
   agents: { options: ["project", "profile", "json", "print"], positional: 0 },
   cost: { options: ["project", "profile", "json"], positional: 0 },
   explain: { options: ["json", "list"], positional: 1 },
 };
 
 const FLAGS = { "--json": "json", "--markdown": "markdown", "--print": "print", "--list": "list", "-h": "help", "--help": "help", "-v": "version", "--version": "version" };
-const VALUES = { "--project": "project", "--profile": "profile", "--shell": "shell" };
+const VALUES = { "--project": "project", "--profile": "profile", "--shell": "shell", "--file": "file" };
 
 class UsageError extends Error {}
 
-/** Reads the argument list. Returns { command, positional, project, profile, shell, json, markdown, print, list, help, version, given } or throws a UsageError. */
+/** Reads the argument list. Returns { command, positional, project, profile, shell, file, json, markdown, print, list, help, version, given } or throws a UsageError. */
 export function parseArgs(argv) {
-  const o = { command: null, positional: [], project: undefined, profile: undefined, shell: undefined, json: false, markdown: false, print: false, list: false, help: false, version: false, given: new Set() };
+  const o = { command: null, positional: [], project: undefined, profile: undefined, shell: undefined, file: undefined, json: false, markdown: false, print: false, list: false, help: false, version: false, given: new Set() };
   const rest = [];
   let dashdash = false;
   for (let i = 0; i < argv.length; i++) {
@@ -100,9 +100,18 @@ export function parseArgs(argv) {
   o.positional = rest.slice(1);
   if (o.command === "explain" && o.list && o.positional.length) throw new UsageError("explain takes --list or one finding id, not both");
   if (o.command === "explain" && !o.list && o.positional.length === 0) throw new UsageError(`explain needs a finding id or --list (${IDS.slice(0, 5).join(", ")}, ...)`);
-  if (o.command === "why" && o.positional.length === 0) throw new UsageError("why needs the command, in quotes: why \"git status\"");
-  if (o.positional.length > spec.positional) {
-    throw new UsageError(o.command === "why" ? `why takes one argument, the command in quotes: why "${o.positional.join(" ")}"` : `${o.command} takes ${spec.positional === 0 ? "no argument" : "one argument"}, not "${o.positional.join(" ")}"`);
+  if (o.command === "why") {
+    if (o.file !== undefined && o.positional.length > 0) {
+      throw new UsageError("why takes --file or one command in quotes, not both");
+    }
+    if (o.file === undefined && o.positional.length === 0) {
+      throw new UsageError("why needs the command, in quotes: why \"git status\"");
+    }
+    if (o.file === undefined && o.positional.length > 1) {
+      throw new UsageError(`why takes one argument, the command in quotes: why "${o.positional.join(" ")}"`);
+    }
+  } else if (o.positional.length > spec.positional) {
+    throw new UsageError(`${o.command} takes ${spec.positional === 0 ? "no argument" : "one argument"}, not "${o.positional.join(" ")}"`);
   }
   if (o.shell !== undefined && !["bash", "powershell"].includes(o.shell)) throw new UsageError("--shell is bash or powershell");
   return o;
@@ -160,6 +169,20 @@ export async function main(argv, io = {}) {
         return result.counts.error + result.counts.warning > 0 ? 1 : 0;
       }
       case "why": {
+        if (o.file !== undefined) {
+          const filePath = sys.resolve(o.file);
+          const text = sys.readText(filePath);
+          if (text === null) throw new UsageError(`cannot read "${o.file}"`);
+          const lines = text
+            .split(/\r?\n/)
+            .map((l) => l.trim())
+            .filter((l) => l.length > 0 && !l.startsWith("#"));
+          if (lines.length === 0) throw new UsageError(`no command found in "${o.file}"`);
+          const results = lines.map((cmd) => why(c, cmd, { shell: o.shell }));
+          const doc = whyFileDoc(c, results, { shell: o.shell });
+          emit(doc, whyFileText(c, results));
+          return doc.ok ? 0 : 1;
+        }
         const r = why(c, o.positional[0], { shell: o.shell });
         emit(whyDoc(c, r), whyText(c, r));
         return r.refused ? 1 : 0;
