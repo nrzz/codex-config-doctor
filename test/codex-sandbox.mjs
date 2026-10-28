@@ -158,6 +158,7 @@ export function fakeApi(script = []) {
   const all = [];
   const server = http.createServer((req, res) => {
     let body = "";
+    req.setEncoding("utf8"); // so a character split across two chunks still decodes
     req.on("data", (c) => { body += c; });
     req.on("end", () => {
       let j = null;
