@@ -123,13 +123,13 @@ test("the licence, the conduct file, the changelog and the version agree", () =>
   assert.match(read("LICENSE"), /^MIT License/);
   assert.match(read("LICENSE"), /Copyright \(c\) 2026 Naresh Prabu/);
   assert.ok(exists("CODE_OF_CONDUCT.md"));
-  assert.match(read("CHANGELOG.md"), new RegExp(`^## \\[${VERSION.replace(/\./g, "\\.")}\\] - 2026-10-17$`, "m"));
+  assert.match(read("CHANGELOG.md"), new RegExp(`^## \\[${VERSION.replace(/\./g, "\\.")}\\] - 2026-10-28$`, "m"));
   assert.match(read("CHANGELOG.md"), new RegExp(`^\\[${VERSION.replace(/\./g, "\\.")}\\]: https://github\\.com/nrzz/codex-config-doctor/releases/tag/v${VERSION.replace(/\./g, "\\.")}$`, "m"));
   for (const f of ["SECURITY.md", "SUPPORT.md", "ROADMAP.md", "CONTRIBUTING.md"]) assert.ok(exists(f), f);
   assert.match(read("SECURITY.md"), /security\/advisories\/new/);
   const roadmap = read("ROADMAP.md");
   assert.ok((roadmap.match(/^- /gm) || []).length >= 3 && (roadmap.match(/^- /gm) || []).length <= 5, "three to five next steps");
-  assert.match(roadmap, /good first issue: \[#1\]\(https:\/\/github\.com\/nrzz\/codex-config-doctor\/issues\/1\)/, "the roadmap names the good first issue");
+  assert.match(roadmap, /good first issue: \[#4\]\(https:\/\/github\.com\/nrzz\/codex-config-doctor\/issues\/4\)/, "the roadmap names the good first issue");
   assert.match(read("CONTRIBUTING.md"), /## Where things are/);
   assert.match(read("CHANGELOG.md"), new RegExp(`${IDS.length} findings`), "the changelog counts the findings");
 });

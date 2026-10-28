@@ -367,8 +367,8 @@ test("the Files table of the README names every source file and every helper of 
 test("the changelog, the roadmap and the contributing guide name what the README names", () => {
   const changelog = rd("CHANGELOG.md");
   for (const word of ["show", "lint", "why", "agents", "cost", "explain", "--json", "--markdown", "--print"]) assert.ok(changelog.includes(word), `the changelog says ${word}`);
-  assert.match(rd("ROADMAP.md"), /https:\/\/github\.com\/nrzz\/codex-config-doctor\/issues\/1\b/, "the roadmap links the good first issue");
-  assert.ok(readme.includes("https://github.com/nrzz/codex-config-doctor/issues/1"), "the README links the good first issue");
+  assert.match(rd("ROADMAP.md"), /https:\/\/github\.com\/nrzz\/codex-config-doctor\/issues\/4\b/, "the roadmap links the good first issue");
+  assert.ok(readme.includes("https://github.com/nrzz/codex-config-doctor/issues/4"), "the README links the good first issue");
   assert.match(rd("CONTRIBUTING.md"), /good first issue/);
   assert.match(rd("CONTRIBUTING.md"), /test\/readme\.test\.mjs/);
 });

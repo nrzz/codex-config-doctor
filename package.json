@@ -1,6 +1,6 @@
 {
   "name": "codex-config-doctor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "What Codex CLI will actually do with your configuration: every layer and the merged result with the source of each key, the AGENTS.md files against their size cap, rules, hooks, MCP servers and the Windows sandbox, linted, and checked against the real codex binary. Zero tokens.",
   "type": "module",
   "bin": {

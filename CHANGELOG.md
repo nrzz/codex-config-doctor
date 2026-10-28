@@ -4,7 +4,10 @@ All notable changes to codex-config-doctor are written here. The format follows 
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-28
+
 - `why`: `--file <list>` judges many commands at once, one per line of a file, skipping comments and blank lines, with a summary count and an exit code of 1 if any command is refused.
+- Contributed by [@yoreva-01](https://github.com/yoreva-01) in [#2](https://github.com/nrzz/codex-config-doctor/pull/2), for the good first issue [#1](https://github.com/nrzz/codex-config-doctor/issues/1). The pull request's tests ran on Linux, macOS and Windows, and its real-binary checks passed against Codex 0.165.0 on all three, before the merge.
 
 ## [1.0.0] - 2026-10-17
 
@@ -17,6 +20,7 @@ All notable changes to codex-config-doctor are written here. The format follows 
 - Found on the way, and written in the pages of `explain` and in what `why` says: `codex exec` with `sandbox_mode = "danger-full-access"` (and with `workspace-write` on Linux and macOS) writes a trusted entry for the working folder into your `config.toml`; a command that no rule decides but that Codex finds dangerous (`rm` with a force option, wherever it is in a script; in PowerShell `Remove-Item -Force`) asks, and is refused with `approval_policy = "never"`, while `git reset` and `git rm` run; `~/.agents/skills` is read on Linux and macOS; `features.prefer_mxc` selects no sandbox where MXC is not available, as on Windows Server 2025; a rules file with an error stops `codex exec` but only warns the terminal UI, which then applies none of your rules; an allow rule for `git`, `rm`, `env`, `sudo`, a shell or an interpreter alone, and for `npm run`, is ignored; an enabled MCP server brings three tools to every request and its own tools are deferred; the lower-case path in Codex's own trust warning is the spelling that works on Windows, and forward slashes are not.
 - Zero tokens for the tool. `lint --markdown` puts at most the number of characters the README states in front of a model, and only if you paste it.
 
+[1.1.0]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.0.0
 
-[Unreleased]: https://github.com/nrzz/codex-config-doctor/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/nrzz/codex-config-doctor/compare/v1.1.0...HEAD

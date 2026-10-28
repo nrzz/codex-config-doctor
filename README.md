@@ -96,7 +96,7 @@ Prints what Codex will use. The first lines say where Codex looks (its home, and
 
 ```text
 $ codex-config-doctor show
-codex-config-doctor 1.0.0  what Codex will do with this configuration
+codex-config-doctor 1.1.0  what Codex will do with this configuration
 project   /home/runner/shop
 codex     /home/runner/.codex  (the default, ~/.codex)
 trust     trusted, by the entry for this folder (/home/runner/shop)
@@ -148,7 +148,7 @@ The findings, worst first within the order of the files. Each says where (file a
 
 ```text
 $ codex-config-doctor lint
-codex-config-doctor 1.0.0  lint
+codex-config-doctor 1.1.0  lint
 project   /home/runner/shop
 codex     /home/runner/.codex
 
@@ -210,7 +210,7 @@ On Windows, `lint` also says what Codex does when no sandbox is selected, which 
 
 ```text
 C:\Users\me\shop> codex-config-doctor lint
-codex-config-doctor 1.0.0  lint
+codex-config-doctor 1.1.0  lint
 project   C:\Users\me\shop
 codex     C:\Users\me\.codex
 
@@ -231,7 +231,7 @@ Takes one shell command in quotes. It applies your approval policy, your sandbox
 
 ```text
 $ codex-config-doctor why "git status"
-codex-config-doctor 1.0.0  why
+codex-config-doctor 1.1.0  why
 command   git status
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -250,7 +250,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git push origin main"
-codex-config-doctor 1.0.0  why
+codex-config-doctor 1.1.0  why
 command   git push origin main
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -267,7 +267,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git status && rm -rf build"
-codex-config-doctor 1.0.0  why
+codex-config-doctor 1.1.0  why
 command   git status && rm -rf build
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -287,7 +287,7 @@ Judged as 2 commands (the script was split):
 
 ```text
 $ codex-config-doctor why "npm publish"
-codex-config-doctor 1.0.0  why
+codex-config-doctor 1.1.0  why
 command   npm publish
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -315,7 +315,7 @@ On Windows with no sandbox selected there is nothing to run a command in, so eve
 
 ```text
 C:\Users\me\shop> codex-config-doctor why "echo hi"
-codex-config-doctor 1.0.0  why
+codex-config-doctor 1.1.0  why
 command   echo hi
 settings  approval_policy on-request; sandbox_mode read-only; Windows sandbox not selected; shell powershell
 
@@ -335,7 +335,7 @@ The AGENTS.md files in the order Codex reads them. For each: its path, its size,
 
 ```text
 $ codex-config-doctor agents
-codex-config-doctor 1.0.0  agents
+codex-config-doctor 1.1.0  agents
 project   /home/runner/shop  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -349,7 +349,7 @@ With the working folder in `app/`, the second file does not fit in the 1,900 byt
 
 ```text
 $ codex-config-doctor agents --project /home/runner/shop/app
-codex-config-doctor 1.0.0  agents
+codex-config-doctor 1.1.0  agents
 project   /home/runner/shop/app  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -366,7 +366,7 @@ What the first request of a session carries before your words, in characters and
 
 ```text
 $ codex-config-doctor cost
-codex-config-doctor 1.0.0  cost
+codex-config-doctor 1.1.0  cost
 project   /home/runner/shop
 What the first request of a session carries before your words. Tokens are characters / 4, an estimate.
 "computed" comes from your files; "recorded" is what Codex 0.163.0 sent with model gpt-5.5 on Linux (2026-10-17) and moves with the version, the model and the system.
@@ -550,7 +550,7 @@ Each row is a finding id (the argument of `explain`), its severity, its basis (`
 
 ## What was verified, and how
 
-Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 24.19.0 and Codex CLI 0.163.0, the npm release of that day. CI runs the unit tests on Linux, macOS and Windows with Node 20, 22 and 24 and on Linux with Node 18, and the real-binary checks on Ubuntu 24.04.5, macOS 26.6.2 and Windows Server 2025 (build 10.0.26100) with Codex 0.163.0 installed from npm. On commit 1686302 all 10 jobs of the unit tests (run 39077259593) and all 3 jobs of the real-binary checks (run 39077259606) were green; it is the last commit that changed the code. The badges at the top show the latest runs.
+Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 24.19.0 and Codex CLI 0.163.0, the npm release of that day. CI runs the unit tests on Linux, macOS and Windows with Node 20, 22 and 24 and on Linux with Node 18, and the real-binary checks on Ubuntu 24.04.5, macOS 26.6.2 and Windows Server 2025 (build 10.0.26100) with the newest Codex installed from npm (0.163.0 when this was first written, 0.165.0 on 28 October). On commit 76f813b all 10 jobs of the unit tests (run 40663188778) and all 3 jobs of the real-binary checks (run 40663188690, Codex 0.165.0) were green; it is the last commit that changed the code, apart from the version number in the release commit after it. The badges at the top show the latest runs.
 
 - **300 automated tests** on Windows and **333** on Linux and macOS (`npm test`, Node's own runner, no dependencies, about 10 seconds on this machine). `node --test` also reports each of the 19 helper files under `test/` as a passing test, on every Node version CI runs (18 to 24); those are not counted here (the runner's total was 319 on Windows and 352 on Linux and macOS). Without a Codex binary, on Windows 185 pass and 115 are skipped; on Linux and macOS 185 pass and 148 are skipped. The skipped ones are the real-binary checks below, which are not the same set on Windows (some rows and checks are about Windows only). The tests cover:
   - the readers, held to tables recorded from Codex 0.163.0: the TOML reader (128 files that Codex accepted or rejected, with the line and column of each error), the Starlark subset of the rules files, the checks of `prefix_rule()` and of the examples of a rule;
@@ -619,7 +619,7 @@ Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The next steps are in [ROADMAP.md](ROADMAP.md); the first is a good first issue, [#1](https://github.com/nrzz/codex-config-doctor/issues/1) (`why --file <list>`). A wrong verdict is a bug: open an issue with the Codex version and what Codex really did.
+See [CONTRIBUTING.md](CONTRIBUTING.md). The next steps are in [ROADMAP.md](ROADMAP.md); the first is a good first issue, [#4](https://github.com/nrzz/codex-config-doctor/issues/4) (`why --file -`). A wrong verdict is a bug: open an issue with the Codex version and what Codex really did.
 
 ## Also by the same author
 
