@@ -1,0 +1,4 @@
+# commands from last week
+git status
+npm publish
+git status && rm -rf build

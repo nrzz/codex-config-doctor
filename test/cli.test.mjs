@@ -49,6 +49,8 @@ test("the arguments: commands, options, values, the end of options", () => {
   assert.deepEqual(parseArgs(["why", "git status"]).positional, ["git status"]);
   assert.deepEqual(parseArgs(["why", "--", "-x --y"]).positional, ["-x --y"]);
   assert.equal(parseArgs(["why", "ls", "--shell", "powershell"]).shell, "powershell");
+  assert.equal(parseArgs(["why", "--file", "commands.txt"]).file, "commands.txt");
+  assert.equal(parseArgs(["why", "--file=commands.txt"]).file, "commands.txt");
   assert.equal(parseArgs(["explain", "--list"]).list, true);
   assert.deepEqual(parseArgs(["explain", "wrong-type"]).positional, ["wrong-type"]);
   assert.equal(parseArgs(["--help"]).help, true);
@@ -68,6 +70,8 @@ test("the usage errors, one by one", () => {
   bad(["why"], /why needs the command, in quotes/);
   bad(["why", "git", "status"], /why takes one argument, the command in quotes: why "git status"/);
   bad(["why", "x", "--shell", "fish"], /--shell is bash or powershell/);
+  bad(["why", "--file", "cmds.txt", "git status"], /why takes --file or one command in quotes, not both/);
+  bad(["why", "--file"], /--file needs a value/);
   bad(["show", "--project"], /--project needs a value/);
   bad(["show", "--profile", "--json"], /--profile needs a value/);
   bad(["explain"], /explain needs a finding id or --list/);
@@ -162,6 +166,89 @@ test("why: exit 0 when Codex would run or ask, 1 when it would refuse; the JSON 
   assert.equal(no.code, 1);
   const doc = JSON.parse(no.out);
   assert.deepEqual([doc.ok, doc.outcome, doc.decision, doc.command, doc.shellCommand], [false, "forbidden", "forbidden", "why", "rm -rf build"]);
+});
+
+test("why --file: judge many commands at once, comments, blank lines, CRLF, --json and exit codes", () => {
+  const w = disk({
+    "config.toml": "",
+    "rules/default.rules": [
+      'prefix_rule(pattern=["git", "status"], decision="allow")',
+      'prefix_rule(pattern=["npm", "publish"], decision="prompt")',
+      'prefix_rule(pattern=["rm", "-rf"], decision="forbidden")',
+    ].join("\n") + "\n",
+    "work/commands.txt": "# commands from last week\r\n\r\n  git status  \r\n  npm publish\r\n  rm -rf build  \r\n",
+    "work/safe.txt": "git status\n# only safe commands\ngit status\n",
+    "work/empty.txt": "# only comments\n   \n",
+  });
+
+  // Multiple commands text output: order preserved, column alignment, summary line, exit 1 if any refused
+  const r = cli(w, ["why", "--file", "commands.txt", "--shell", "bash"]);
+  assert.equal(r.code, 1);
+  const expected = [
+    "outside-sandbox   git status",
+    "asks              npm publish",
+    "forbidden         rm -rf build",
+    "",
+    "3 commands: 1 outside-sandbox, 1 asks, 1 forbidden.",
+  ].join("\n") + "\n";
+  assert.equal(r.out, expected);
+
+  // Safe file: all allowed / asked, none refused -> exit code 0
+  const safe = cli(w, ["why", "--file", "safe.txt", "--shell", "bash"]);
+  assert.equal(safe.code, 0);
+  assert.equal(safe.out, [
+    "outside-sandbox   git status",
+    "outside-sandbox   git status",
+    "",
+    "2 commands: 2 outside-sandbox.",
+  ].join("\n") + "\n");
+
+  // JSON form: { ok: false, tool, version, command: "why", platform, project, shell, settings, results: [...] }
+  const jRes = cli(w, ["why", "--file", "commands.txt", "--shell", "bash", "--json"]);
+  assert.equal(jRes.code, 1);
+  const doc = JSON.parse(jRes.out);
+  assert.equal(doc.ok, false);
+  assert.equal(doc.command, "why");
+  assert.equal(doc.tool, "codex-config-doctor");
+  assert.equal(doc.shell, "bash");
+  assert.ok(doc.settings && typeof doc.settings === "object");
+  assert.equal(doc.results.length, 3);
+  assert.equal(doc.results[0].shellCommand, "git status");
+  assert.equal(doc.results[0].outcome, "outside-sandbox");
+  assert.equal(doc.results[1].shellCommand, "npm publish");
+  assert.equal(doc.results[1].outcome, "asks");
+  assert.equal(doc.results[2].shellCommand, "rm -rf build");
+  assert.equal(doc.results[2].outcome, "forbidden");
+
+  // Safe file with JSON -> doc.ok is true
+  const safeJson = JSON.parse(cli(w, ["why", "--file", "safe.txt", "--shell", "bash", "--json"]).out);
+  assert.equal(safeJson.ok, true);
+  assert.equal(safeJson.results.length, 2);
+
+  // Unreadable file -> exit code 2, error message
+  const unreadable = cli(w, ["why", "--file", "does-not-exist.txt"]);
+  assert.equal(unreadable.code, 2);
+  assert.match(unreadable.err, /cannot read "does-not-exist\.txt"/);
+
+  const unreadableJson = cli(w, ["why", "--file", "does-not-exist.txt", "--json"]);
+  assert.equal(unreadableJson.code, 2);
+  assert.equal(JSON.parse(unreadableJson.out).ok, false);
+  assert.match(JSON.parse(unreadableJson.out).error, /cannot read "does-not-exist\.txt"/);
+
+  // Empty file (or only comments) -> exit code 2, error message
+  const empty = cli(w, ["why", "--file", "empty.txt"]);
+  assert.equal(empty.code, 2);
+  assert.match(empty.err, /no command found in "empty\.txt"/);
+
+  const emptyJson = cli(w, ["why", "--file", "empty.txt", "--json"]);
+  assert.equal(emptyJson.code, 2);
+  assert.equal(JSON.parse(emptyJson.out).ok, false);
+  assert.match(JSON.parse(emptyJson.out).error, /no command found in "empty\.txt"/);
+
+  // Both file and positional command -> exit code 2
+  const both = cli(w, ["why", "--file", "commands.txt", "git status"]);
+  assert.equal(both.code, 2);
+  assert.match(both.err, /why takes --file or one command in quotes, not both/);
 });
 
 test("agents: exit 0, 1 when a file is cut; --print is the text the model gets", () => {
