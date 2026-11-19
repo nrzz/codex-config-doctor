@@ -238,7 +238,7 @@ export const PAGES = {
     does: [
       [V, "Codex skips the hook. In `codex exec` it says nothing at all. The trust is a record in the user's config.toml: [hooks.state.\"<key>\"] trusted_hash = \"sha256:...\", where the key is <path of the file>:<event>:<group>:<handler>."],
       [V, "The app server reports the hook as \"untrusted\"; `--dangerously-bypass-hook-trust` runs hooks without the record, and prints \"warning: `--dangerously-bypass-hook-trust` is enabled. Enabled hooks may run without review for this invocation.\""],
-      [V, "`--dangerously-bypass-hook-trust` does not run the hooks of a project that is not trusted: Codex does not load them at all (put to Codex 0.163.0, 0.166.0, 0.168.0 and 0.170.0)."],
+      [V, "`--dangerously-bypass-hook-trust` does not run the hooks of a project that is not trusted: Codex does not load them, from the project's config.toml or its hooks.json. Before Codex 0.169.0 a run with sandbox_mode \"danger-full-access\" trusted the folder first (it wrote the entry itself), and with the flag that project's hooks then ran in the same session (put to 0.166.0 and 0.168.0); since 0.169.0 no run trusts a folder by itself."],
       [D, "The documentation says that /hooks, in the terminal UI, lists the hooks for review; the terminal UI was not driven."],
     ],
     fix: ["Review and trust the hook with /hooks, or add the record the finding prints (its hash is the SHA-256 of the hook's canonical JSON; `show` prints each hook's key and hash)."],

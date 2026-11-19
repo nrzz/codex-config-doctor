@@ -96,7 +96,7 @@ Prints what Codex will use. The first lines say where Codex looks (its home, and
 
 ```text
 $ codex-config-doctor show
-codex-config-doctor 1.2.0  what Codex will do with this configuration
+codex-config-doctor 1.2.1  what Codex will do with this configuration
 project   /home/runner/shop
 codex     /home/runner/.codex  (the default, ~/.codex)
 trust     trusted, by the entry for this folder (/home/runner/shop)
@@ -148,7 +148,7 @@ The findings, worst first within the order of the files. Each says where (file a
 
 ```text
 $ codex-config-doctor lint
-codex-config-doctor 1.2.0  lint
+codex-config-doctor 1.2.1  lint
 project   /home/runner/shop
 codex     /home/runner/.codex
 
@@ -210,7 +210,7 @@ On Windows, `lint` also says what Codex does when no sandbox is selected, which 
 
 ```text
 C:\Users\me\shop> codex-config-doctor lint
-codex-config-doctor 1.2.0  lint
+codex-config-doctor 1.2.1  lint
 project   C:\Users\me\shop
 codex     C:\Users\me\.codex
 
@@ -231,7 +231,7 @@ Takes one shell command in quotes. It applies your approval policy, your sandbox
 
 ```text
 $ codex-config-doctor why "git status"
-codex-config-doctor 1.2.0  why
+codex-config-doctor 1.2.1  why
 command   git status
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -250,7 +250,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git push origin main"
-codex-config-doctor 1.2.0  why
+codex-config-doctor 1.2.1  why
 command   git push origin main
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -267,7 +267,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git status && rm -rf build"
-codex-config-doctor 1.2.0  why
+codex-config-doctor 1.2.1  why
 command   git status && rm -rf build
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -287,7 +287,7 @@ Judged as 2 commands (the script was split):
 
 ```text
 $ codex-config-doctor why "npm publish"
-codex-config-doctor 1.2.0  why
+codex-config-doctor 1.2.1  why
 command   npm publish
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -315,7 +315,7 @@ On Windows with no sandbox selected there is nothing to run a command in, so eve
 
 ```text
 C:\Users\me\shop> codex-config-doctor why "echo hi"
-codex-config-doctor 1.2.0  why
+codex-config-doctor 1.2.1  why
 command   echo hi
 settings  approval_policy on-request; sandbox_mode read-only; Windows sandbox not selected; shell powershell
 
@@ -335,7 +335,7 @@ The AGENTS.md files in the order Codex reads them. For each: its path, its size,
 
 ```text
 $ codex-config-doctor agents
-codex-config-doctor 1.2.0  agents
+codex-config-doctor 1.2.1  agents
 project   /home/runner/shop  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -349,7 +349,7 @@ With the working folder in `app/`, the second file does not fit in the 1,900 byt
 
 ```text
 $ codex-config-doctor agents --project /home/runner/shop/app
-codex-config-doctor 1.2.0  agents
+codex-config-doctor 1.2.1  agents
 project   /home/runner/shop/app  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -366,7 +366,7 @@ What the first request of a session carries before your words, in characters and
 
 ```text
 $ codex-config-doctor cost
-codex-config-doctor 1.2.0  cost
+codex-config-doctor 1.2.1  cost
 project   /home/runner/shop
 What the first request of a session carries before your words. Tokens are characters / 4, an estimate.
 "computed" comes from your files; "recorded" is what Codex 0.170.0 sent with model gpt-5.5 on Linux (2026-11-19) and moves with the version, the model and the system.
@@ -566,7 +566,7 @@ Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 
   - **Trust.** A project's `.codex/` layer, hooks and rules are used only when the project is trusted, by its own entry or its Git root's; the app server warns with the entry to add, and `codex exec` warns too, naming `codex exec --trust` (Codex 0.169.0 and later; before, it said nothing). `codex exec --trust` writes the Git root's entry, also from a subfolder, and loads the project's file in that run and the next session; an entry that says `untrusted` stops it and is left as it is. Since 0.169.0 no sandbox mode writes an entry (`danger-full-access` in the file, with `--sandbox` or with the bypass flag, `workspace-write`, `read-only`, the default) or loads the project's file; before, `danger-full-access` did, and `workspace-write` on Linux and macOS. On Windows an entry with forward slashes, a trailing backslash or a `\\?\` prefix does not trust the folder, and the lower-case spelling of Codex's own warning does.
   - **AGENTS.md.** The message Codex builds was compared in 44 worlds with the tool's (size, hash and ends): the cap crossed by the second of three files, a global file that does not count, the cap at 0 and at 3 bytes, a character cut in the middle, a byte order mark, UTF-16, CRLF, override and fallback names, an empty override, a folder named AGENTS.md. `agents --print` is that message.
   - **Rules.** 327 commands under nine rule sets and 63 rules files were put to `codex execpolicy check` and the answers recorded; the tool's matcher agrees with every one. `codex exec` stops on a rules file with a syntax error or a failing example (`Error loading rules:` and the line, which is the line after the last for a bracket that is never closed); the app server starts and warns `Error parsing rules; custom rules not applied.`, and a forbidden rule in another file stopped nothing.
-  - **Hooks.** The key and the hash of every hook of 41 worlds were read back from `hooks/list` of the app server: the tool computes the same SHA-256. A hook with no record or with another hash is skipped; `--dangerously-bypass-hook-trust` runs it, but not the hook of a project that is not trusted (Codex 0.163.0 to 0.170.0; until 1.2.0 the explain page of `hook-untrusted` said it did, which no version bore out: [#5](https://github.com/nrzz/codex-config-doctor/issues/5)). A layer with both formats loads both and warns; a `hooks.json` that does not parse loads none of its hooks and warns; an event Codex does not have is ignored in silence; a handler field Codex does not read is dropped in silence (a timeout written `timeout_sec` stays 600 seconds). A `PreToolUse` hook that answers `ask` changed nothing; `deny` and `block` stopped the command with `Command blocked by PreToolUse hook: ...`.
+  - **Hooks.** The key and the hash of every hook of 41 worlds were read back from `hooks/list` of the app server: the tool computes the same SHA-256. A hook with no record or with another hash is skipped; `--dangerously-bypass-hook-trust` runs it, but not the hook of a project that is not trusted; before Codex 0.169.0 a run with `danger-full-access` trusted the folder first, and with the flag the project's hooks then ran in the same session ([#5](https://github.com/nrzz/codex-config-doctor/issues/5)). A layer with both formats loads both and warns; a `hooks.json` that does not parse loads none of its hooks and warns; an event Codex does not have is ignored in silence; a handler field Codex does not read is dropped in silence (a timeout written `timeout_sec` stays 600 seconds). A `PreToolUse` hook that answers `ask` changed nothing; `deny` and `block` stopped the command with `Command blocked by PreToolUse hook: ...`.
   - **Rules for shell commands.** `why` was compared with what a thread of the app server did to a command that writes outside the project (it was refused, the client was asked, it ran inside the sandbox, or it wrote outside): under every approval policy and sandbox mode, with allow, prompt and forbidden rules, lists of commands, substitutions and a banned prefix. All 88 allow rules for a banned prefix were ignored by the Windows binary and a longer pattern was honoured; on Linux and macOS the same was seen for `env`, `python3`, `rm` and `git` (and for `node`, in the rows above): an allow rule for the bare prefix left the command inside the sandbox, a longer pattern ran it outside.
   - **Commands Codex finds dangerous.** With no rule to decide, `rm` with a force option (`-f`, `--force`, or a group of options with an f such as `-rf`, `-fr`, `-rfv` or `-Rf`, before or after the operands) asks, and with `approval_policy = "never"` is refused with `rm -f style commands are not permitted. Use a safer approach`. On Linux and macOS that holds wherever the `rm` is in a script: after `VAR=1`, `env` or `sudo`, by its path, in a list, a pipe, a subshell, a loop, a substitution, a redirection or the script of `bash -c`. Plain `rm`, `rm -r`, `git reset`, `git rm`, `git clean`, `git push --force`, `xargs rm -rf` and `find -exec rm -rf` run; Ubuntu 24.04 and macOS 26 gave the same answers to all of these. In PowerShell on Windows `Remove-Item`, `rm`, `ri` and `del` with `-Force`, and `Start-Process` with a web address, ask (and are refused with `blocked by policy`), while `rm -rf` and `git reset --hard` run. A command that starts with `bash -lc` is not opened, so the rules for what is inside it do not match.
   - **MCP servers, providers.** A stdio server whose program is missing is skipped in silence (exit 0) and stops Codex with `required = true`; on Windows `tool.cmd` and `tool.bat` are found through PATHEXT and a `.ps1` is not. A `command` and a `url`, or neither, stop Codex. `openai`, `ollama` and `lmstudio` cannot be redefined; `wire_api` other than `responses` stops Codex; a provider with no `base_url` connects to api.openai.com; an `env_key` that is not set stops Codex at the first request.

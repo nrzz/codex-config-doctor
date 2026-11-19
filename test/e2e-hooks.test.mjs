@@ -10,7 +10,7 @@ import { askHooks, pool, PARALLEL } from "./ask.mjs";
 import { exec, lintWorld, noise } from "./behave.mjs";
 import { AppServer } from "./app-server.mjs";
 import { hookHash } from "../src/hooks.mjs";
-import { IS_WIN, fakeApi, gitInit, sandbox, shellCall, skip, writeUserConfig } from "./codex-sandbox.mjs";
+import { IS_WIN, codexInfo, fakeApi, gitInit, sandbox, shellCall, skip, writeUserConfig } from "./codex-sandbox.mjs";
 import { ROOT, fwd } from "./helpers.mjs";
 import { SCENARIOS } from "./hooks-table.mjs";
 
@@ -137,13 +137,22 @@ test("hook-untrusted: the bypass flag runs a hook without a record", opts, async
   assert.match(r.err, /warning: `--dangerously-bypass-hook-trust` is enabled\. Enabled hooks may run without review for this invocation\./);
 });
 
-test("hook-untrusted: the bypass flag does not run the hooks of a project that is not trusted; a trusted project's hook it runs", opts, async () => {
+test("hook-untrusted: the bypass flag does not run the hooks of a project that is not trusted; a trusted project's hook it runs; before Codex 0.169.0 a danger-full-access run trusted the folder first, and then it ran them", opts, async () => {
   const off = await exec({ label: "e2e-hooks-bypass-project", project: (sb) => toml(sb), args: [BYPASS] });
   assert.equal(off.code, 0, off.err);
   assert.deepEqual(ran(off), [], "the hook of a project that is not trusted");
+  const offJson = await exec({ label: "e2e-hooks-bypass-project-json", files: { "work/.codex/hooks.json": (sb) => json(sb) }, args: [BYPASS] });
+  assert.deepEqual(ran(offJson), [], "the hooks.json of a project that is not trusted");
   const on = await exec({ label: "e2e-hooks-bypass-trusted", trust: true, project: (sb) => toml(sb), args: [BYPASS] });
   assert.equal(on.code, 0, on.err);
   assert.deepEqual(ran(on), ["SessionStart"], "the hook of a trusted project");
+  // a run with danger-full-access: before 0.169.0 it wrote the folder's trust entry itself, and the project's hooks.json then ran in the same session
+  const [major, minor] = codexInfo().number.split(".").map(Number);
+  const before169 = major === 0 && minor < 169;
+  const danger = await exec({ label: "e2e-hooks-bypass-danger", userTop: 'sandbox_mode = "danger-full-access"\n', files: { "work/.codex/hooks.json": (sb) => json(sb) }, args: [BYPASS] });
+  assert.equal(danger.code, 0, danger.err);
+  assert.deepEqual(ran(danger), before169 ? ["SessionStartJson"] : [], `Codex ${codexInfo().number}, danger-full-access`);
+  assert.equal(/\[projects\./.test(fs.readFileSync(danger.sb.user, "utf8")), before169, "the run wrote a trust entry");
 });
 
 test("hooks-feature-off: features.hooks = false runs no hook, in silence", opts, async () => {

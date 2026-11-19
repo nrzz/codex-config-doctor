@@ -4,6 +4,10 @@ All notable changes to codex-config-doctor are written here. The format follows 
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-19
+
+- A correction to 1.2.0, which said that the `hook-untrusted` line "the bypass flag also runs the hooks of a project that is not trusted" was this tool's error on every version. It was right in one case: before Codex 0.169.0 a run with `sandbox_mode = "danger-full-access"` trusted the folder first (it wrote the entry itself), and with `--dangerously-bypass-hook-trust` the project's `.codex/hooks.json` then ran in the same session (SessionStart and PreToolUse, put to 0.166.0 and 0.168.0). The check of 1.2.0 ran in the default sandbox, where those hooks never ran. The explain page and the README now say both, and the real-binary check covers the danger-full-access run: since 0.169.0 no run trusts a folder by itself, so those hooks do not run. Found by everyhook's bisect of the same Codex change. Closes [#5](https://github.com/nrzz/codex-config-doctor/issues/5).
+
 ## [1.2.0] - 2026-11-19
 
 Following Codex 0.167.0 to 0.170.0, whose changes turned the weekly real-binary checks red from 9 November. Each change was bisected on Windows with side-by-side installs of 0.166.0, 0.167.0, 0.168.0, 0.169.0 and 0.170.0, and put to 0.170.0 on Linux, macOS and Windows.
@@ -28,8 +32,9 @@ Following Codex 0.167.0 to 0.170.0, whose changes turned the weekly real-binary 
 - Found on the way, and written in the pages of `explain` and in what `why` says: `codex exec` with `sandbox_mode = "danger-full-access"` (and with `workspace-write` on Linux and macOS) writes a trusted entry for the working folder into your `config.toml`; a command that no rule decides but that Codex finds dangerous (`rm` with a force option, wherever it is in a script; in PowerShell `Remove-Item -Force`) asks, and is refused with `approval_policy = "never"`, while `git reset` and `git rm` run; `~/.agents/skills` is read on Linux and macOS; `features.prefer_mxc` selects no sandbox where MXC is not available, as on Windows Server 2025; a rules file with an error stops `codex exec` but only warns the terminal UI, which then applies none of your rules; an allow rule for `git`, `rm`, `env`, `sudo`, a shell or an interpreter alone, and for `npm run`, is ignored; an enabled MCP server brings three tools to every request and its own tools are deferred; the lower-case path in Codex's own trust warning is the spelling that works on Windows, and forward slashes are not.
 - Zero tokens for the tool. `lint --markdown` puts at most the number of characters the README states in front of a model, and only if you paste it.
 
+[1.2.1]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.2.1
 [1.2.0]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.2.0
 [1.1.0]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.1.0
 [1.0.0]: https://github.com/nrzz/codex-config-doctor/releases/tag/v1.0.0
 
-[Unreleased]: https://github.com/nrzz/codex-config-doctor/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/nrzz/codex-config-doctor/compare/v1.2.1...HEAD
