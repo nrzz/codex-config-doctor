@@ -26,12 +26,14 @@ export function partsOf(request) {
   const permissions = find(/^<permissions instructions>/);
   const environment = find(/^<environment_context>/);
   const agents = find(/^# AGENTS\.md instructions/);
+  // the deferred tool namespaces: a part of the developer message since Codex 0.167.0
+  const namespaces = find(/^<tools>\n/);
   const tools = (request.tools || []).map((t) => [t.name || t.type, JSON.stringify(t).length]);
   const text = (p) => (p ? p.text : null);
   return {
     model: request.model,
-    text: { base: text(base), skills: text(skills), permissions: text(permissions), environment: text(environment), agents: text(agents) },
-    chars: { base: base ? base.text.length : 0, skills: skills ? skills.text.length : 0, permissions: permissions ? permissions.text.length : 0, environment: environment ? environment.text.length : 0, agents: agents ? agents.text.length : 0 },
+    text: { base: text(base), skills: text(skills), permissions: text(permissions), environment: text(environment), agents: text(agents), namespaces: text(namespaces) },
+    chars: { base: base ? base.text.length : 0, skills: skills ? skills.text.length : 0, permissions: permissions ? permissions.text.length : 0, environment: environment ? environment.text.length : 0, agents: agents ? agents.text.length : 0, namespaces: namespaces ? namespaces.text.length : 0 },
     tools,
     toolsChars: tools.reduce((n, t) => n + t[1], 0),
     toolsJsonChars: JSON.stringify(request.tools || []).length,
@@ -80,7 +82,7 @@ export async function recordFirstRequest() {
   const thread = {};
   for (const mode of SANDBOX_MODES) exec[mode] = await captureExec({ sandboxMode: mode });
   for (const mode of SANDBOX_MODES) thread[mode] = await captureThread({ approval: "on-request", sandboxMode: mode });
-  // an enabled MCP server that starts: the tools Codex adds to the first request, and what it adds to the tool_search description
+  // an enabled MCP server that starts: the tools Codex adds to the first request, and the line it adds to the deferred tool namespaces
   const mcp = await captureExec({ sandboxMode: "read-only", config: { tables: mcpServer("stub", ["echo", "shout"]) } });
   return { exec, thread, mcp, codex: codexInfo().number, on: today() };
 }
@@ -110,9 +112,22 @@ export function recordedSource(m, previous = {}, platform = process.platform) {
   const tail = skills.slice(tailStart);
   const rebuilt = `${head}${rootsText}### Available skills\n${entries.map((l) => l.replace("@R", "r0")).join("\n")}\n${tail}`;
   if (rebuilt !== skills) throw new Error("the skills block cannot be rebuilt from its parts");
-  // the tools an enabled MCP server adds to the list, and the characters of the line it adds to the tool_search description ("- <id>")
+  // the tools an enabled MCP server adds to the list
   const base = new Set(ro.parts.tools.map((x) => x[0]));
   const mcpTools = m.mcp.parts.tools.filter((x) => !base.has(x[0]));
+  // the deferred tool namespaces: the head, a line for each namespace, the tail; a server that starts adds a line "<prefix><id>"
+  const ns = ro.parts.text.namespaces;
+  const nsMcp = m.mcp.parts.text.namespaces;
+  if (!ns || !nsMcp) throw new Error("the first request has no deferred tool namespaces (<tools>): this Codex is older than 0.167.0 or builds the request another way");
+  const nsHead = "<tools>\nDeferred tool namespaces:\n";
+  const nsTail = "\n</tools>";
+  if (!ns.startsWith(nsHead) || !ns.endsWith(nsTail)) throw new Error(`the deferred tool namespaces have another shape: ${JSON.stringify(ns.slice(0, 200))}`);
+  const nsLines = ns.slice(nsHead.length, ns.length - nsTail.length).split("\n");
+  const stubLine = nsMcp.slice(nsHead.length, nsMcp.length - nsTail.length).split("\n").find((l) => !nsLines.includes(l));
+  if (!stubLine || !stubLine.endsWith("stub")) throw new Error(`the line of the MCP server is not "<prefix>stub": ${JSON.stringify(nsMcp)}`);
+  const nsPrefix = stubLine.slice(0, -"stub".length);
+  const rebuiltNs = `${nsHead}${[...nsLines, `${nsPrefix}stub`].sort().join("\n")}${nsTail}`;
+  if (rebuiltNs !== nsMcp) throw new Error("the deferred tool namespaces cannot be rebuilt from their parts");
   const perms = { never: {}, "on-request": {} };
   const env = {};
   for (const mode of SANDBOX_MODES) {
@@ -149,11 +164,19 @@ ${bySystemText}
 };
 
 /**
- * What an enabled MCP server adds to the first request (put to Codex ${m.codex}): these tools, after write_stdin, and a line "- <id>" in the
- * description of tool_search for a server that starts. The tools of the server itself are not in the request: Codex defers them behind
+ * What an enabled MCP server adds to the first request (put to Codex ${m.codex}): these tools, after write_stdin, and, for a server that
+ * starts, a line in the deferred tool namespaces (below). The tools of the server itself are not in the request: Codex defers them behind
  * tool_search (2, 3, 30 and 60 tools gave the same request).
  */
 export const MCP_TOOLS = ${JSON.stringify(mcpTools)};
+
+// The deferred tool namespaces, a part of the developer message (since Codex 0.167.0; before, the sources were named in the description of
+// tool_search): the head, one line for each namespace in the order of the lines, the tail. A server of [mcp_servers] that starts adds a
+// line NAMESPACE_MCP_PREFIX + its id, with every character other than a letter, a digit or _ turned into _.
+export const NAMESPACES_HEAD = ${JSON.stringify(nsHead)};
+export const NAMESPACES_BUNDLED = ${JSON.stringify(nsLines, null, 2)};
+export const NAMESPACE_MCP_PREFIX = ${JSON.stringify(nsPrefix)};
+export const NAMESPACES_TAIL = ${JSON.stringify(nsTail)};
 
 // The skills block, as Codex builds it: the head, one line for each root (\`rN\`), the entries, the tail. The four skills Codex bundles are
 // in $CODEX_HOME/skills/.system; the entries below name that root @R.

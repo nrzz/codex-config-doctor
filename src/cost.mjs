@@ -1,10 +1,11 @@
 // What the first request of a session carries before the user's words, and how much of it is yours. Figures marked `computed` come from your
 // files and are exact (the AGENTS.md message and the skills block are put to the real Codex in test/e2e-cost.test.mjs, character for
-// character); figures marked `recorded` are what Codex 0.163.0 sent with a default configuration (src/recorded.mjs) and move with
+// character); figures marked `recorded` are what the Codex named in src/recorded.mjs sent with a default configuration and move with
 // the Codex version, the model and the feature flags. A token is estimated as four characters.
 import {
   BASE_INSTRUCTIONS_CHARS, BY_SYSTEM, RECORDED_CODEX, RECORDED_MODEL, RECORDED_ON,
   MCP_TOOLS, SKILLS_BUNDLED, SKILLS_HEAD, SKILLS_LIST_HEAD, SKILLS_TAIL,
+  NAMESPACES_HEAD, NAMESPACES_BUNDLED, NAMESPACE_MCP_PREFIX, NAMESPACES_TAIL,
 } from "./recorded.mjs";
 import { SKILL_DESCRIPTION_CAP } from "./knowledge.mjs";
 
@@ -128,7 +129,7 @@ export function permissionsChars(cwd, approval, mode, platform) {
 
 /**
  * The tool definitions of the first request: the recorded ones, with the web_search definition as the configuration makes it (put to Codex
- * 0.163.0): 89 characters for `cached`, which is the default outside danger-full-access; 88 for `live`, which is the default in
+ * 0.163.0 and again to 0.170.0): 89 characters for `cached`, which is the default outside danger-full-access; 88 for `live`, which is the default in
  * danger-full-access (there `cached` also gives the live one); 114 for `indexed`; and no definition at all for `disabled`.
  */
 export function toolList(c) {
@@ -141,14 +142,27 @@ export function toolList(c) {
     else if (mode === "indexed") list[i][1] = 114;
     else if (mode === "live" || danger) list[i][1] = 88;
   }
-  // an enabled MCP server, even one that does not start, adds three tools; one that starts adds its id to the description of tool_search
+  // an enabled MCP server, even one that does not start, adds three tools (one that starts also adds a deferred tool namespace: see below)
   const enabled = c.mcp.filter((s) => s.enabled && s.transport !== "invalid");
-  if (enabled.length) {
-    list.splice(list.findIndex((t) => t[0] === "write_stdin") + 1, 0, ...MCP_TOOLS.map((t) => [...t]));
-    const search = list.find((t) => t[0] === "tool_search");
-    if (search) for (const s of enabled) if (s.transport === "http" || (s.resolved && s.resolved.found)) search[1] += s.id.length + 4;
-  }
+  if (enabled.length) list.splice(list.findIndex((t) => t[0] === "write_stdin") + 1, 0, ...MCP_TOOLS.map((t) => [...t]));
   return list;
+}
+
+/** The servers counted as ones that start: enabled, valid, and an HTTP server or a program that is found. */
+const starting = (c) => c.mcp.filter((s) => s.enabled && s.transport !== "invalid" && (s.transport === "http" || (s.resolved && s.resolved.found)));
+
+/** The name of a server's namespace: its id with every character other than a letter, a digit or _ turned into _. */
+export const namespaceOf = (id) => `mcp__${String(id).replace(/[^A-Za-z0-9_]/g, "_")}`;
+
+/**
+ * The deferred tool namespaces of the developer message (Codex 0.167.0 and later; before, the sources were named in the description of
+ * tool_search): the recorded lines and one line for each MCP server that starts, in the order of the lines.
+ */
+export function namespacesBlock(c) {
+  const servers = starting(c).map((s) => namespaceOf(s.id));
+  const lines = [...NAMESPACES_BUNDLED, ...servers.map((n) => `${NAMESPACE_MCP_PREFIX}${n.slice("mcp__".length)}`)].sort();
+  const text = `${NAMESPACES_HEAD}${lines.join("\n")}${NAMESPACES_TAIL}`;
+  return { text, chars: text.length, servers, bundled: NAMESPACES_BUNDLED.map((l) => l.replace(/^- /, "").replace(/:.*$/, "")) };
 }
 
 export function cost(c) {
@@ -160,6 +174,7 @@ export function cost(c) {
   // the definitions are a JSON array in the request: a comma between two and a bracket at each end
   const tools = toolList(c);
   const toolChars = tools.reduce((n, t) => n + t[1], 0) + tools.length + 1;
+  const namespaces = namespacesBlock(c);
   const rows = [
     { id: "base", label: "Base instructions", chars: BASE_INSTRUCTIONS_CHARS, source: "recorded", detail: `Codex ${RECORDED_CODEX}, model ${RECORDED_MODEL}` },
     { id: "skills", label: "Skills", chars: skills.chars, source: skills.yours.length ? "computed" : "recorded", detail: `${skills.bundled} bundled skills${skills.yours.length ? ` and ${skills.yours.length} of yours (${skills.yours.map((s) => s.name).join(", ")})` : ""}; the how-to text is about 2,600 of the characters` },
@@ -167,9 +182,10 @@ export function cost(c) {
     { id: "agents", label: "AGENTS.md", chars: c.agents.chars, source: "computed", detail: c.agents.text === null ? "no AGENTS.md" : `${c.agents.files.length} project file${c.agents.files.length === 1 ? "" : "s"}${c.agents.global ? " and the global file" : ""}, ${c.agents.bytesOfText.toLocaleString("en-US")} bytes` },
     { id: "environment", label: "Environment", chars: environmentChars(c.world.dir, mode, sys.platform), source: "recorded", detail: "the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path (and by a few characters with the names of the shell and the time zone)" },
     { id: "tools", label: `Tool definitions (${tools.length})`, chars: toolChars, source: "recorded", detail: tools.map((t) => `${t[0]} ${t[1].toLocaleString("en-US")}`).join(", "), items: tools.map((t) => ({ name: t[0], chars: t[1] })) },
+    { id: "namespaces", label: "Deferred tool namespaces", chars: namespaces.chars, source: namespaces.servers.length ? "computed" : "recorded", detail: `${[...namespaces.bundled, ...namespaces.servers].join(", ")}: the groups of tools the model can load with tool_search, named in the developer message`, items: [...namespaces.bundled, ...namespaces.servers] },
   ];
   const enabledServers = c.mcp.filter((s) => s.enabled);
-  rows.push({ id: "mcp", label: `MCP servers (${enabledServers.length})`, chars: null, source: "not measured", detail: enabledServers.length ? `${enabledServers.map((s) => s.id).join(", ")}: the three resource tools they bring are counted under tool definitions; a server's own tools are not in the first request (Codex 0.163.0 defers them behind tool_search: 2, 3, 30 and 60 tools gave the same request), so they cost when the model loads them, which this tool does not measure because it starts no server` : "none configured" });
+  rows.push({ id: "mcp", label: `MCP servers (${enabledServers.length})`, chars: null, source: "not measured", detail: enabledServers.length ? `${enabledServers.map((s) => s.id).join(", ")}: the three resource tools they bring are counted under tool definitions, and the namespace of each one that starts under deferred tool namespaces; a server's own tools are not in the first request (Codex defers them behind tool_search: 2, 3, 30 and 60 tools gave the same request), so they cost when the model loads them, which this tool does not measure because it starts no server` : "none configured" });
   const total = rows.reduce((n, r) => n + (r.chars || 0), 0);
   const yours = (c.agents.chars || 0) + skills.yours.reduce((n, s) => n + `- ${s.name}: ${s.description} (file: ${s.alias}/${s.rel})\n`.length, 0);
   return { rows, total, totalTokens: tokens(total), yours, yoursTokens: tokens(yours), recorded: { codex: RECORDED_CODEX, model: RECORDED_MODEL, on: recordedFor(sys.platform).on || RECORDED_ON, system: recordedFor(sys.platform).system, exact: recordedFor(sys.platform).exact }, skills };

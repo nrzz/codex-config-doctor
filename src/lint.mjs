@@ -51,7 +51,7 @@ export function lint(c) {
     if (layer.status !== "broken" && !layer.brokenWhenTrusted) continue;
     // an untrusted project's file is not opened: it does not stop Codex until the project is trusted
     const untrusted = layer.kind === "project" && !layer.trusted;
-    const later = "Codex does not open an untrusted project's file, so it ignores this one for now. The moment the project is trusted, or a session starts with sandbox_mode \"danger-full-access\" (which trusts the folder first), Codex stops with the error";
+    const later = "Codex does not open an untrusted project's file, so it ignores this one for now. The moment the project is trusted (`codex exec --trust` saves the trust first; before Codex 0.169.0, so did a session with sandbox_mode \"danger-full-access\"), Codex stops with the error";
     if (layer.error.kind === "toml") {
       const e = layer.error;
       add("toml-error", {
@@ -128,8 +128,8 @@ export function lint(c) {
       add("untrusted-project", {
         file: layer.dotCodex,
         message: `${layer.dotCodex} holds ${what}, and Codex does not load it: ${marked ? `the project is marked untrusted ([projects.'${marked}'] has trust_level = "untrusted")` : "the project is not trusted"}`,
-        effect: `Codex ignores that folder's config.toml, hooks and rules (skills in it still load). \`codex exec\` prints nothing about it; the app server, which the terminal UI is built on, warns: "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load."`,
-        fix: marked ? `Set trust_level = "trusted" in [projects.'${marked}'] of ${userFile}.` : `Add this to ${userFile}:\n[projects.'${entry}']\ntrust_level = "trusted"${win ? "\nWrite the path with backslashes, as here, without a trailing backslash: an entry with forward slashes or a \\\\?\\ prefix does not trust the folder." : ""}`,
+        effect: `Codex ignores that folder's config.toml, hooks and rules (skills in it still load). \`codex exec\` warns that it does not load the project's configuration and names \`codex exec --trust\` (Codex 0.169.0 and later; before, it said nothing); the app server, which the terminal UI is built on, warns: "Project-local config, hooks, and exec policies are disabled in the following folders until the project is trusted, but skills still load."`,
+        fix: marked ? `Set trust_level = "trusted" in [projects.'${marked}'] of ${userFile}.` : `Run \`codex exec --trust\` once in the project (Codex 0.169.0 and later), or add this to ${userFile}:\n[projects.'${entry}']\ntrust_level = "trusted"${win ? "\nWrite the path with backslashes, as here, without a trailing backslash: an entry with forward slashes or a \\\\?\\ prefix does not trust the folder." : ""}`,
       });
     }
   }

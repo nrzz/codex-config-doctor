@@ -2,9 +2,9 @@
 // (src/recorded.mjs); test/e2e-cost.test.mjs compares both with a real first request of Codex.
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cost, environmentChars, parseSkill, recordedFor, skillsBlock, tokens, toolList } from "../src/cost.mjs";
+import { cost, environmentChars, namespaceOf, namespacesBlock, parseSkill, recordedFor, skillsBlock, tokens, toolList } from "../src/cost.mjs";
 import { costDoc, costText } from "../src/report.mjs";
-import { BASE_INSTRUCTIONS_CHARS, MCP_TOOLS } from "../src/recorded.mjs";
+import { BASE_INSTRUCTIONS_CHARS, MCP_TOOLS, NAMESPACES_BUNDLED, NAMESPACES_HEAD, NAMESPACES_TAIL } from "../src/recorded.mjs";
 import { world } from "./world.mjs";
 
 const row = (r, id) => r.rows.find((x) => x.id === id);
@@ -22,14 +22,16 @@ test("a token is four characters, rounded", () => {
 test("the rows add up to the total, and AGENTS.md is what the model gets", () => {
   const { c } = world({ "config.toml": "" });
   const r = cost(c);
-  assert.deepEqual(r.rows.map((x) => x.id), ["base", "skills", "permissions", "agents", "environment", "tools", "mcp"]);
+  assert.deepEqual(r.rows.map((x) => x.id), ["base", "skills", "permissions", "agents", "environment", "tools", "namespaces", "mcp"]);
   assert.equal(r.total, r.rows.reduce((n, x) => n + (x.chars || 0), 0));
   assert.equal(r.totalTokens, tokens(r.total));
   assert.equal(row(r, "base").chars, BASE_INSTRUCTIONS_CHARS);
   assert.equal(row(r, "tools").chars, TOOLS.reduce((n, t) => n + t[1], 0) + TOOLS.length + 1, "the definitions are one JSON array");
   assert.equal(row(r, "agents").chars, c.agents.chars);
   assert.equal(row(r, "mcp").chars, null);
-  assert.deepEqual(r.recorded, { codex: "0.163.0", model: "gpt-5.5", on: REC.on, system: REC.system, exact: REC.exact });
+  assert.deepEqual(r.recorded, { codex: "0.170.0", model: "gpt-5.5", on: REC.on, system: REC.system, exact: REC.exact });
+  assert.equal(row(r, "namespaces").chars, `${NAMESPACES_HEAD}${NAMESPACES_BUNDLED.join("\n")}${NAMESPACES_TAIL}`.length, "the recorded namespaces, with no MCP server");
+  assert.equal(row(r, "namespaces").source, "recorded");
 });
 
 test("AGENTS.md: the figure follows the files that reach the model", () => {
@@ -168,19 +170,35 @@ test("MCP servers: the three resource tools they bring are counted, their own to
   const r = cost(world(files).c);
   assert.match(row(r, "mcp").label, /MCP servers \(1\)/);
   assert.equal(row(r, "mcp").chars, null);
-  assert.match(row(r, "mcp").detail, /^a: the three resource tools they bring are counted under tool definitions; a server's own tools are not in the first request/);
+  assert.match(row(r, "mcp").detail, /^a: the three resource tools they bring are counted under tool definitions, and the namespace of each one that starts under deferred tool namespaces; a server's own tools are not in the first request/);
   const names = row(r, "tools").items.map((t) => t.name);
   assert.deepEqual(names.slice(0, 5), ["exec_command", "write_stdin", "list_mcp_resources", "list_mcp_resource_templates", "read_mcp_resource"]);
   const added = MCP_TOOLS.reduce((n, t) => n + t[1], 0);
-  assert.equal(row(r, "tools").chars - row(without, "tools").chars, added + MCP_TOOLS.length + "a".length + 4, "three tools, their commas, and \"- a\" in the description of tool_search");
+  assert.equal(row(r, "tools").chars - row(without, "tools").chars, added + MCP_TOOLS.length, "three tools and their commas (since Codex 0.167.0 the description of tool_search names no server)");
+  const ns = (x) => row(x, "namespaces").chars - row(without, "namespaces").chars;
+  assert.equal(ns(r), "\n- mcp__a".length, "a line in the deferred tool namespaces");
+  assert.deepEqual(row(r, "namespaces").items, ["multi_agent_v1", "mcp__a"]);
+  assert.equal(row(r, "namespaces").source, "computed");
   // a server that is not found adds the tools and not its name; a server that is turned off adds nothing; the same for an http server
   const notFound = cost(world({ "config.toml": '[mcp_servers.gone]\ncommand = "nosuchprog"\n' }).c);
   assert.equal(row(notFound, "tools").chars - row(without, "tools").chars, added + MCP_TOOLS.length);
+  assert.equal(ns(notFound), 0);
   const off = cost(world({ "config.toml": '[mcp_servers.a]\ncommand = "node"\nenabled = false\n', "abs:/bin/node": "x" }).c);
   assert.equal(row(off, "tools").chars, row(without, "tools").chars);
+  assert.equal(ns(off), 0);
   const web = cost(world({ "config.toml": '[mcp_servers.web]\nurl = "http://127.0.0.1:1/mcp"\n' }).c);
-  assert.equal(row(web, "tools").chars - row(without, "tools").chars, added + MCP_TOOLS.length + "web".length + 4);
-  assert.equal(row(cost(world({ "config.toml": '[mcp_servers.x]\nargs = []\n' }).c), "tools").chars, row(without, "tools").chars, "an invalid server adds nothing");
+  assert.equal(row(web, "tools").chars - row(without, "tools").chars, added + MCP_TOOLS.length);
+  assert.equal(ns(web), "\n- mcp__web".length);
+  const invalid = cost(world({ "config.toml": '[mcp_servers.x]\nargs = []\n' }).c);
+  assert.equal(row(invalid, "tools").chars, row(without, "tools").chars, "an invalid server adds nothing");
+  assert.equal(ns(invalid), 0);
+});
+
+test("the deferred tool namespaces: the recorded lines and one for each server that starts, in order, its id with other characters turned into _", () => {
+  const two = world({ "config.toml": '[mcp_servers.one]\nurl = "http://127.0.0.1:1/mcp"\n[mcp_servers.longer-name]\nurl = "http://127.0.0.1:1/mcp"\n' }).c;
+  assert.equal(namespacesBlock(two).text, `${NAMESPACES_HEAD}${["- mcp__longer_name", "- mcp__one", ...NAMESPACES_BUNDLED].join("\n")}${NAMESPACES_TAIL}`);
+  assert.deepEqual(namespacesBlock(two).servers, ["mcp__one", "mcp__longer_name"]);
+  assert.equal(namespaceOf("a.b-C_9"), "mcp__a_b_C_9");
 });
 
 test("the report: every row, the total, and a line for what is yours", () => {
@@ -188,9 +206,9 @@ test("the report: every row, the total, and a line for what is yours", () => {
   const r = cost(c);
   const doc = costDoc(c, r);
   assert.equal(doc.total, r.total);
-  assert.equal(doc.rows.length, 7);
+  assert.equal(doc.rows.length, 8);
   const text = costText(c, r);
-  for (const label of ["Base instructions", "Skills", "Permissions", "AGENTS.md", "Environment", "Tool definitions (10)", "MCP servers (0)", "Total"]) assert.ok(text.includes(label), label);
+  for (const label of ["Base instructions", "Skills", "Permissions", "AGENTS.md", "Environment", "Tool definitions (10)", "Deferred tool namespaces", "MCP servers (0)", "Total"]) assert.ok(text.includes(label), label);
   assert.match(text, /Yours \(AGENTS\.md and your skills\): \d[\d,]* characters, about \d[\d,]* tokens/);
   assert.match(text, /Tokens are characters \/ 4, an estimate/);
 });

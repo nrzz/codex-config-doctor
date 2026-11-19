@@ -12,7 +12,7 @@ codex-config-doctor reads your Codex configuration and says what Codex will do w
 - `lint`: 44 findings, each with an id, a severity (error, warning or note), the file and line, what Codex does about it, and the fix. 42 rest on the real binary and two on the documentation. Exit 1 when there is an error or a warning. `lint --markdown` is the short form to paste into an agent: at most 12 findings and 500 characters a line.
 - `why "<command>"`: what Codex does with a shell command under your approval policy, sandbox and rules: runs it inside the sandbox, asks first, runs it outside the sandbox through an allow rule, refuses it, or splits a script into the commands it judges one by one. Which rule matched each part, with the prefix and the file and line, or why none did. Exit 1 when Codex would refuse it.
 - `agents`: the AGENTS.md files in the order Codex reads them, each included, cut or left out against the cap, and the size of the text. `agents --print` prints the text exactly as Codex sends it.
-- `cost`: what the first request of a session carries before your words (the base instructions, the skills, the permissions, AGENTS.md, the environment, the tool definitions), in characters and in tokens. The parts that come from your files are computed and exact; the parts that belong to Codex are the ones recorded from Codex 0.163.0 on each system.
+- `cost`: what the first request of a session carries before your words (the base instructions, the skills, the permissions, AGENTS.md, the environment, the tool definitions, the deferred tool namespaces), in characters and in tokens. The parts that come from your files are computed and exact; the parts that belong to Codex are the ones recorded from Codex 0.170.0 on each system.
 - `explain <finding-id>` and `explain --list`: the page of a finding: what it means, what Codex does (each line marked verified, documented or not verified), and the fix.
 - `--json` on every command, for scripts and for other tools. `--project <dir>` and `--profile <name>` on the commands that read the configuration. `CODEX_HOME` is honoured as Codex honours it.
 
@@ -96,7 +96,7 @@ Prints what Codex will use. The first lines say where Codex looks (its home, and
 
 ```text
 $ codex-config-doctor show
-codex-config-doctor 1.1.0  what Codex will do with this configuration
+codex-config-doctor 1.2.0  what Codex will do with this configuration
 project   /home/runner/shop
 codex     /home/runner/.codex  (the default, ~/.codex)
 trust     trusted, by the entry for this folder (/home/runner/shop)
@@ -148,7 +148,7 @@ The findings, worst first within the order of the files. Each says where (file a
 
 ```text
 $ codex-config-doctor lint
-codex-config-doctor 1.1.0  lint
+codex-config-doctor 1.2.0  lint
 project   /home/runner/shop
 codex     /home/runner/.codex
 
@@ -210,7 +210,7 @@ On Windows, `lint` also says what Codex does when no sandbox is selected, which 
 
 ```text
 C:\Users\me\shop> codex-config-doctor lint
-codex-config-doctor 1.1.0  lint
+codex-config-doctor 1.2.0  lint
 project   C:\Users\me\shop
 codex     C:\Users\me\.codex
 
@@ -231,7 +231,7 @@ Takes one shell command in quotes. It applies your approval policy, your sandbox
 
 ```text
 $ codex-config-doctor why "git status"
-codex-config-doctor 1.1.0  why
+codex-config-doctor 1.2.0  why
 command   git status
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -250,7 +250,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git push origin main"
-codex-config-doctor 1.1.0  why
+codex-config-doctor 1.2.0  why
 command   git push origin main
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -267,7 +267,7 @@ Judged as 1 command:
 
 ```text
 $ codex-config-doctor why "git status && rm -rf build"
-codex-config-doctor 1.1.0  why
+codex-config-doctor 1.2.0  why
 command   git status && rm -rf build
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -287,7 +287,7 @@ Judged as 2 commands (the script was split):
 
 ```text
 $ codex-config-doctor why "npm publish"
-codex-config-doctor 1.1.0  why
+codex-config-doctor 1.2.0  why
 command   npm publish
 settings  approval_policy on-request; sandbox_mode workspace-write; shell bash
 
@@ -315,7 +315,7 @@ On Windows with no sandbox selected there is nothing to run a command in, so eve
 
 ```text
 C:\Users\me\shop> codex-config-doctor why "echo hi"
-codex-config-doctor 1.1.0  why
+codex-config-doctor 1.2.0  why
 command   echo hi
 settings  approval_policy on-request; sandbox_mode read-only; Windows sandbox not selected; shell powershell
 
@@ -335,7 +335,7 @@ The AGENTS.md files in the order Codex reads them. For each: its path, its size,
 
 ```text
 $ codex-config-doctor agents
-codex-config-doctor 1.1.0  agents
+codex-config-doctor 1.2.0  agents
 project   /home/runner/shop  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -349,7 +349,7 @@ With the working folder in `app/`, the second file does not fit in the 1,900 byt
 
 ```text
 $ codex-config-doctor agents --project /home/runner/shop/app
-codex-config-doctor 1.1.0  agents
+codex-config-doctor 1.2.0  agents
 project   /home/runner/shop/app  (root /home/runner/shop)
 cap       project_doc_max_bytes 1,900
 
@@ -366,25 +366,26 @@ What the first request of a session carries before your words, in characters and
 
 ```text
 $ codex-config-doctor cost
-codex-config-doctor 1.1.0  cost
+codex-config-doctor 1.2.0  cost
 project   /home/runner/shop
 What the first request of a session carries before your words. Tokens are characters / 4, an estimate.
-"computed" comes from your files; "recorded" is what Codex 0.163.0 sent with model gpt-5.5 on Linux (2026-10-17) and moves with the version, the model and the system.
+"computed" comes from your files; "recorded" is what Codex 0.170.0 sent with model gpt-5.5 on Linux (2026-11-19) and moves with the version, the model and the system.
 
-                         characters  tokens  source
-  Base instructions      21,299      5,325   recorded: Codex 0.163.0, model gpt-5.5
-  Skills                 4,511       1,128   recorded: 4 bundled skills; the how-to text is about 2,600 of the characters
-  Permissions            4,039       1,010   recorded: approval on-request, sandbox workspace-write
-  AGENTS.md              1,458       365     computed: 1 project file and the global file, 1,458 bytes
-  Environment            853         213     recorded: the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path (and by a few characters with the names of the shell and the time zone)
-  Tool definitions (13)  11,066      2,767   recorded: exec_command 1,564, write_stdin 784, list_mcp_resources 628, list_mcp_resource_templates 717, read_mcp_resource 526, request_user_input 1,355, apply_patch 846, view_image 526, get_goal 281, create_goal 760, update_goal 2,172, tool_search 804, web_search 89
-  MCP servers (1)        -           -       not measured: docs: the three resource tools they bring are counted under tool definitions; a server's own tools are not in the first request (Codex 0.163.0 defers them behind tool_search: 2, 3, 30 and 60 tools gave the same request), so they cost when the model loads them, which this tool does not measure because it starts no server
-  Total                  43,226      10,807
+                            characters  tokens  source
+  Base instructions         21,299      5,325   recorded: Codex 0.170.0, model gpt-5.5
+  Skills                    4,676       1,169   recorded: 4 bundled skills; the how-to text is about 2,600 of the characters
+  Permissions               4,039       1,010   recorded: approval on-request, sandbox workspace-write
+  AGENTS.md                 1,458       365     computed: 1 project file and the global file, 1,458 bytes
+  Environment               853         213     recorded: the folder, the shell, the date, the time zone and the sandbox; moves with the length of the folder's path (and by a few characters with the names of the shell and the time zone)
+  Tool definitions (13)     10,806      2,702   recorded: exec_command 1,564, write_stdin 784, list_mcp_resources 628, list_mcp_resource_templates 717, read_mcp_resource 526, request_user_input 1,355, apply_patch 846, view_image 371, get_goal 281, create_goal 760, update_goal 2,172, tool_search 699, web_search 89
+  Deferred tool namespaces  104         26      recorded: multi_agent_v1: the groups of tools the model can load with tool_search, named in the developer message
+  MCP servers (1)           -           -       not measured: docs: the three resource tools they bring are counted under tool definitions, and the namespace of each one that starts under deferred tool namespaces; a server's own tools are not in the first request (Codex defers them behind tool_search: 2, 3, 30 and 60 tools gave the same request), so they cost when the model loads them, which this tool does not measure because it starts no server
+  Total                     43,235      10,809
 
 Yours (AGENTS.md and your skills): 1,458 characters, about 365 tokens, on every request of the session.
 ```
 
-An enabled MCP server brings three tools to every request (the resource tools, counted under tool definitions) and adds its id to the description of `tool_search`; its own tools are not in the first request, because Codex defers them, so `cost` cannot say what they cost and says so. It starts no server.
+An enabled MCP server brings three tools to every request (the resource tools, counted under tool definitions), and one that starts adds its namespace, `mcp__` and its id, to the deferred tool namespaces of the developer message (Codex 0.167.0 and later; before, its id went into the description of `tool_search`); its own tools are not in the first request, because Codex defers them, so `cost` cannot say what they cost and says so. It starts no server.
 
 ### `explain`
 
@@ -471,10 +472,10 @@ It reads, on your machine only, the places below. What it says about Codex is wh
 
 - From the lowest layer to the highest: the system `config.toml`, the user's `config.toml`, the profile file, then the `.codex/config.toml` of each folder from the project root down to the working folder, the closest winning. Tables merge key by key; arrays and single values are replaced. A `-c key=value` on the command line is above all of them and is not seen by this tool.
 - A project layer applies only when the user's `config.toml` has `projects.<path>.trust_level = "trusted"` for the folder itself or, when the folder has no entry, for the Git root. Trusting only a subfolder loads that folder's layer and not the root's; an entry for a parent of the repository does nothing; `"untrusted"` is the same as no entry.
-- An untrusted project's `.codex/config.toml` is not opened, so a syntax error in it does not stop Codex, and its hooks and rules are not used. Its skills are still read, and so are its AGENTS.md files.
+- An untrusted project's `.codex/config.toml` is not opened, so a syntax error in it does not stop Codex, and its hooks and rules are not used. Its skills are still read, and so are its AGENTS.md files. `codex exec` prints one warning about it that names `codex exec --trust` (Codex 0.169.0 and later; before, it said nothing).
 - Ten keys are ignored in a project's `config.toml` (`openai_base_url`, `chatgpt_base_url`, `apps_mcp_product_sku`, `model_provider`, `model_providers`, `notify`, `profile`, `profiles`, `experimental_realtime_ws_base_url`, `otel`), with one warning at start.
 - On Windows the `projects` entry is compared with the folder's path as Windows spells it: backslashes, no trailing separator, no `\\?\` prefix, case ignored. An entry with forward slashes, a trailing backslash or a `\\?\` prefix matches nothing. The warning that Codex prints for an untrusted project names the folder in lower case with backslashes, and an entry written that way trusts it.
-- `codex exec` with the sandbox set to `danger-full-access` (in the file, with `--sandbox` or with the bypass flag) writes a trusted entry for the working folder into your `config.toml` after the run, and so does `--sandbox workspace-write` where a sandbox can run (Linux and macOS; on Windows with no sandbox selected workspace-write is read-only and writes nothing).
+- `codex exec --trust` (Codex 0.169.0 and later) writes a trusted entry for the project's Git root into your `config.toml`, also when it runs in a subfolder, and that run already loads the project's file; an entry that says `untrusted` stops it with `Error: <folder> is marked as untrusted. Update its trust setting first.` No sandbox mode trusts a folder any more. Before 0.169.0, `codex exec` with the sandbox set to `danger-full-access` (in the file, with `--sandbox` or with the bypass flag) wrote the entry after the run, and so did `--sandbox workspace-write` where a sandbox can run (Linux and macOS).
 - A profile is a file: `--profile x` reads `$CODEX_HOME/x.config.toml`, and without the file Codex starts without a profile and says nothing. A top-level `profile = "x"` stops Codex, and `--profile x` with a `[profiles.x]` table in `config.toml` stops it too.
 
 **Keys**: Codex accepts a key it does not know and prints one warning (`--strict-config` refuses to start). A value of the wrong type or outside the allowed words stops Codex with its own message. The tool knows the keys, tables and types of Codex 0.163.0 and its 175 feature flags (42 of them removed, which Codex accepts and ignores; a few deprecated, which Codex honours with a notice). `codex features list` is the list it was written from.
@@ -485,13 +486,13 @@ It reads, on your machine only, the places below. What it says about Codex is wh
 
 **Hooks**: a hook is in `hooks.json` or in a `[hooks]` table, per layer; a layer with both loads both and warns. Codex runs a hook only after it is trusted: a record `[hooks.state."<file>:<event>:<group>:<handler>"] trusted_hash = "sha256:..."` in the user's `config.toml`, where the hash is the SHA-256 of the hook's canonical JSON (the tool computes it; `lint` prints the key and the hash to add, and `show --json` has them for every hook). A changed hook is skipped until it is trusted again. A handler field that Codex does not read (`timeout_sec`, `status_message`) is dropped in silence. A `PreToolUse` hook that answers `ask` changes nothing; `deny` and `block` stop the command.
 
-**MCP servers**: a server with a `command` is a stdio server and one with a `url` is an HTTP server; both, or neither, stops Codex. A stdio server whose program is not found is skipped in silence unless `required = true`. Any enabled server adds three resource tools to every request, and a server that starts adds its id to the description of `tool_search`; its own tools are not in the first request.
+**MCP servers**: a server with a `command` is a stdio server and one with a `url` is an HTTP server; both, or neither, stops Codex. A stdio server whose program is not found is skipped in silence unless `required = true`. Any enabled server adds three resource tools to every request, and a server that starts adds its namespace to the deferred tool namespaces of the developer message: `mcp__` and its id, with every character other than a letter, a digit or `_` turned into `_` (Codex 0.167.0 and later; before, its id went into the description of `tool_search`). Its own tools are not in the first request.
 
 **Model providers**: `openai`, `ollama` and `lmstudio` are built in and cannot be redefined; `wire_api` can only be `responses`; `model_provider` must name a provider that is defined; a provider's `env_key` must be set where Codex starts, or Codex stops at the first request.
 
 **The Windows sandbox**: with no implementation selected (`windows.sandbox` unset and `features.prefer_mxc` not true), `sandbox_mode = "workspace-write"` becomes read-only in the prompt the model gets, and every command that no allow rule covers asks, even `echo hi`; with `approval_policy = "never"` it is refused. `windows.sandbox = "unelevated"` (or `"mxc"` on a Windows that has MXC) selects an implementation and the same commands run inside it. `features.prefer_mxc` picks MXC only where it is available, and where it is not Codex selects nothing and does not fall back to `unelevated`.
 
-**What `cost` computes and what it records**: the AGENTS.md message and the skills block are built from your files by the rules above and were compared with Codex's, character for character. The base instructions, the tool definitions, the permissions text and the environment text are Codex's own: they are recorded in `src/recorded.mjs` from Codex 0.163.0 on Windows, Linux and macOS, and the permissions and environment figures are adjusted to the length of your folder's path. `test/record-oracles.mjs recorded` and the `record` workflow write them again for a newer Codex.
+**What `cost` computes and what it records**: the AGENTS.md message and the skills block are built from your files by the rules above and were compared with Codex's, character for character, and so were the deferred tool namespaces. The base instructions, the tool definitions, the namespaces Codex brings, the permissions text and the environment text are Codex's own: they are recorded in `src/recorded.mjs` from Codex 0.170.0 on Windows, Linux and macOS (on 19 November 2026; first from 0.163.0), and the permissions and environment figures are adjusted to the length of your folder's path. `test/record-oracles.mjs recorded` and the `record` workflow write them again for a newer Codex.
 
 ### Privacy
 
@@ -550,26 +551,26 @@ Each row is a finding id (the argument of `explain`), its severity, its basis (`
 
 ## What was verified, and how
 
-Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 24.19.0 and Codex CLI 0.163.0, the npm release of that day. CI runs the unit tests on Linux, macOS and Windows with Node 20, 22 and 24 and on Linux with Node 18, and the real-binary checks on Ubuntu 24.04.5, macOS 26.6.2 and Windows Server 2025 (build 10.0.26100) with the newest Codex installed from npm (0.163.0 when this was first written, 0.165.0 on 28 October). On commit 76f813b all 10 jobs of the unit tests (run 40663188778) and all 3 jobs of the real-binary checks (run 40663188690, Codex 0.165.0) were green; it is the last commit that changed the code, apart from the version number in the release commit after it. The badges at the top show the latest runs.
+Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 24.19.0 and Codex CLI 0.163.0, the npm release of that day. CI runs the unit tests on Linux, macOS and Windows with Node 20, 22 and 24 and on Linux with Node 18, and the real-binary checks on Ubuntu 24.04.5, macOS 26.6.2 and Windows Server 2025 (build 10.0.26100) with the newest Codex installed from npm (0.163.0 when this was first written, 0.165.0 on 28 October). On commit 76f813b all 10 jobs of the unit tests (run 40663188778) and all 3 jobs of the real-binary checks (run 40663188690, Codex 0.165.0) were green; it is the last commit that changed the code, apart from the version number in the release commit after it. On 19 November 2026 the real-binary checks had been red since Codex 0.167.0; the changes were bisected on this machine with side-by-side installs of 0.166.0, 0.167.0, 0.168.0, 0.169.0 and 0.170.0 (0.167.0: the sources of deferred tools left the description of `tool_search` for a block of the developer message; 0.168.0: `view_image` lost its `detail` parameter; 0.169.0: the trust of a project, and the text of the bundled `openai-docs` skill), the figures were recorded again from 0.170.0 on all three systems by the `record` workflow (run 44492032769), and the checks were put to 0.170.0. The badges at the top show the latest runs.
 
-- **300 automated tests** on Windows and **333** on Linux and macOS (`npm test`, Node's own runner, no dependencies, about 10 seconds on this machine). `node --test` also reports each of the 19 helper files under `test/` as a passing test, on every Node version CI runs (18 to 24); those are not counted here (the runner's total was 319 on Windows and 352 on Linux and macOS). Without a Codex binary, on Windows 185 pass and 115 are skipped; on Linux and macOS 185 pass and 148 are skipped. The skipped ones are the real-binary checks below, which are not the same set on Windows (some rows and checks are about Windows only). The tests cover:
+- **302 automated tests** on Windows and **335** on Linux and macOS (`npm test`, Node's own runner, no dependencies, about 10 seconds on this machine). `node --test` also reports each of the 19 helper files under `test/` as a passing test, on every Node version CI runs (18 to 24); those are not counted here (the runner's total was 321 on Windows and 354 on Linux and macOS). Without a Codex binary, on Windows 186 pass and 116 are skipped; on Linux and macOS 186 pass and 149 are skipped. The skipped ones are the real-binary checks below, which are not the same set on Windows (some rows and checks are about Windows only). The tests cover:
   - the readers, held to tables recorded from Codex 0.163.0: the TOML reader (128 files that Codex accepted or rejected, with the line and column of each error), the Starlark subset of the rules files, the checks of `prefix_rule()` and of the examples of a rule;
   - the layers (19 worlds: which folders Codex loads, which it skips, where each key came from, every spelling of a trust entry), the settings (321 keys in seven groups that Codex reads without a warning, 21 typos it lists as ignored, 198 values of the wrong type it refuses), the AGENTS.md message (44 worlds, byte for byte), the hooks (41 worlds: the key, the hash and the status of each hook), and the rules (327 commands under nine rule sets, and 63 rules files, as `codex execpolicy check` answered them);
   - each of the 44 findings, from a pretend machine that a test spoils in one way: said when it should be, with its effect and its fix, and not otherwise; the pages of `explain` (one for every id, every line marked verified, documented or not verified); the table of banned allow-rule prefixes;
   - `why`: the split of a script, the matching of rules, the outcome under every approval policy and sandbox mode; `agents`; `cost` (the rows add up, the folder's path moves the permissions and environment figures as stated, the skills block for every place skills are read from);
   - the reports: the text, the markdown (at most 12 findings, 500 characters a line), the JSON documents; the command line (every usage error and exit code); on a pretend Windows, Linux and macOS machine;
   - the package: its files, the workflows, the community files, the README (its sections, the usage block, the examples, the table of findings, the JSON shapes, the Files table, the numbers it quotes), that nothing under `src/` writes a file, starts a program or opens a connection, and that no tracked file has a carriage return.
-- **115 tests that run the real binary** on Windows and **148** on Linux and macOS (`test/e2e-*.test.mjs`, 13 files; they skip when `E2E_CODEX` is not set). Each starts a fake Responses API on 127.0.0.1 and runs `codex exec` or a thread of `codex app-server` (what the terminal UI is built on) against it, with a throwaway `CODEX_HOME`, `HOME` and `USERPROFILE`, the variables of every agent removed from the environment, every proxy variable pointed at a closed port, and stdin ignored; the binary is started with `spawn`, never `spawnSync`. No model is reached and no token is spent. On this machine all 115 ran: 113 passed and 2 were skipped (the check of programs on Linux and macOS, and the check of a `commandWindows` handler off Windows), in 571 seconds. In CI, with Codex 0.163.0 from npm, on commit 1686302: Ubuntu 24.04.5 ran 148 tests, 141 passed and 7 were skipped (the ones about Windows), in 109 seconds; macOS 26.6.2 the same, in 157 seconds; Windows Server 2025 ran 115, 113 passed and 2 were skipped, in 604 seconds. The same findings were compared with what the tool says (`lint` is run on the very folder `codex` was run in). What Codex answered:
+- **116 tests that run the real binary** on Windows and **149** on Linux and macOS (`test/e2e-*.test.mjs`, 13 files; they skip when `E2E_CODEX` is not set). Each starts a fake Responses API on 127.0.0.1 and runs `codex exec` or a thread of `codex app-server` (what the terminal UI is built on) against it, with a throwaway `CODEX_HOME`, `HOME` and `USERPROFILE`, the variables of every agent removed from the environment, every proxy variable pointed at a closed port, and stdin ignored; the binary is started with `spawn`, never `spawnSync`. No model is reached and no token is spent. On this machine all 115 ran: 113 passed and 2 were skipped (the check of programs on Linux and macOS, and the check of a `commandWindows` handler off Windows), in 571 seconds. In CI, with Codex 0.163.0 from npm, on commit 1686302: Ubuntu 24.04.5 ran 148 tests, 141 passed and 7 were skipped (the ones about Windows), in 109 seconds; macOS 26.6.2 the same, in 157 seconds; Windows Server 2025 ran 115, 113 passed and 2 were skipped, in 604 seconds. The same findings were compared with what the tool says (`lint` is run on the very folder `codex` was run in). What Codex answered:
   - **Configuration errors.** A `config.toml` or a profile file that does not parse stops Codex with `Error loading config.toml:` and the path, line and column; a trusted project's file does too, and an untrusted project's file is not opened. A UTF-16 file is refused (`invalid utf-8 sequence`); a byte order mark and CRLF are fine. A value of the wrong type stops Codex with its own message (`invalid type: string "yes", expected a boolean`, `unknown variant`, `missing field`); `experimental_thread_store_endpoint` is refused by name. `CODEX_HOME` naming a folder that is not there stops Codex (`CODEX_HOME points to "...", but that path does not exist`).
   - **Silence.** An unknown key is ignored with one warning, and `codex exec --json` prints it as an error item in the event stream and nothing on stderr; `--strict-config` refuses to start. The ten keys in a project's file are ignored with `Ignored unsupported project-local config keys in ...`. `--profile` with no file starts without it, with no message. A feature flag that was removed is accepted without a word; a deprecated one prints a notice.
-  - **Trust.** A project's `.codex/` layer, hooks and rules are used only when the project is trusted, by its own entry or its Git root's; the app server warns with the entry to add and `codex exec` says nothing. `codex exec` with `danger-full-access` writes the entry itself, also with `--sandbox workspace-write` on Linux and macOS, where a sandbox can run it (on Windows with no sandbox selected workspace-write is read-only and writes nothing); read-only and the default write nothing, an entry that is already there (even `untrusted`) is left alone, and the next session loads the folder's file. On Windows an entry with forward slashes, a trailing backslash or a `\\?\` prefix does not trust the folder, and the lower-case spelling of Codex's own warning does.
+  - **Trust.** A project's `.codex/` layer, hooks and rules are used only when the project is trusted, by its own entry or its Git root's; the app server warns with the entry to add, and `codex exec` warns too, naming `codex exec --trust` (Codex 0.169.0 and later; before, it said nothing). `codex exec --trust` writes the Git root's entry, also from a subfolder, and loads the project's file in that run and the next session; an entry that says `untrusted` stops it and is left as it is. Since 0.169.0 no sandbox mode writes an entry (`danger-full-access` in the file, with `--sandbox` or with the bypass flag, `workspace-write`, `read-only`, the default) or loads the project's file; before, `danger-full-access` did, and `workspace-write` on Linux and macOS. On Windows an entry with forward slashes, a trailing backslash or a `\\?\` prefix does not trust the folder, and the lower-case spelling of Codex's own warning does.
   - **AGENTS.md.** The message Codex builds was compared in 44 worlds with the tool's (size, hash and ends): the cap crossed by the second of three files, a global file that does not count, the cap at 0 and at 3 bytes, a character cut in the middle, a byte order mark, UTF-16, CRLF, override and fallback names, an empty override, a folder named AGENTS.md. `agents --print` is that message.
   - **Rules.** 327 commands under nine rule sets and 63 rules files were put to `codex execpolicy check` and the answers recorded; the tool's matcher agrees with every one. `codex exec` stops on a rules file with a syntax error or a failing example (`Error loading rules:` and the line, which is the line after the last for a bracket that is never closed); the app server starts and warns `Error parsing rules; custom rules not applied.`, and a forbidden rule in another file stopped nothing.
-  - **Hooks.** The key and the hash of every hook of 41 worlds were read back from `hooks/list` of the app server: the tool computes the same SHA-256. A hook with no record or with another hash is skipped; `--dangerously-bypass-hook-trust` runs it. A layer with both formats loads both and warns; a `hooks.json` that does not parse loads none of its hooks and warns; an event Codex does not have is ignored in silence; a handler field Codex does not read is dropped in silence (a timeout written `timeout_sec` stays 600 seconds). A `PreToolUse` hook that answers `ask` changed nothing; `deny` and `block` stopped the command with `Command blocked by PreToolUse hook: ...`.
+  - **Hooks.** The key and the hash of every hook of 41 worlds were read back from `hooks/list` of the app server: the tool computes the same SHA-256. A hook with no record or with another hash is skipped; `--dangerously-bypass-hook-trust` runs it, but not the hook of a project that is not trusted (Codex 0.163.0 to 0.170.0; until 1.2.0 the explain page of `hook-untrusted` said it did, which no version bore out: [#5](https://github.com/nrzz/codex-config-doctor/issues/5)). A layer with both formats loads both and warns; a `hooks.json` that does not parse loads none of its hooks and warns; an event Codex does not have is ignored in silence; a handler field Codex does not read is dropped in silence (a timeout written `timeout_sec` stays 600 seconds). A `PreToolUse` hook that answers `ask` changed nothing; `deny` and `block` stopped the command with `Command blocked by PreToolUse hook: ...`.
   - **Rules for shell commands.** `why` was compared with what a thread of the app server did to a command that writes outside the project (it was refused, the client was asked, it ran inside the sandbox, or it wrote outside): under every approval policy and sandbox mode, with allow, prompt and forbidden rules, lists of commands, substitutions and a banned prefix. All 88 allow rules for a banned prefix were ignored by the Windows binary and a longer pattern was honoured; on Linux and macOS the same was seen for `env`, `python3`, `rm` and `git` (and for `node`, in the rows above): an allow rule for the bare prefix left the command inside the sandbox, a longer pattern ran it outside.
   - **Commands Codex finds dangerous.** With no rule to decide, `rm` with a force option (`-f`, `--force`, or a group of options with an f such as `-rf`, `-fr`, `-rfv` or `-Rf`, before or after the operands) asks, and with `approval_policy = "never"` is refused with `rm -f style commands are not permitted. Use a safer approach`. On Linux and macOS that holds wherever the `rm` is in a script: after `VAR=1`, `env` or `sudo`, by its path, in a list, a pipe, a subshell, a loop, a substitution, a redirection or the script of `bash -c`. Plain `rm`, `rm -r`, `git reset`, `git rm`, `git clean`, `git push --force`, `xargs rm -rf` and `find -exec rm -rf` run; Ubuntu 24.04 and macOS 26 gave the same answers to all of these. In PowerShell on Windows `Remove-Item`, `rm`, `ri` and `del` with `-Force`, and `Start-Process` with a web address, ask (and are refused with `blocked by policy`), while `rm -rf` and `git reset --hard` run. A command that starts with `bash -lc` is not opened, so the rules for what is inside it do not match.
   - **MCP servers, providers.** A stdio server whose program is missing is skipped in silence (exit 0) and stops Codex with `required = true`; on Windows `tool.cmd` and `tool.bat` are found through PATHEXT and a `.ps1` is not. A `command` and a `url`, or neither, stop Codex. `openai`, `ollama` and `lmstudio` cannot be redefined; `wire_api` other than `responses` stops Codex; a provider with no `base_url` connects to api.openai.com; an `env_key` that is not set stops Codex at the first request.
-  - **The first request.** The base instructions are 21,299 characters on all three systems. The tool definitions, the permissions block and the environment block differ by system and are recorded for each; the skills block was reproduced character for character in ten worlds (the places skills are read from, hidden folders, a description longer than 1,024 characters, which Codex cuts to 1,021 and `...`); the AGENTS.md message and the skills block of a world with files agree with the tool's; a server that starts adds its id to `tool_search`, and 2, 3, 30 and 60 tools of a server gave the same request.
+  - **The first request.** The base instructions are 21,299 characters on all three systems. The tool definitions, the permissions block and the environment block differ by system and are recorded for each; the deferred tool namespaces were reproduced character for character, with ids that Codex rewrites (`longer-name`, `Dot.Name`); the skills block was reproduced character for character in ten worlds (the places skills are read from, hidden folders, a description longer than 1,024 characters, which Codex cuts to 1,021 and `...`); the AGENTS.md message and the skills block of a world with files agree with the tool's; a server that starts adds its namespace to the developer message (Codex 0.167.0 and later; before, its id to `tool_search`), one that cannot start adds none, and 2, 3, 30 and 60 tools of a server gave the same request.
   - **The Windows sandbox.** With nothing selected the log says `Windows sandbox selection: disabled`, the prompt says `read-only`, and every command asks (refused with `never`). `unelevated` and `mxc` select an implementation and the commands run inside it. `features.prefer_mxc` picks MXC where the log says `MXC availability: true` and nothing where it says `false` (Windows Server 2025, build 26100: `Windows sandbox selection: disabled`); an explicit `mxc` is selected either way. `elevated` is selected without a word; `bogus` stops Codex.
   - **`codex doctor`.** Run on nine worlds, it reported the unknown key, the TOML error, the legacy profile selector and the missing MCP program, and said nothing of a rules file that does not load, an untrusted project, a hook with no trust record or an AGENTS.md cut by the cap.
 - **From GitHub.** `npx -y github:nrzz/codex-config-doctor lint --project <folder>` ran from the published repository (commit 1686302) with a throwaway npm cache, home folder and Codex home. It printed its report, with the two warnings that the folder deserved (a misspelt key, and no Windows sandbox selected), and exited 1, after 10 seconds on Windows 11 with Node 24.19.0, the download from GitHub included.
@@ -585,7 +586,7 @@ Checked on 17 October 2026 on Windows 11 Home (build 10.0.26300, x64) with Node 
 - **The hash of an `mcp_tool` hook handler with an `input` table** is not reproduced (the key and the status are). The handler types `prompt` and `agent` are read and not checked.
 - **That `ask` marks a hook run as failed** is the documentation's word; Codex printed nothing about it (`hook-ask-unsupported` is a `docs` finding). The same goes for `rules-unevaluated`, the finding for a rules file that uses Starlark the reader does not run.
 - **Other shells and wrappers.** On the macOS runner Codex used `/bin/bash -lc`, so a Mac whose login shell is zsh, and fish or nushell anywhere, were not tried. For the dangerous commands, `sudo` and `env` in front of `rm` were put to the binary; `sudo -u root`, `nohup`, `command`, `time`, the PowerShell aliases `rmdir`, `rd` and `erase`, an abbreviated `-Force` and `Start-Process` through its aliases were not.
-- **Another Codex.** The keys, the feature flags, the banned prefixes and the recorded figures are Codex 0.163.0's. A newer Codex may add a key that `lint` reports as unknown; the weekly run of the real-binary checks is there to show it, and `test/record-oracles.mjs` writes the records again.
+- **Another Codex.** The recorded figures of the first request are Codex 0.170.0's; the keys, the feature flags and the banned prefixes are Codex 0.163.0's, and the real-binary checks still agree with them on 0.170.0. A newer Codex may add a key that `lint` reports as unknown; the weekly run of the real-binary checks is there to show it, and `test/record-oracles.mjs` writes the records again.
 - **Tokens** are characters divided by four, an estimate, not the count of a tokenizer. The permissions and environment blocks hold names from your machine (the folder, the time zone, the shell, the temporary folder), so they differ from the recorded figures by a few dozen characters; the checks allow 20 for the environment block.
 - **What a model does** is not part of any of this: the fake API answers with a scripted command or a fixed text.
 - **`mcp-disabled-tools-unknown`**, a finding for a tool name in `disabled_tools` that the server does not have, is not written: it needs the server to list its tools.

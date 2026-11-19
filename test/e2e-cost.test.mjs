@@ -5,7 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { collect } from "../src/collect.mjs";
-import { cost, recordedFor, skillsBlock, toolList } from "../src/cost.mjs";
+import { cost, namespacesBlock, recordedFor, skillsBlock, toolList } from "../src/cost.mjs";
 import { BASE_INSTRUCTIONS_CHARS, RECORDED_CODEX } from "../src/recorded.mjs";
 import { sysFor } from "./behave.mjs";
 import { skip, put } from "./codex-sandbox.mjs";
@@ -22,7 +22,7 @@ const ENVIRONMENT_CWD_CHARS = REC.cwdChars;
 const ENVIRONMENT_SLACK = 20;
 const nearly = (actual, expected, what) => assert.ok(Math.abs(actual - expected) <= ENVIRONMENT_SLACK, `${what}: ${actual} against ${expected}`);
 
-test("the recorded figures are what this Codex sends: base instructions, tools, permissions and environment, for each sandbox", opts, async () => {
+test("the recorded figures are what this Codex sends: base instructions, tools, the deferred tool namespaces, permissions and environment, for each sandbox", opts, async () => {
   assert.equal(REC.exact, true, `src/recorded.mjs has no figures for ${process.platform}: run E2E_CODEX=... node test/record-oracles.mjs recorded on this system`);
   const seen = [];
   for (const mode of SANDBOX_MODES) {
@@ -31,6 +31,7 @@ test("the recorded figures are what this Codex sends: base instructions, tools, 
     seen.push(`${mode}: base ${parts.chars.base}, tools ${parts.toolsChars}`);
     assert.equal(parts.chars.base, BASE_INSTRUCTIONS_CHARS, `${mode}: the base instructions`);
     assert.deepEqual(parts.tools, toolList(worldOf(cap)), `${mode}: the tool definitions, by name and size`);
+    assert.equal(parts.text.namespaces, namespacesBlock(worldOf(cap)).text, `${mode}: the deferred tool namespaces, character for character`);
     const shift = mode === "workspace-write" ? cap.cwd.length - ENVIRONMENT_CWD_CHARS : 0;
     assert.equal(parts.chars.permissions, REC.permissions.never[mode] + shift, `${mode}: the permissions block of codex exec (approval never)`);
     nearly(parts.chars.environment, REC.environment[mode] + TIMES[mode] * (cap.cwd.length - ENVIRONMENT_CWD_CHARS), `${mode}: the environment block; the folder of the run is ${cap.cwd}; Codex sent ${JSON.stringify(parts.text.environment.slice(0, 400))}`);
@@ -79,6 +80,7 @@ test("cost: every row that is computed or sized agrees with the first request of
   assert.equal(row(r, "permissions").chars, cap.parts.chars.permissions);
   nearly(row(r, "environment").chars, cap.parts.chars.environment, "the environment block");
   assert.equal(row(r, "tools").chars, cap.parts.toolsJsonChars);
+  assert.equal(row(r, "namespaces").chars, cap.parts.chars.namespaces, "the deferred tool namespaces");
   const ratio = r.total / cap.parts.requestChars;
   console.log(`# the rows add up to ${r.total} characters; the whole request is ${cap.parts.requestChars} characters of JSON (${(ratio * 100).toFixed(1)}%)`);
   assert.ok(ratio > 0.9 && ratio <= 1.0, `the rows are ${(ratio * 100).toFixed(1)}% of the request`);

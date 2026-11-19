@@ -13,6 +13,8 @@ import { codexInfo, execArgs, fakeApi, gitInit, promptInput, put, runCodex, sand
 
 const opts = { skip: skip() };
 const LEGACY_PROFILE = '[profiles.x]\nmodel = "y"\n';
+// what codex exec prints in a folder whose project configuration it does not load (Codex 0.169.0 and later)
+const UNTRUSTED_WARNING = /^warning: Untrusted project-local configuration is disabled\. Run `codex exec --trust` to allow project configuration and MCP servers for this and future chats in the project, including MCP commands outside the sandbox\. Explicitly untrusted projects must have their trust setting updated first\.$/m;
 
 test("the binary is the one these checks are about", opts, () => {
   const info = codexInfo();
@@ -74,50 +76,61 @@ test("toml-error: a trusted project's config.toml with a syntax error stops Code
   assert.equal(trusted.requests.length, 0);
   const l = lintWorld(trusted.sb);
   assert.deepEqual(l.find("toml-error").map((f) => [f.severity, f.line, f.column]), [["error", 2, 5]]);
-  // not trusted: ignored, in silence, and `lint` says so
+  // not trusted: not opened (codex exec warns that the project's configuration is off), and `lint` says so
   const off = await exec({ label: "e2e-toml-project-off", project: broken });
   assert.equal(off.code, 0, off.err);
   assert.equal(off.requests.length, 1);
+  assert.match(off.err, UNTRUSTED_WARNING);
   assert.deepEqual(lintWorld(off.sb).find("toml-error").map((f) => [f.severity, f.line]), [["warning", 2]]);
-  // a session with sandbox_mode danger-full-access trusts the folder first, and then meets the error
+  // since Codex 0.169.0 a session with sandbox_mode danger-full-access trusts nothing, so the file stays closed
   const danger = await exec({ label: "e2e-toml-project-danger", userTop: 'sandbox_mode = "danger-full-access"\n', project: broken });
-  assert.equal(danger.code, 1);
-  assert.match(danger.err, /^Error: thread\/start: thread\/start failed: failed to load configuration: Error parsing project config file .*config\.toml: TOML parse error at line 2, column 5/m);
-  assert.equal(danger.requests.length, 0);
+  assert.equal(danger.code, 0, danger.err);
+  assert.equal(danger.requests.length, 1);
+  // codex exec --trust saves the trust first, and then meets the error
+  const trusting = await exec({ label: "e2e-toml-project-trust", project: broken, args: ["--trust"] });
+  assert.equal(trusting.code, 1);
+  assert.match(trusting.err, /^Error: Error parsing project config file .*config\.toml: TOML parse error at line 2, column 5/m);
+  assert.equal(trusting.requests.length, 0);
+  assert.match(readUser(trusting.sb), /^trust_level = "trusted"$/m);
 });
 
-test("untrusted-project: a run with sandbox_mode danger-full-access writes a trusted entry for the working folder, and the next run loads the folder's config", opts, async () => {
+test("untrusted-project: codex exec --trust writes a trusted entry for the Git root and loads the folder's config at once; no sandbox mode writes one (Codex 0.169.0 and later)", opts, async () => {
   const project = 'model = "gpt-5.4"\n';
-  for (const [how, spec] of [["in the file", { userTop: 'sandbox_mode = "danger-full-access"\n' }], ["with --sandbox", { args: ["--sandbox", "danger-full-access"] }], ["with the bypass flag", { args: ["--dangerously-bypass-approvals-and-sandbox"] }]]) {
-    const first = await exec({ label: "e2e-trust-danger", project, ...spec });
-    assert.equal(first.code, 0, first.err);
-    assert.equal(first.model, "gpt-5.5", `${how}: the first run did not load the project's file`);
-    const text = readUser(first.sb);
-    // Codex writes the key in single quotes on Windows (the path has backslashes) and in double quotes elsewhere
-    const entry = /^\[projects\.(?:'([^']+)'|"([^"]+)")\]\ntrust_level = "trusted"$/m.exec(text);
-    assert.ok(entry, `${how}: an entry was written:\n${text}`);
-    assert.equal(entry[1] ?? entry[2], process.platform === "win32" ? first.sb.work.toLowerCase() : first.sb.work, `${how}: the folder, lower-cased on Windows`);
-    assert.equal(lintWorld(first.sb).find("untrusted-project").length, 0, "after the run the project is trusted");
-    // and the next session loads the folder's file: the app server reads the project's model, which wins over the user's
-    const srv = new AppServer(first.sb, { cwd: first.sb.work, online: true });
-    try {
-      await srv.start();
-      const cfg = await srv.request("config/read", { cwd: first.sb.work, includeLayers: false });
-      assert.equal(cfg.config.model, "gpt-5.4", `${how}: the next session loads the folder's file`);
-    } finally { await srv.close(); }
-  }
-  // the other sandbox modes: read-only and the default (read-only for a folder that is not trusted) write nothing; workspace-write writes the
-  // entry where a sandbox can run it (Linux and macOS), and on Windows with no sandbox selected it is read-only, so it writes nothing
-  const wrote = {};
-  for (const [how, spec] of [["workspace-write", { args: ["--sandbox", "workspace-write"] }], ["read-only", { args: ["--sandbox", "read-only"] }], ["the default", {}]]) {
-    const r = await exec({ label: "e2e-trust-safe", project, ...spec });
+  // Codex writes the key in single quotes on Windows (the path has backslashes) and in double quotes elsewhere
+  const entryOf = (sb) => { const m = /^\[projects\.(?:'([^']+)'|"([^"]+)")\]\ntrust_level = "trusted"$/m.exec(readUser(sb)); return m ? m[1] ?? m[2] : null; };
+  const spelt = (dir) => (process.platform === "win32" ? dir.toLowerCase() : dir);
+  const first = await exec({ label: "e2e-trust-flag", project, args: ["--trust"] });
+  assert.equal(first.code, 0, first.err);
+  assert.equal(first.model, "gpt-5.4", "the run that trusts the folder loads the project's file");
+  assert.doesNotMatch(first.err, UNTRUSTED_WARNING);
+  assert.equal(entryOf(first.sb), spelt(first.sb.work), `the folder, lower-cased on Windows:\n${readUser(first.sb)}`);
+  assert.equal(lintWorld(first.sb).find("untrusted-project").length, 0, "after the run the project is trusted");
+  // and the next session loads the folder's file: the app server reads the project's model, which wins over the user's
+  const srv = new AppServer(first.sb, { cwd: first.sb.work, online: true });
+  try {
+    await srv.start();
+    const cfg = await srv.request("config/read", { cwd: first.sb.work, includeLayers: false });
+    assert.equal(cfg.config.model, "gpt-5.4", "the next session loads the folder's file");
+  } finally { await srv.close(); }
+  // from a subfolder, the entry is the Git root's
+  const spec = { label: "e2e-trust-sub", project, args: ["--trust"] };
+  spec.before = (sb) => { fs.mkdirSync(path.join(sb.work, "sub"), { recursive: true }); spec.cwd = path.join(sb.work, "sub"); };
+  const sub = await exec(spec);
+  assert.equal(sub.code, 0, sub.err);
+  assert.equal(entryOf(sub.sb), spelt(sub.sb.work), "the entry of the Git root, not of the subfolder");
+  // no sandbox mode trusts the folder: the project's file is not loaded, nothing is written, and codex exec says how to trust it
+  for (const [how, extra] of [["danger-full-access in the file", { userTop: 'sandbox_mode = "danger-full-access"\n' }], ["--sandbox danger-full-access", { args: ["--sandbox", "danger-full-access"] }], ["the bypass flag", { args: ["--dangerously-bypass-approvals-and-sandbox"] }], ["--sandbox workspace-write", { args: ["--sandbox", "workspace-write"] }], ["--sandbox read-only", { args: ["--sandbox", "read-only"] }], ["the default", {}]]) {
+    const r = await exec({ label: "e2e-trust-safe", project, ...extra });
     assert.equal(r.code, 0, r.err);
-    wrote[how] = /\[projects\./.test(readUser(r.sb));
+    assert.equal(r.model, "gpt-5.5", `${how}: the project's file is not loaded`);
+    assert.doesNotMatch(readUser(r.sb), /\[projects\./, `${how}: no entry is written`);
+    assert.match(r.err, UNTRUSTED_WARNING, `${how}: the warning`);
   }
-  assert.deepEqual(wrote, { "workspace-write": process.platform !== "win32", "read-only": false, "the default": false }, "which sandbox modes write an entry");
-  // an entry that is there is left as it is
-  const marked = await exec({ label: "e2e-trust-marked", project, userTop: 'sandbox_mode = "danger-full-access"\n', before: (sb) => { fs.appendFileSync(sb.user, `\n[projects.'${sb.work}']\ntrust_level = "untrusted"\n`); } });
-  assert.equal(marked.code, 0, marked.err);
+  // an entry that says untrusted stops --trust, and is left as it is
+  const marked = await exec({ label: "e2e-trust-marked", project, args: ["--trust"], before: (sb) => { fs.appendFileSync(sb.user, `\n[projects.'${sb.work}']\ntrust_level = "untrusted"\n`); } });
+  assert.equal(marked.code, 1);
+  assert.match(marked.err, /^Error: .+ is marked as untrusted\. Update its trust setting first\.$/m);
+  assert.equal(marked.requests.length, 0);
   assert.match(readUser(marked.sb), /trust_level = "untrusted"/);
   assert.doesNotMatch(readUser(marked.sb), /trust_level = "trusted"/);
 });
@@ -230,12 +243,14 @@ test("ignored-in-project: the ten keys are ignored in a project's config.toml, w
   assert.match(json.out, /"type":"error","message":"Ignored unsupported project-local config keys in .*: model_provider, model_providers, notify\./, "the warning is an item of type error in the event stream");
 });
 
-test("untrusted-project: an untrusted project's config.toml is ignored in silence; a trusted one applies", opts, async () => {
+test("untrusted-project: an untrusted project's config.toml is ignored, and codex exec prints one warning that names --trust; a trusted one applies", opts, async () => {
   const project = 'model = "gpt-5.4"\n';
   const off = await exec({ label: "e2e-untrusted", trust: false, project });
   assert.equal(off.code, 0, off.err);
   assert.equal(off.model, "gpt-5.5", "the user's model");
-  assert.deepEqual(noise(off.err).filter((l) => /project|trust/i.test(l)), [], "codex exec prints nothing about it");
+  const said = noise(off.err).filter((l) => /project|trust/i.test(l));
+  assert.equal(said.length, 1, `codex exec says it once (Codex 0.169.0 and later; before, it said nothing): ${JSON.stringify(said)}`);
+  assert.match(said[0], UNTRUSTED_WARNING);
   const l = lintWorld(off.sb);
   assert.equal(l.find("untrusted-project").length, 1);
   assert.match(l.find("untrusted-project")[0].fix, /trust_level = "trusted"/);

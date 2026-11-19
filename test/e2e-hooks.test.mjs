@@ -137,6 +137,15 @@ test("hook-untrusted: the bypass flag runs a hook without a record", opts, async
   assert.match(r.err, /warning: `--dangerously-bypass-hook-trust` is enabled\. Enabled hooks may run without review for this invocation\./);
 });
 
+test("hook-untrusted: the bypass flag does not run the hooks of a project that is not trusted; a trusted project's hook it runs", opts, async () => {
+  const off = await exec({ label: "e2e-hooks-bypass-project", project: (sb) => toml(sb), args: [BYPASS] });
+  assert.equal(off.code, 0, off.err);
+  assert.deepEqual(ran(off), [], "the hook of a project that is not trusted");
+  const on = await exec({ label: "e2e-hooks-bypass-trusted", trust: true, project: (sb) => toml(sb), args: [BYPASS] });
+  assert.equal(on.code, 0, on.err);
+  assert.deepEqual(ran(on), ["SessionStart"], "the hook of a trusted project");
+});
+
 test("hooks-feature-off: features.hooks = false runs no hook, in silence", opts, async () => {
   const r = await exec({ label: "e2e-hooks-off", userTables: (sb) => `[features]\nhooks = false\n${toml(sb)}`, args: [BYPASS] });
   assert.equal(r.code, 0, r.err);

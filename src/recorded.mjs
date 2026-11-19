@@ -1,8 +1,8 @@
-// What Codex 0.163.0 sent in the first request of a session, recorded with the fake API of test/codex-sandbox.mjs
+// What Codex 0.170.0 sent in the first request of a session, recorded with the fake API of test/codex-sandbox.mjs
 // (`E2E_CODEX=... node test/record-oracles.mjs recorded` writes this file again; test/measure.mjs does the measuring). `cost` uses these
 // where it cannot compute a figure from your files, and says so; test/e2e-cost.test.mjs compares them with a real first request.
-export const RECORDED_ON = "2026-10-17";
-export const RECORDED_CODEX = "0.163.0";
+export const RECORDED_ON = "2026-11-19";
+export const RECORDED_CODEX = "0.170.0";
 export const RECORDED_MODEL = "gpt-5.5";
 
 /** The base instructions: the first developer message (characters). */
@@ -16,17 +16,27 @@ export const BASE_INSTRUCTIONS_CHARS = 21299;
  * environment block (characters at a working folder of cwdChars characters: the folder's path appears twice, seven times with workspace-write).
  */
 export const BY_SYSTEM = {
-  win32: {"on":"2026-10-17","tools":[["exec_command",2635],["write_stdin",784],["request_user_input",1355],["apply_patch",884],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":342,"workspace-write":534,"danger-full-access":363},"on-request":{"read-only":3939,"workspace-write":4131,"danger-full-access":3960}},"environment":{"read-only":519,"workspace-write":1180,"danger-full-access":457},"cwdChars":62},
-  linux: {"on":"2026-10-17","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":543,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4084,"danger-full-access":3903}},"environment":{"read-only":507,"workspace-write":1168,"danger-full-access":445},"cwdChars":62},
-  darwin: {"on":"2026-10-17","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",526],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",804],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":611,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4152,"danger-full-access":3903}},"environment":{"read-only":503,"workspace-write":1164,"danger-full-access":441},"cwdChars":62},
+  win32: {"on":"2026-11-19","tools":[["exec_command",2635],["write_stdin",784],["request_user_input",1355],["apply_patch",884],["view_image",371],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",699],["web_search",89]],"permissions":{"never":{"read-only":342,"workspace-write":534,"danger-full-access":363},"on-request":{"read-only":3939,"workspace-write":4131,"danger-full-access":3960}},"environment":{"read-only":519,"workspace-write":1180,"danger-full-access":457},"cwdChars":62},
+  linux: {"on":"2026-11-19","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",371],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",699],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":543,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4084,"danger-full-access":3903}},"environment":{"read-only":507,"workspace-write":1168,"danger-full-access":445},"cwdChars":62},
+  darwin: {"on":"2026-11-19","tools":[["exec_command",1564],["write_stdin",784],["request_user_input",1355],["apply_patch",846],["view_image",371],["get_goal",281],["create_goal",760],["update_goal",2172],["tool_search",699],["web_search",89]],"permissions":{"never":{"read-only":341,"workspace-write":611,"danger-full-access":362},"on-request":{"read-only":3882,"workspace-write":4152,"danger-full-access":3903}},"environment":{"read-only":503,"workspace-write":1164,"danger-full-access":441},"cwdChars":62},
 };
 
 /**
- * What an enabled MCP server adds to the first request (put to Codex 0.163.0): these tools, after write_stdin, and a line "- <id>" in the
- * description of tool_search for a server that starts. The tools of the server itself are not in the request: Codex defers them behind
+ * What an enabled MCP server adds to the first request (put to Codex 0.170.0): these tools, after write_stdin, and, for a server that
+ * starts, a line in the deferred tool namespaces (below). The tools of the server itself are not in the request: Codex defers them behind
  * tool_search (2, 3, 30 and 60 tools gave the same request).
  */
 export const MCP_TOOLS = [["list_mcp_resources",628],["list_mcp_resource_templates",717],["read_mcp_resource",526]];
+
+// The deferred tool namespaces, a part of the developer message (since Codex 0.167.0; before, the sources were named in the description of
+// tool_search): the head, one line for each namespace in the order of the lines, the tail. A server of [mcp_servers] that starts adds a
+// line NAMESPACE_MCP_PREFIX + its id, with every character other than a letter, a digit or _ turned into _.
+export const NAMESPACES_HEAD = "<tools>\nDeferred tool namespaces:\n";
+export const NAMESPACES_BUNDLED = [
+  "- multi_agent_v1: Tools for spawning and managing sub-agents."
+];
+export const NAMESPACE_MCP_PREFIX = "- mcp__";
+export const NAMESPACES_TAIL = "\n</tools>";
 
 // The skills block, as Codex builds it: the head, one line for each root (`rN`), the entries, the tail. The four skills Codex bundles are
 // in $CODEX_HOME/skills/.system; the entries below name that root @R.
@@ -34,7 +44,7 @@ export const SKILLS_HEAD = "<skills_instructions>\n## Skills\nA skill is a set o
 export const SKILLS_LIST_HEAD = "### Available skills\n";
 export const SKILLS_BUNDLED = [
   "- imagegen: Generate or edit raster images when the task benefits from AI-created bitmap visuals such as photos, illustrations, textures, sprites, mockups, or transparent-background cutouts. Use when Codex should create a brand-new image, transform an existing image, or derive visual variants from references, and the output should be a bitmap asset rather than repo-native code or vector. Do not use when the task is better handled by editing existing SVG/vector/code-native assets, extending an established icon or logo system, or building the visual directly in HTML/CSS/canvas. (file: @R/imagegen/SKILL.md)",
-  "- openai-docs: Use for Codex models/pricing, scheduled tasks, skills, settings, setup, troubleshooting, customization, automations, and self-knowledge—including 'you,' 'your,' 'this app,' or 'this coding agent' when they refer to Codex—and for OpenAI APIs/products and ChatGPT Work. Also use for model choice/migration, prompting, SDKs, Responses, Realtime, agents, evals, and Chat/Work/Codex comparisons. Do not use for generic app/software tasks that merely mention Codex. (file: @R/openai-docs/SKILL.md)",
+  "- openai-docs: API first-timers, Codex/Work Q&A. If the user already has an OpenAI API integration, skip this skill for API questions and use the developer docs. Read this skill before answering how Codex or ChatGPT Work behaves, where to find a feature, or how to configure or troubleshoot this app or coding agent. This includes conversation history, model and cache behavior, instruction precedence, permissions, and tool availability. Use for API onboarding only when the user is connecting to the OpenAI API for the first time. Skip action requests, such as scheduling an automation, and tasks fully answered by supplied text or data. (file: @R/openai-docs/SKILL.md)",
   "- skill-creator: Create or update a Codex skill with appropriately scoped instructions and any needed supporting resources. (file: @R/skill-creator/SKILL.md)",
   "- skill-installer: Install Codex skills into $CODEX_HOME/skills from a curated list or a GitHub repo path. Use when a user asks to list installable skills, install a curated skill, or install a skill from another repo (including private repos). (file: @R/skill-installer/SKILL.md)"
 ];

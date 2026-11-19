@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { collect } from "../src/collect.mjs";
-import { cost, toolList } from "../src/cost.mjs";
+import { cost, namespacesBlock, toolList } from "../src/cost.mjs";
 import { MCP_TOOLS } from "../src/recorded.mjs";
 import { exec, lintWorld, noise, sysFor } from "./behave.mjs";
 import { IS_WIN, skip, toolNames } from "./codex-sandbox.mjs";
@@ -18,7 +18,7 @@ const toolsOf = (r) => partsOf(r.requests[0]).tools;
 const baseline = async () => toolsOf(await exec({ label: "e2e-mcp-base" }));
 const size = (tools) => tools.reduce((n, t) => n + t[1], 0);
 
-test("an enabled MCP server adds three resource tools and its name to tool_search; its own tools are not in the first request, however many it has", opts, async () => {
+test("an enabled MCP server adds three resource tools, and its namespace to the developer message; its own tools are not in the first request, however many it has", opts, async () => {
   const base = await baseline();
   const sizes = [];
   for (const n of [1, 2, 30, 60]) {
@@ -28,32 +28,42 @@ test("an enabled MCP server adds three resource tools and its name to tool_searc
     sizes.push(size(tools));
     assert.deepEqual(tools.map((t) => t[0]).slice(0, 5), ["exec_command", "write_stdin", "list_mcp_resources", "list_mcp_resource_templates", "read_mcp_resource"]);
     assert.ok(!toolNames(r.requests[0]).some((name) => /tool_\d|stub/.test(name)), `${n} tools: none of the server's tools is listed`);
-    assert.equal(size(tools) - size(base), added + "stub".length + 4, `${n} tools: three resource tools and \"- stub\" in the description of tool_search`);
+    assert.equal(size(tools) - size(base), added, `${n} tools: three resource tools, and the description of tool_search names no server`);
     const c = collect(sysFor(r.sb), { project: r.sb.work });
     assert.deepEqual(tools, toolList(c), `${n} tools: what cost lists`);
     assert.equal(cost(c).rows.find((x) => x.id === "tools").chars, partsOf(r.requests[0]).toolsJsonChars);
+    const ns = partsOf(r.requests[0]).text.namespaces;
+    assert.match(ns, /\n- mcp__stub\n/, `${n} tools: the namespace of the server`);
+    assert.equal(namespacesBlock(c).text, ns, `${n} tools: the deferred tool namespaces, character for character`);
   }
   assert.equal(new Set(sizes).size, 1, `the request is the same size for 1, 2, 30 and 60 tools: ${sizes}`);
 });
 
-test("the name of each server that starts is added to tool_search; a server that is turned off adds nothing; one that cannot start adds the three tools and not its name", opts, async () => {
+test("each server that starts adds its namespace (mcp__ and its id, other characters turned into _); a server that is turned off adds nothing; one that cannot start adds the three tools and no namespace", opts, async () => {
   const base = await baseline();
-  const two = await exec({ label: "e2e-mcp-two", userTables: mcpServer("one", ["a"]) + mcpServer("longer-name", ["b"]) });
-  assert.equal(size(toolsOf(two)) - size(base), added + ("one".length + 4) + ("longer-name".length + 4));
+  const baseNs = partsOf((await exec({ label: "e2e-mcp-base-ns" })).requests[0]).text.namespaces;
+  const two = await exec({ label: "e2e-mcp-two", userTables: mcpServer("one", ["a"]) + mcpServer("longer-name", ["b"]) + mcpServer('"Dot.Name"', ["c"]) });
+  assert.equal(size(toolsOf(two)) - size(base), added);
+  const twoNs = partsOf(two.requests[0]).text.namespaces;
+  assert.deepEqual(twoNs.split("\n").filter((l) => l.startsWith("- mcp__")), ["- mcp__Dot_Name", "- mcp__longer_name", "- mcp__one"], "in the order of the lines");
+  assert.equal(namespacesBlock(collect(sysFor(two.sb), { project: two.sb.work })).text, twoNs, "what cost computes");
   const off = await exec({ label: "e2e-mcp-off", userTables: mcpServer("off", ["a"], "enabled = false\n") });
   assert.equal(size(toolsOf(off)), size(base));
-  for (const [what, tables] of [
-    ["a program that is not found", '[mcp_servers.gone]\ncommand = "nosuchprogxyz"\n'],
-    ["a program that exits at once", '[mcp_servers.bad]\ncommand = "node"\nargs = ["-e", "process.exit(0)"]\n'],
-    ["an http server nobody answers", '[mcp_servers.web]\nurl = "http://127.0.0.1:9/mcp"\n'],
+  assert.equal(partsOf(off.requests[0]).text.namespaces, baseNs);
+  for (const [what, id, tables] of [
+    ["a program that is not found", "gone", '[mcp_servers.gone]\ncommand = "nosuchprogxyz"\n'],
+    ["a program that exits at once", "bad", '[mcp_servers.bad]\ncommand = "node"\nargs = ["-e", "process.exit(0)"]\n'],
+    ["an http server nobody answers", "web", '[mcp_servers.web]\nurl = "http://127.0.0.1:9/mcp"\n'],
   ]) {
     const r = await exec({ label: "e2e-mcp-fail", userTables: tables });
     assert.equal(r.code, 0, `${what}: ${r.err}`);
     assert.equal(size(toolsOf(r)) - size(base), added, what);
+    assert.equal(partsOf(r.requests[0]).text.namespaces, baseNs, `${what}: no namespace`);
     const c = collect(sysFor(r.sb), { project: r.sb.work });
-    // cost counts a server whose program is found as one that starts: a program that is not an MCP server, or an http server nobody answers, is counted with its name (3 characters here)
-    const over = what === "a program that is not found" ? 0 : 3 + 4;
-    assert.equal(cost(c).rows.find((x) => x.id === "tools").chars - over, partsOf(r.requests[0]).toolsJsonChars, `${what}: what cost lists`);
+    assert.equal(cost(c).rows.find((x) => x.id === "tools").chars, partsOf(r.requests[0]).toolsJsonChars, `${what}: the tools row`);
+    // cost counts a server whose program is found as one that starts: a program that is not an MCP server, or an http server nobody answers, is counted with its namespace
+    const over = what === "a program that is not found" ? 0 : `\n- mcp__${id}`.length;
+    assert.equal(cost(c).rows.find((x) => x.id === "namespaces").chars - over, partsOf(r.requests[0]).chars.namespaces, `${what}: the namespaces row`);
   }
 });
 
@@ -99,7 +109,7 @@ test("mcp on Windows: tool.cmd and tool.bat are found through PATHEXT, a full pa
   const base = size(await baseline());
   const withName = async (label, files, command) => {
     const r = await exec({ label, files: Object.fromEntries(Object.entries(files).map(([name, text]) => [`bin/${name}`, text])), userTables: (sb) => `[mcp_servers.x]\ncommand = ${JSON.stringify(typeof command === "function" ? command(sb) : command)}\n`, path: (sb) => sb.bin });
-    return { r, started: size(toolsOf(r)) - base === added + "x".length + 4, found: lintWorld(r.sb, { env: { PATH: [r.sb.bin, process.env.PATH || process.env.Path].join(path.delimiter) } }).find("mcp-command-missing").length === 0 };
+    return { r, started: size(toolsOf(r)) - base === added && /\n- mcp__x\n/.test(partsOf(r.requests[0]).text.namespaces), found:lintWorld(r.sb, { env: { PATH: [r.sb.bin, process.env.PATH || process.env.Path].join(path.delimiter) } }).find("mcp-command-missing").length === 0 };
   };
   const cmd = await withName("e2e-mcp-cmd", { "tool.cmd": launcher }, "tool");
   assert.deepEqual([cmd.started, cmd.found], [true, true], "tool.cmd");

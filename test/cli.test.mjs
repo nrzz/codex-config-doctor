@@ -275,7 +275,7 @@ test("cost: exit 0 and a total", () => {
   assert.equal(r.code, 0, r.all);
   assert.match(r.out, /Total {2}/);
   const doc = JSON.parse(cli(w, ["cost", "--json"]).out);
-  assert.equal(doc.rows.length, 7);
+  assert.equal(doc.rows.length, 8);
   assert.equal(doc.total, doc.rows.reduce((n, x) => n + (x.chars || 0), 0));
 });
 
